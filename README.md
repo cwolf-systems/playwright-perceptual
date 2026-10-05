@@ -19,7 +19,13 @@ comparator passes changes people can. On 193 labelled pairs it caught all 48 fai
 Playwright's default caught none. Baselines, update modes and the HTML report's image diff work as
 they do for `toHaveScreenshot`.
 
-> **Pre-release.** Nothing is published to npm yet.
+## Install
+
+```bash
+npm install --save-dev @cwolf-systems/playwright-perceptual
+```
+
+Requires `@playwright/test` 1.53 or later.
 
 ## Quick start
 

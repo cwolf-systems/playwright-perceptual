@@ -2,7 +2,6 @@
   "name": "@cwolf-systems/playwright-perceptual",
   "version": "0.1.0",
   "description": "Perceptual screenshot and pixel assertions for Playwright, judged by CIEDE2000 colour difference.",
-  "private": true,
   "license": "Apache-2.0",
   "author": "CWOLFSYSTEMS <info@cwolfsystems.com>",
   "repository": {
@@ -24,7 +23,9 @@
     "NOTICE"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "clean": "node --eval \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
@@ -66,5 +67,8 @@
     "ciede2000",
     "color-difference",
     "testing"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
