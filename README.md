@@ -9,6 +9,7 @@
 
 [![CI](https://github.com/cwolf-systems/playwright-perceptual/actions/workflows/ci.yml/badge.svg)](https://github.com/cwolf-systems/playwright-perceptual/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-168-brightgreen)](https://github.com/cwolf-systems/playwright-perceptual/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@cwolf-systems/playwright-perceptual)](https://www.npmjs.com/package/@cwolf-systems/playwright-perceptual)
 
 Screenshot and pixel assertions for Playwright that judge a change the way a person sees it: by
 CIEDE2000 colour difference, where 1.0 is about the smallest difference anyone can notice.
