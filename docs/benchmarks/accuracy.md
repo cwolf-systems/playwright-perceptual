@@ -17,7 +17,8 @@ Labelled pairs from three sources.
   geofences, flight tracks and labelled drones, and a 3D mission view of hillshaded terrain with
   contours, fog and drones on altitude stems), rendered in Chromium, Firefox and WebKit:
   - **should match:** a colour change too small to see (15), and the same page through Chromium's
-    software rasteriser and through the GPU (8, on machines with a GPU);
+    software rasteriser and through the GPU (8, on machines with a GPU; measured here as
+    SwiftShader against ANGLE on Metal, Apple M4);
   - **large regression:** a word changed, an icon removed, a bar taller, a shadow turned red, the
     light moved across, a geofence or a drone gone (24);
   - **faint regression:** visible but small, ΔE00 3 to 11: text grey lightened, a stroke or bar

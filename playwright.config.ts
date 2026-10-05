@@ -7,7 +7,14 @@ export default defineConfig({
   use: { viewport: { width: 320, height: 200 } },
   projects: [
     { name: 'chromium', use: { browserName: 'chromium' } },
-    { name: 'firefox', use: { browserName: 'firefox' } },
+    {
+      name: 'firefox',
+      use: {
+        browserName: 'firefox',
+        // Without it Firefox on Windows runners offers no WebGL 2, and the WebGL fixtures skip.
+        launchOptions: { firefoxUserPrefs: { 'webgl.force-enabled': true } },
+      },
+    },
     { name: 'webkit', use: { browserName: 'webkit' } },
   ],
 });

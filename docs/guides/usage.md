@@ -78,6 +78,11 @@ changes of only a few pixels, like two of the regressions in the
 
 - Keep baselines per browser and rendering path. GPU and software rendering differ along tile
   seams and stroke edges by more than the defaults allow.
+- Know which path you are testing. Playwright's default headless Chromium renders WebGL in
+  software (SwiftShader) even on a machine with a GPU; full Chromium (`channel: 'chromium'`), or
+  `--use-angle=metal` on macOS, uses the GPU.
+- On Windows CI, Firefox offers WebGL 2 only with the `webgl.force-enabled` preference
+  (`launchOptions: { firefoxUserPrefs: { 'webgl.force-enabled': true } }`).
 - Fix the camera and the viewport to whole pixels, and wait for tiles and terrain to finish
   loading before the assertion.
 - For a WebGL canvas, `toBePerceptuallyNear` on pixels read back with `readPixels` skips PNG
