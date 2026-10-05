@@ -1,0 +1,230 @@
+<!doctype html>
+<meta charset="utf-8" />
+<style>
+  body {
+    margin: 0;
+    background: #e8ecef;
+  }
+  canvas {
+    display: block;
+  }
+</style>
+<canvas width="320" height="200"></canvas>
+<script>
+  // An operations map: raster basemap tiles drawn between zoom levels, so the browser resamples
+  // them, with a road, geofences, flight tracks and labelled drones drawn over the top.
+  //
+  // Variants: subtle moves the water's blue one level; shifted pans the map 0.3 px; regression
+  // drops the restricted zone; faint makes its fill a little stronger.
+  const variant = new URLSearchParams(location.search).get('variant');
+
+  const TILE = 128;
+  const ZOOM = 1.37;
+  const ORIGIN = [-38, -27];
+  const SEA_LEVEL = 0.44;
+  const pan = variant === 'shifted' ? 0.3 : 0;
+
+  const ctx = document.querySelector('canvas').getContext('2d');
+
+  // Deterministic value noise, so every run draws the same terrain.
+  function hash(x, y) {
+    let h = Math.imul(x, 374761393) + Math.imul(y, 668265263);
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  }
+  const smooth = (t) => t * t * (3 - 2 * t);
+  function noise(x, y) {
+    const xi = Math.floor(x);
+    const yi = Math.floor(y);
+    const u = smooth(x - xi);
+    const v = smooth(y - yi);
+    const a = hash(xi, yi);
+    const b = hash(xi + 1, yi);
+    const c = hash(xi, yi + 1);
+    const d = hash(xi + 1, yi + 1);
+    return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+  }
+  const height = (x, y) =>
+    0.55 * noise(x / 48, y / 48) + 0.3 * noise(x / 19, y / 19) + 0.15 * noise(x / 7, y / 7);
+
+  const LAND = [
+    [0, [172, 200, 142]],
+    [0.35, [208, 204, 152]],
+    [0.7, [186, 164, 132]],
+    [1, [238, 236, 230]],
+  ];
+  function landColour(h) {
+    const t = (h - SEA_LEVEL) / (1 - SEA_LEVEL);
+    const i = LAND.findIndex(([stop]) => stop >= t);
+    const [t0, c0] = LAND[Math.max(0, i - 1)];
+    const [t1, c1] = LAND[i];
+    const f = t1 === t0 ? 0 : (t - t0) / (t1 - t0);
+    return c0.map((c, k) => c + (c1[k] - c) * f);
+  }
+
+  function tile(tx, ty) {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = TILE;
+    const image = new ImageData(TILE, TILE);
+    for (let y = 0; y < TILE; y++) {
+      for (let x = 0; x < TILE; x++) {
+        const gx = tx * TILE + x;
+        const gy = ty * TILE + y;
+        const h = height(gx, gy);
+        let rgb;
+        if (h < SEA_LEVEL) {
+          const depth = (SEA_LEVEL - h) * 60;
+          rgb = [156 - depth, 194 - depth, (variant === 'subtle' ? 225 : 224) - depth];
+        } else {
+          // Hillshade, lit from the north-west.
+          const shade = 1 + 7 * (height(gx - 1, gy - 1) - height(gx + 1, gy + 1));
+          rgb = landColour(h).map((c) => c * shade);
+        }
+        image.data.set([...rgb.map(Math.round), 255], (y * TILE + x) * 4);
+      }
+    }
+    canvas.getContext('2d').putImageData(image, 0, 0);
+    return canvas;
+  }
+
+  ctx.imageSmoothingQuality = 'high';
+  ctx.setTransform(ZOOM, 0, 0, ZOOM, ORIGIN[0] + pan, ORIGIN[1]);
+  for (let ty = 0; ty < 2; ty++) {
+    for (let tx = 0; tx < 3; tx++) ctx.drawImage(tile(tx, ty), tx * TILE, ty * TILE);
+  }
+  ctx.setTransform(1, 0, 0, 1, pan, 0);
+
+  function path(points) {
+    ctx.beginPath();
+    points.forEach(([x, y]) => ctx.lineTo(x, y));
+  }
+
+  function line(points, colour, width, casing) {
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    path(points);
+    ctx.strokeStyle = casing;
+    ctx.lineWidth = width + 2;
+    ctx.stroke();
+    ctx.strokeStyle = colour;
+    ctx.lineWidth = width;
+    ctx.stroke();
+  }
+
+  function zone(points, fill, stroke, dash) {
+    path(points);
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.setLineDash(dash);
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function label(text, x, y) {
+    ctx.font = '600 10px sans-serif';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.lineWidth = 3;
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = '#263238';
+    ctx.fillText(text, x, y);
+  }
+
+  function drone(x, y, heading, colour, name) {
+    ctx.beginPath();
+    ctx.arc(x, y, 6.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fill();
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(heading);
+    ctx.beginPath();
+    ctx.moveTo(0, -5);
+    ctx.lineTo(3.8, 4);
+    ctx.lineTo(0, 2);
+    ctx.lineTo(-3.8, 4);
+    ctx.closePath();
+    ctx.fillStyle = colour;
+    ctx.fill();
+    ctx.restore();
+    label(name, x + 9, y + 3.5);
+  }
+
+  line(
+    [
+      [-5, 150],
+      [60, 138],
+      [118, 146],
+      [176, 120],
+      [240, 112],
+      [330, 84],
+    ],
+    '#fbe9a6',
+    3,
+    '#b0a27a',
+  );
+
+  zone(
+    [
+      [196, 28],
+      [262, 22],
+      [296, 70],
+      [248, 96],
+      [204, 80],
+    ],
+    'rgba(41, 98, 255, 0.08)',
+    '#2962ff',
+    [],
+  );
+  if (variant !== 'regression') {
+    zone(
+      [
+        [92, 46],
+        [150, 38],
+        [168, 92],
+        [120, 112],
+        [84, 88],
+      ],
+      `rgba(213, 0, 0, ${variant === 'faint' ? 0.24 : 0.16})`,
+      '#d50000',
+      [5, 3],
+    );
+  }
+
+  line(
+    [
+      [28, 176],
+      [54, 132],
+      [70, 78],
+      [112, 30],
+      [180, 34],
+      [226, 56],
+    ],
+    '#00838f',
+    2,
+    'rgba(255, 255, 255, 0.8)',
+  );
+  line(
+    [
+      [300, 186],
+      [268, 150],
+      [212, 140],
+      [172, 158],
+      [130, 168],
+    ],
+    '#ef6c00',
+    2,
+    'rgba(255, 255, 255, 0.8)',
+  );
+  drone(226, 56, 1.1, '#00838f', 'UAV-1');
+  drone(130, 168, -1.9, '#ef6c00', 'UAV-2');
+
+  ctx.fillStyle = '#263238';
+  ctx.fillRect(12, 188, 48, 2);
+  ctx.fillRect(12, 183, 1.5, 7);
+  ctx.fillRect(58.5, 183, 1.5, 7);
+  label('500 m', 64, 192);
+</script>

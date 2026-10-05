@@ -1,0 +1,7 @@
+dist/
+coverage/
+test-results/
+playwright-report/
+package-lock.json
+bench/data/
+bench/results/

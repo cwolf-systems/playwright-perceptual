@@ -1,0 +1,15 @@
+export { deltaE2000, type Weights } from './color/ciede2000.js';
+export { compareImages, PerceptualComparator } from './compare/comparator.js';
+export { ImageSizeError, InvalidOptionError, PerceptualError, PngDecodeError } from './errors.js';
+export { isAntialiased } from './image/antialiasing.js';
+export { decodePng } from './image/png.js';
+export { isShifted } from './image/shift.js';
+export { createPerceptualMatchers, perceptualMatchers } from './matchers/create.js';
+export { matchSnapshot, type MatchRequest, type MatchResult } from './snapshot/match.js';
+export type { ScreenshotSource } from './snapshot/capture.js';
+export type { Artifact, SnapshotStore } from './snapshot/store.js';
+export type * from './color/types.js';
+export type * from './compare/types.js';
+export type * from './image/types.js';
+export type * from './matchers/types.js';
+export type * from './snapshot/types.js';

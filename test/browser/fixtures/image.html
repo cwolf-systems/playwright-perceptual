@@ -1,0 +1,35 @@
+<!doctype html>
+<meta charset="utf-8" />
+<style>
+  body {
+    margin: 0;
+    background: #111;
+  }
+  img {
+    display: block;
+    width: 320px;
+    height: 200px;
+    image-rendering: auto;
+  }
+</style>
+<img alt="" />
+<script>
+  // A small procedural picture, scaled up so the browser's resampling filter shows. The subtle
+  // variant moves the blue channel one level; a CSS filter would also change how WebKit resamples
+  // the image, which is a different test.
+  const variant = new URLSearchParams(location.search).get('variant');
+  const blue = { subtle: 161, faint: 172 }[variant] ?? 160;
+  const source = document.createElement('canvas');
+  source.width = 64;
+  source.height = 40;
+  const ctx = source.getContext('2d');
+  for (let y = 0; y < 40; y++) {
+    for (let x = 0; x < 64; x++) {
+      const v = Math.round(127 + 127 * Math.sin(x / 5) * Math.cos(y / 4));
+      ctx.fillStyle =
+        variant === 'regression' ? `rgb(${v}, 60, ${255 - v})` : `rgb(${v}, ${255 - v}, ${blue})`;
+      ctx.fillRect(x, y, 1, 1);
+    }
+  }
+  document.querySelector('img').src = source.toDataURL();
+</script>

@@ -1,0 +1,2 @@
+# Check out with LF line endings on every OS, so Prettier and file-reading tests see the same bytes.
+* text=auto eol=lf

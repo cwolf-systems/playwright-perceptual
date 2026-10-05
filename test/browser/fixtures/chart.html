@@ -1,0 +1,33 @@
+<!doctype html>
+<meta charset="utf-8" />
+<style>
+  body {
+    margin: 0;
+    background: white;
+  }
+</style>
+<canvas width="320" height="200"></canvas>
+<script>
+  const variant = new URLSearchParams(location.search).get('variant');
+  const shift = variant === 'shifted' ? 0.25 : 0;
+  const values = [62, 110, 84, 140, 96, 128];
+  if (variant === 'regression') values[3] *= 1.1;
+  const ctx = document.querySelector('canvas').getContext('2d');
+  ctx.translate(shift, 0);
+  ctx.strokeStyle = '#d5dbe3';
+  for (let y = 40; y <= 180; y += 35) {
+    ctx.beginPath();
+    ctx.moveTo(20, y + 0.5);
+    ctx.lineTo(300, y + 0.5);
+    ctx.stroke();
+  }
+  values.forEach((v, i) => {
+    ctx.fillStyle = variant === 'faint' ? '#4a89cc' : '#3f7cbf';
+    ctx.fillRect(30 + i * 46, 180 - v, 30, v);
+  });
+  ctx.strokeStyle = '#e07a2f';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  values.forEach((v, i) => ctx.lineTo(45 + i * 46, 170 - v * 0.9));
+  ctx.stroke();
+</script>

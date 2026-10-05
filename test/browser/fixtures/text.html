@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8" />
+<style>
+  body {
+    margin: 0;
+    background: #fbfaf7;
+  }
+  p {
+    width: 300px;
+    margin: 10px;
+    font:
+      15px/1.45 system-ui,
+      sans-serif;
+    color: #1f2933;
+  }
+  .shifted p {
+    transform: translateX(0.3px);
+  }
+</style>
+<p>
+  The <span id="word">quick</span> brown fox jumps over the lazy dog. Pack my box with five dozen
+  liquor jugs; how vexingly quick daft zebras jump.
+</p>
+<script>
+  const variant = new URLSearchParams(location.search).get('variant');
+  if (variant === 'shifted') document.body.classList.add('shifted');
+  if (variant === 'regression') document.getElementById('word').textContent = 'quiet';
+  if (variant === 'faint') document.querySelector('p').style.color = '#3e4c59';
+</script>
