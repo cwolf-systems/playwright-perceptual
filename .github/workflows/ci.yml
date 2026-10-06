@@ -27,13 +27,30 @@ jobs:
           oldest=$(node -p "require('./package.json').engines.node.match(/\\d+/)[0]")
           echo "matrix=[\"$oldest\", \"lts/*\"]" >> "$GITHUB_OUTPUT"
 
-  verify:
-    name: Verify (Node ${{ matrix.node }})
-    needs: node-versions
+  quality:
+    name: Quality
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:coverage
+      - run: npm run build
+
+  node:
+    name: Node ${{ matrix.node }}
+    needs: node-versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
+      # Whether the code runs on each supported Node; the quality job covers the rest.
       matrix:
         node: ${{ fromJSON(needs.node-versions.outputs.matrix) }}
     steps:
@@ -43,10 +60,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run test:coverage
-      - run: npm run build
+      - run: npm test
 
   browser:
     name: Browsers (${{ matrix.os }})
