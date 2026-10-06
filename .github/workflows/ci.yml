@@ -68,8 +68,9 @@ jobs:
     timeout-minutes: 20
     strategy:
       fail-fast: false
-      # Chromium, Firefox and WebKit on each: software rendering on Linux and Windows, the GPU
-      # path on macOS, and Windows for its file paths.
+      # Chromium, Firefox and WebKit on each, as playwright.config.ts lists them: software rendering
+      # on Linux and Windows, the GPU on macOS for Firefox and WebKit (Playwright's headless
+      # Chromium renders in software there too), and Windows for its file paths.
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
@@ -82,6 +83,12 @@ jobs:
       - run: npx playwright install --with-deps
       - run: npm run test:browser
       - run: npm run test:runner
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: test-results-${{ matrix.os }}
+          path: test-results/
+          retention-days: 7
       - name: Test count in README
         if: matrix.os == 'ubuntu-latest'
         run: npm run test:count -- --check
