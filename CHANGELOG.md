@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Source maps carry the TypeScript sources, so stack traces and debuggers show them.
 - The matchers' types are exported: `PerceptualMatchers`, `ToMatchPerceptually` and
   `ToBePerceptuallyNear`.
 

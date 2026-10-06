@@ -4,6 +4,7 @@
     "noEmit": false,
     "rootDir": "src",
     "outDir": "dist",
+    "inlineSources": true,
     "lib": ["ES2022"]
   },
   "include": ["src"]
