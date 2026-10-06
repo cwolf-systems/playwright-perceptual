@@ -1,4 +1,4 @@
-import type { MatcherDefaults } from './types.js';
+import type { MatcherDefaults, PerceptualMatchers } from './types.js';
 import { createToBePerceptuallyNear } from './to-be-perceptually-near.js';
 import { createToMatchPerceptually } from './to-match-perceptually.js';
 
@@ -10,7 +10,7 @@ import { createToMatchPerceptually } from './to-match-perceptually.js';
  * const expect = base.extend(createPerceptualMatchers({ maxDeltaE: 2 }));
  * ```
  */
-export function createPerceptualMatchers(defaults: MatcherDefaults = {}) {
+export function createPerceptualMatchers(defaults: MatcherDefaults = {}): PerceptualMatchers {
   return {
     toMatchPerceptually: createToMatchPerceptually(defaults),
     toBePerceptuallyNear: createToBePerceptuallyNear(defaults),

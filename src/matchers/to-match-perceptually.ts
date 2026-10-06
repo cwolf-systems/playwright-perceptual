@@ -11,7 +11,7 @@ import { allowedDiffPixels, CAPTURE_DEFAULTS } from '../defaults.js';
 import { decodePng } from '../image/png.js';
 import { matchSnapshot } from '../snapshot/match.js';
 import { FileSnapshotStore } from '../snapshot/store.js';
-import type { MatcherDefaults, PerceptualScreenshotOptions } from './types.js';
+import type { MatcherDefaults, PerceptualScreenshotOptions, ToMatchPerceptually } from './types.js';
 import { comparatorFor } from './shared.js';
 
 const NAME = 'toMatchPerceptually';
@@ -64,7 +64,7 @@ function screenshotOf(
   };
 }
 
-export function createToMatchPerceptually(defaults: MatcherDefaults) {
+export function createToMatchPerceptually(defaults: MatcherDefaults): ToMatchPerceptually {
   return async function toMatchPerceptually(
     this: ExpectMatcherState,
     target: Page | Locator,

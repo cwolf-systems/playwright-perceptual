@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- The matchers' types are exported: `PerceptualMatchers`, `ToMatchPerceptually` and
+  `ToBePerceptuallyNear`.
+
 ## 0.1.0
 
 First release.

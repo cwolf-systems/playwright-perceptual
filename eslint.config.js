@@ -23,4 +23,9 @@ export default tseslint.config(
       '@typescript-eslint/no-non-null-assertion': 'off',
     },
   },
+  {
+    // The public surface states its types rather than leaving them to inference.
+    files: ['src/**/*.ts'],
+    rules: { '@typescript-eslint/explicit-module-boundary-types': 'error' },
+  },
 );

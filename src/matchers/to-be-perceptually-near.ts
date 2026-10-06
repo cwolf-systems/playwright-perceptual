@@ -3,14 +3,14 @@ import { DEFAULT_WITHIN, wholePixels } from '../defaults.js';
 import { InvalidOptionError } from '../errors.js';
 import { describeComparison, describeSize } from '../snapshot/report.js';
 import type { RgbaImage } from '../image/types.js';
-import type { MatcherDefaults, PerceptualPixelOptions } from './types.js';
+import type { MatcherDefaults, PerceptualPixelOptions, ToBePerceptuallyNear } from './types.js';
 import { comparatorFor } from './shared.js';
 
 const NAME = 'toBePerceptuallyNear';
 
 const percent = (share: number): string => `${Number((share * 100).toFixed(4))}%`;
 
-export function createToBePerceptuallyNear(defaults: MatcherDefaults) {
+export function createToBePerceptuallyNear(defaults: MatcherDefaults): ToBePerceptuallyNear {
   return function toBePerceptuallyNear(
     this: ExpectMatcherState,
     actual: RgbaImage,
