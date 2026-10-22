@@ -4,21 +4,6 @@ import type { Pixels, RgbaImage } from './types.js';
 const CHANNELS = 4;
 const OPAQUE = 255;
 
-/** Offsets of the eight neighbours of a pixel, as [dx, dy]. */
-export const NEIGHBOURS: readonly (readonly [number, number])[] = [
-  [-1, -1],
-  [0, -1],
-  [1, -1],
-  [-1, 0],
-  [1, 0],
-  [-1, 1],
-  [0, 1],
-  [1, 1],
-];
-
-export const contains = (pixels: Pixels, x: number, y: number): boolean =>
-  x >= 0 && y >= 0 && x < pixels.width && y < pixels.height;
-
 export const onEdge = (pixels: Pixels, x: number, y: number): boolean =>
   x === 0 || y === 0 || x === pixels.width - 1 || y === pixels.height - 1;
 
@@ -51,7 +36,25 @@ export class Raster implements Pixels {
     return pack(overWhite(d[i]!, alpha), overWhite(d[i + 1]!, alpha), overWhite(d[i + 2]!, alpha));
   }
 
+  /**
+   * Colours as 0xRRGGBB, worked out a row at a time on first use. The noise detectors read each
+   * pixel near a changed one many times; the comparison itself reads a changed pixel once.
+   */
+  private colours: Int32Array | null = null;
+  private decoded: Uint8Array | null = null;
+
   rgbAt(x: number, y: number): number {
-    return this.rgb(y * this.width + x);
+    if (this.colours === null || this.decoded === null) {
+      this.colours = new Int32Array(this.pixels);
+      this.decoded = new Uint8Array(this.height);
+    }
+    const start = y * this.width;
+    if (this.decoded[y] === 0) {
+      for (let index = start; index < start + this.width; index++) {
+        this.colours[index] = this.rgb(index);
+      }
+      this.decoded[y] = 1;
+    }
+    return this.colours[start + x]!;
   }
 }

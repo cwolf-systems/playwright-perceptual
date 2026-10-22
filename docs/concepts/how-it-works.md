@@ -27,10 +27,14 @@ Two images of the same size are compared pixel by pixel.
    each image's colour at a changed pixel lies within the range of colours in the 3×3
    neighbourhood of the same place in the other image, channel by channel, give or take three
    levels for rounding. A move also conserves colour: over the 5×5 window around the pixel, each
-   channel's total can change only by what a move of under a pixel carries across the window's
-   border, plus a level per pixel for rounding. Near the image's border the window moves inward,
-   so the colour just beyond it is known. A pixel that passes both tests, both ways round,
-   is reported as shifted. A real change brings in a colour that was not nearby, such as a line
+   channel's total can change only by what the move carries across the window's border. Moving
+   right by t brings in t times the column just before the window and pushes out t times its last
+   column; moving left, down or up does the same with the other sides. One move moves all three
+   channels, so a single move of under a pixel each way, in one image or the other, must explain
+   every channel's change at once, give or take a level per pixel for rounding. Near the image's
+   border the window moves inward, so the colour just beyond it is known; along a side under
+   three pixels long, the image's edge is taken to continue. A pixel that passes both tests, both
+   ways round, is reported as shifted. A real change brings in a colour that was not nearby, such as a line
    that went away or a new colour on an edge, or changes the colour of a whole area at once,
    such as a translucent overlay made a little stronger or weaker over textured ground.
 
@@ -55,15 +59,14 @@ lightness, chroma and hue, and for blues, where earlier formulas were least accu
   that lands on the next pixel in another page load, or an aliased edge that runs within 1/32 px
   of a row of pixel centres and covers that row in one rasteriser but not another, leaves a few
   pixels counted.
-- Along edges, shift tolerance can still take part of a uniform change for a move, where a move
-  could carry as much colour across the window as the change adds: a quarter to a third of the
-  pixels of a faint overlay change, in the cases measured.
+- Along edges, shift tolerance can still take part of a uniform change for a move, where a single
+  move could explain the change in every channel at once: under a tenth of the pixels of a faint
+  overlay change in the benchmark's synthetic pair, about an eighth in the capture it reproduces.
 - A drift of one level everywhere passes as rounding while shift tolerance is on, even where it
   passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over an area counts.
 - In an image under three pixels high or wide, what lies beyond the image along that side is
-  unknown, so shift tolerance cannot test whether colour was conserved, and any change within
-  three levels of the colours nearby passes as a shift. Use `ignoreShifts: false` for such
-  slivers.
+  unknown, and shift tolerance takes the image's edge to continue there. A move that brings new
+  colour in across that side counts as a change.
 - Not every sub-pixel move passes. Thin text, maps and 3D scenes moved 0.3 px still leave changed
   pixels where edges overlap and produce colours neither image has nearby.
 - Fine detail is judged at full resolution. CIEDE2000 was built for uniform patches; the eye blends

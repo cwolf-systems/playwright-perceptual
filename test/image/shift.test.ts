@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Raster } from '../../src/image/raster.js';
-import { isShifted } from '../../src/image/shift.js';
+import { conserved, isShifted } from '../../src/image/shift.js';
 import type { RgbaImage } from '../../src/image/types.js';
 import { setPixel, solid, type Rgba } from '../helpers.js';
 
@@ -109,6 +109,18 @@ describe('isShifted, on colour a move would have to conserve', () => {
     expect(shifted(edge(before), edge(after), 2, 10)).toBe(true);
   });
 
+  /** A soft vertical edge, from 0 to 255 over columns 3 to 7, resampled after a move of `t`. */
+  const level = (x: number, t: number) => Math.min(255, Math.max(0, Math.round(51 * (x - 2 - t))));
+
+  it('accepts all three channels moved together, and refuses them moved apart', () => {
+    // One move explains each channel alone, but not red and green going right while blue goes left.
+    const before = image((x) => [level(x, 0), level(x, 0), level(x, 0), 255]);
+    const together = image((x) => [level(x, 0.4), level(x, 0.4), level(x, 0.4), 255]);
+    const apart = image((x) => [level(x, 0.4), level(x, 0.4), level(x, -0.4), 255]);
+    expect(shifted(before, together, 5, 5)).toBe(true);
+    expect(shifted(before, apart, 5, 5)).toBe(false);
+  });
+
   it('accepts points moved diagonally, where colour enters past the corner of the window', () => {
     // Bright points at (4, 4) and (2, 2), just beyond the corner of (5, 5)'s window, resampled
     // bilinearly after a move of (0.75, 0.75). The move carries 0.75² of the corner point into the
@@ -157,8 +169,60 @@ describe('isShifted, on a faint tint over a flat dark panel, at every size', () 
     expect(shiftedPixels(width, height)).toBe(0);
   });
 
-  it('takes all of a panel under three pixels high for a move: what lies beyond is unknown', () => {
-    expect(shiftedPixels(200, 2)).toBe(400);
-    expect(shiftedPixels(1, 50)).toBe(50);
+  it.each([
+    [200, 2],
+    [1, 50],
+    [2, 2],
+    [1, 1],
+  ])(
+    'takes none of a %i×%i sliver for a move either, its edge taken to continue beyond it',
+    (width, height) => {
+      expect(shiftedPixels(width, height)).toBe(0);
+    },
+  );
+});
+
+describe('conservation, on any move of under a pixel', () => {
+  /** A deterministic generator of numbers from 0 to 1. */
+  function random(seed: number): () => number {
+    let state = seed;
+    return () => (state = (Math.imul(state, 1103515245) + 12345) >>> 0) / 2 ** 32;
+  }
+
+  it('explains every bilinear move of random content, in any direction, at any pixel', () => {
+    const next = random(7);
+    const side = 11;
+    let refused = 0;
+    for (let n = 0; n < 2_000; n++) {
+      const levels = Array.from({ length: side * side * 3 }, () => Math.floor(next() * 256));
+      // Beyond the image its edge continues, as the test assumes for a side under three pixels.
+      const at = (x: number, y: number, c: number) =>
+        levels[
+          (Math.min(side - 1, Math.max(0, y)) * side + Math.min(side - 1, Math.max(0, x))) * 3 + c
+        ]!;
+      const [a, b] = [next() * 2 - 1, next() * 2 - 1];
+      const before = solid(side, side, WHITE);
+      const after = solid(side, side, WHITE);
+      for (let y = 0; y < side; y++) {
+        for (let x = 0; x < side; x++) {
+          const [sx, sy] = [x - a, y - b];
+          const [x0, y0] = [Math.floor(sx), Math.floor(sy)];
+          const [fx, fy] = [sx - x0, sy - y0];
+          const moved = [0, 1, 2].map((c) =>
+            Math.round(
+              (1 - fx) * (1 - fy) * at(x0, y0, c) +
+                fx * (1 - fy) * at(x0 + 1, y0, c) +
+                (1 - fx) * fy * at(x0, y0 + 1, c) +
+                fx * fy * at(x0 + 1, y0 + 1, c),
+            ),
+          );
+          setPixel(before, x, y, [at(x, y, 0), at(x, y, 1), at(x, y, 2), 255]);
+          setPixel(after, x, y, [moved[0]!, moved[1]!, moved[2]!, 255]);
+        }
+      }
+      const [x, y] = [Math.floor(next() * side), Math.floor(next() * side)];
+      if (!conserved(new Raster(before), new Raster(after), x, y)) refused++;
+    }
+    expect(refused).toBe(0);
   });
 });

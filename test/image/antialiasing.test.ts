@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isAntialiased } from '../../src/image/antialiasing.js';
-import { contains, onEdge, Raster } from '../../src/image/raster.js';
+import { onEdge, Raster } from '../../src/image/raster.js';
 import type { RgbaImage } from '../../src/image/types.js';
 import { setPixel, solid } from '../helpers.js';
 
@@ -59,13 +59,17 @@ describe('isAntialiased', () => {
 });
 
 describe('Raster', () => {
-  it('knows which coordinates are inside it and on its edge', () => {
+  it('knows which pixels are on its edge', () => {
     const raster = new Raster(solid(3, 3, [0, 0, 0, 255]));
-    expect([contains(raster, 0, 0), contains(raster, 3, 0), contains(raster, -1, 1)]).toEqual([
-      true,
-      false,
-      false,
-    ]);
     expect([onEdge(raster, 0, 1), onEdge(raster, 1, 1)]).toEqual([true, false]);
+  });
+
+  it('reads colours a row at a time, blended over white, the same as by index', () => {
+    const image = solid(3, 2, [10, 20, 30, 255]);
+    setPixel(image, 2, 1, [0, 0, 0, 0]);
+    const raster = new Raster(image);
+    expect(raster.rgbAt(2, 1)).toBe(0xffffff);
+    expect(raster.rgbAt(0, 0)).toBe(raster.rgb(0));
+    expect(raster.rgbAt(1, 1)).toBe(0x0a141e);
   });
 });

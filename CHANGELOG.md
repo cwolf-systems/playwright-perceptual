@@ -9,9 +9,12 @@
   always around it, so any change of up to three levels per channel passed as a shift: a tint
   across a flat panel, a dark theme a shade lighter, a GPU readback drifting by two levels. A
   pixel now counts as shifted only if the colour in the 5×5 window around it is also conserved,
-  as a move of under a pixel conserves it, give or take a level per pixel for rounding. Near the
-  image's border the window moves inward, so the border and small element screenshots are
-  judged too.
+  as a move of under a pixel conserves it: one move, the same for all three channels, must explain
+  each channel's change across the window's border, give or take a level per pixel for rounding.
+  A tint changes the channels in the proportions of its own colour, not of the edges nearby, so
+  no single move explains it. Near the image's border the window moves inward, so the border and
+  small element screenshots are judged too; along a side under three pixels long, the image's
+  edge is taken to continue.
 - **Renders whose colour drifts by two levels or more over an area now fail.** In a renderer's
   golden set of 56 pairs of identical input, 10 failed with 0.1.0 and 12 now: one scene's first
   capture is one to two levels darker over nearly half the frame (41,872 pixels counted against
@@ -48,9 +51,16 @@
 
 ### Limits
 
-- In an image under three pixels high or wide, shift tolerance cannot test whether colour was
-  conserved along that side, since what lies beyond the image is unknown, so 0.1.0's rule still
-  applies there. Use `ignoreShifts: false` for such slivers.
+- In an image under three pixels high or wide, what lies beyond the image along that side is
+  unknown. Shift tolerance takes the image's edge to continue there, so a move that brings new
+  colour in across that side counts as a change.
+
+### Migrating
+
+- `isShifted` keeps its signature and is stricter, as above. It now reads each image through a
+  table of running totals kept for as long as the `Pixels` object is, so a custom detector that
+  calls it must not change an image's pixels between calls on the same object. The comparator
+  gives each comparison objects of its own.
 
 ### Speed
 
