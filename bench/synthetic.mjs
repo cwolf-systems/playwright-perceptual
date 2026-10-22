@@ -75,26 +75,65 @@ function terrainHeight(terrain, x, y, seed) {
   return h / total;
 }
 
+/**
+ * A terrain's height, remembered at the sample points of an area render (`renderArea`) whose
+ * scene is panned by `pan`. Hillshading reads the height half a pixel either side of each sample,
+ * which is mostly another sample, so each height is computed about once rather than five times.
+ * A point is looked up only when its coordinates equal a sample's exactly, so the image is the
+ * same as without this.
+ */
+function sampledHeights(terrain, seed, pan, width = WIDTH, height = HEIGHT) {
+  const step = 1 / SUPERSAMPLE;
+  // The coordinates renderArea passes, computed the same way, with the pan added as the scene does.
+  const at = (n) => Math.floor(n / SUPERSAMPLE) + ((n % SUPERSAMPLE) + 0.5) * step;
+  const columns = Float64Array.from({ length: width * SUPERSAMPLE }, (_, i) => at(i) + pan);
+  const rows = Float64Array.from({ length: height * SUPERSAMPLE }, (_, j) => at(j));
+  const known = new Float64Array(columns.length * rows.length).fill(NaN);
+  return (x, y) => {
+    const i = Math.round((x - pan) * SUPERSAMPLE - 0.5);
+    const j = Math.round(y * SUPERSAMPLE - 0.5);
+    if (!(columns[i] === x && rows[j] === y)) return terrainHeight(terrain, x, y, seed);
+    const k = j * columns.length + i;
+    let h = known[k];
+    if (Number.isNaN(h)) h = known[k] = terrainHeight(terrain, x, y, seed);
+    return h;
+  };
+}
+
 /** The terrain's hillshaded colour at a point, as unrounded sRGB levels, and its height. */
-function terrainAt(terrain, x, y, seed) {
-  const height = (px, py) => terrainHeight(terrain, px, py, seed);
+function terrainAt(terrain, x, y, seed, height = (px, py) => terrainHeight(terrain, px, py, seed)) {
   const h = height(x, y);
   const dx = height(x + 0.5, y) - height(x - 0.5, y);
   const dy = height(x, y + 0.5) - height(x, y - 0.5);
   const shade = Math.min(1.4, Math.max(0.6, 1 + terrain.relief * (dx - dy)));
-  const colour = terrain.low.map((low, c) => (low + (terrain.high[c] - low) * h) * shade);
+  const { low, high } = terrain;
+  const colour = [
+    (low[0] + (high[0] - low[0]) * h) * shade,
+    (low[1] + (high[1] - low[1]) * h) * shade,
+    (low[2] + (high[2] - low[2]) * h) * shade,
+  ];
   if (terrain.contours > 0) {
     // Contour lines half a pixel wide: distance to the nearest contour, in pixels.
     const level = h * terrain.contours;
     const distance = Math.abs(level - Math.round(level)) / (terrain.contours * Math.hypot(dx, dy));
-    if (distance < CONTOUR_HALF_WIDTH) return { colour: colour.map((v) => v * CONTOUR_SHADE), h };
+    if (distance < CONTOUR_HALF_WIDTH) {
+      return {
+        colour: [colour[0] * CONTOUR_SHADE, colour[1] * CONTOUR_SHADE, colour[2] * CONTOUR_SHADE],
+        h,
+      };
+    }
   }
   return { colour, h };
 }
 
 const terrainColour = (terrain, x, y, seed) => terrainAt(terrain, x, y, seed).colour;
 
-const blend = (under, over, alpha) => under.map((u, c) => u * (1 - alpha) + over[c] * alpha);
+// Written out per channel rather than mapped: a render calls it millions of times.
+const blend = (under, over, alpha) => [
+  under[0] * (1 - alpha) + over[0] * alpha,
+  under[1] * (1 - alpha) + over[1] * alpha,
+  under[2] * (1 - alpha) + over[2] * alpha,
+];
 
 /** Renders a scene, given as a colour at a point, by the average over each pixel's area. */
 function renderArea(colourAt, width = WIDTH, height = HEIGHT) {
@@ -154,11 +193,22 @@ const SURFACE_LOW = [70, 98, 90];
 const SURFACE_HIGH = [84, 112, 102];
 
 function surfaceScene(opacity, pan = 0) {
+  const height = sampledHeights(SMOOTH, 7, pan);
   return (x, y) => {
-    const { colour, h } = terrainAt(SMOOTH, x + pan, y, 7);
+    const { colour, h } = terrainAt(SMOOTH, x + pan, y, 7, height);
     if (!insideConvex(SURFACE, x + pan, y)) return colour;
     return blend(colour, blend(SURFACE_LOW, SURFACE_HIGH, h), opacity);
   };
+}
+
+// Finding 1's pairs share their unpanned image at 35%; each render is kept, and copied out.
+const surfaceRenders = new Map();
+
+function renderSurface(opacity, pan = 0) {
+  const key = `${opacity} ${pan}`;
+  if (!surfaceRenders.has(key)) surfaceRenders.set(key, renderArea(surfaceScene(opacity, pan)));
+  const { data, width, height } = surfaceRenders.get(key);
+  return { data: Uint8Array.from(data), width, height };
 }
 
 /**
@@ -166,12 +216,12 @@ function surfaceScene(opacity, pan = 0) {
  * over the area, of two or three levels per channel.
  */
 export function surfaceOpacity(before = 0.35, after = 0.3) {
-  return { expected: renderArea(surfaceScene(before)), actual: renderArea(surfaceScene(after)) };
+  return { expected: renderSurface(before), actual: renderSurface(after) };
 }
 
 /** The control for finding 1: the same scene panned by part of a pixel, with nothing else changed. */
 export function surfacePanned(pan = 0.3) {
-  return { expected: renderArea(surfaceScene(0.35)), actual: renderArea(surfaceScene(0.35, pan)) };
+  return { expected: renderSurface(0.35), actual: renderSurface(0.35, pan) };
 }
 
 // Finding 2: a map label, a translucent box with text, placed at a projected position. Two
