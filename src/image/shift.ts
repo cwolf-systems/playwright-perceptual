@@ -14,9 +14,11 @@ import type { Pixels } from './types.js';
 //   by at most a level and a half. A change of colour moves the mean by what it adds everywhere.
 // - Where the mean did change, the change must be a move. The window is registered: the change is
 //   fitted as the expected image's gradient times one offset, a single Lucas–Kanade step, and is a
-//   move if an offset under 0.75 px explains at least 40% of it. Texture moved one way and back
-//   averages to no change, so a change of colour over texture has no offset that explains it. A
-//   ramp or an edge does have one: there a move and a change of colour look alike.
+//   move if an offset under 0.75 px explains at least 40% of it, and lies within 0.4 px of the
+//   offset fitted over the whole tile (32×32) around it. Texture moved one way and back averages
+//   to no change, so a change of colour over texture has no offset that explains it. Over five
+//   pixels a ramp or an edge does have one, where a move and a change of colour look alike; over
+//   the tile, smooth texture turns, and a change of colour fits a different offset at each turn.
 //
 // An edge resampled differently, rather than moved, as a GPU and a software rasteriser draw a
 // soft edge or a gradient's end, is neither: it changes the mean and fits no one offset. Such a
@@ -40,6 +42,13 @@ const MAX_OFFSET = 0.75;
 
 /** The share of the change, in squared levels, that the offset may leave unexplained. */
 const UNEXPLAINED = 0.6;
+
+/**
+ * How far, in pixels along each axis, a window's offset may lie from its tile's. Content that moved
+ * moves together; a change of colour over smooth texture fits a different offset at every turn of
+ * the texture.
+ */
+const AGREEMENT = 0.4;
 
 /**
  * Damping of the fitted offset, as a share of the window's gradient energy. Along a straight edge
@@ -77,30 +86,60 @@ function keepsColour(tile: Tile, window: Box): boolean {
   return [Sum.red, Sum.green, Sum.blue].every((c) => Math.abs(tile.sum(c, window)) <= allowed);
 }
 
+/** The sums over a box from which a move is fitted. */
+interface Moments {
+  readonly gxx: number;
+  readonly gxy: number;
+  readonly gyy: number;
+  readonly bx: number;
+  readonly by: number;
+  /** The squared change. */
+  readonly change: number;
+}
+
+const moments = (tile: Tile, box: Box): Moments => ({
+  gxx: tile.sum(Sum.gxx, box),
+  gxy: tile.sum(Sum.gxy, box),
+  gyy: tile.sum(Sum.gyy, box),
+  bx: tile.sum(Sum.gxd, box),
+  by: tile.sum(Sum.gyd, box),
+  change: tile.sum(Sum.dd, box),
+});
+
 /**
- * Whether a move of `image` by under `MAX_OFFSET` explains the change to `other` over the window.
- * The change d is fitted, summed over the channels, as g·t for the gradient g of `image` and one
- * offset t: the normal equations M t = b, with M the sum of g gᵀ and b the sum of g d (Lucas and
- * Kanade, 1981). What the fit leaves is the sum of d² less 2 b·t plus tᵀ M t.
+ * The offset t that best explains the change d over a box as a move of `image`: d is fitted,
+ * summed over the channels, as g·t for the gradient g of `image`, by the normal equations
+ * M t = b, with M the sum of g gᵀ and b the sum of g d (Lucas and Kanade, 1981), damped. Null
+ * where there is no gradient to move.
  */
-function explainedByMove(tile: Tile, window: Box): boolean {
-  const gxx = tile.sum(Sum.gxx, window);
-  const gxy = tile.sum(Sum.gxy, window);
-  const gyy = tile.sum(Sum.gyy, window);
-  const bx = tile.sum(Sum.gxd, window);
-  const by = tile.sum(Sum.gyd, window);
-  const change = tile.sum(Sum.dd, window);
+function offset({ gxx, gxy, gyy, bx, by }: Moments): readonly [number, number] | null {
   const damping = DAMPING * (gxx + gyy);
   const mxx = gxx + damping;
   const myy = gyy + damping;
   const det = mxx * myy - gxy * gxy;
-  // A flat window has no gradient to move: nothing there is a move.
-  if (!(det > 0)) return false;
-  const tx = (myy * bx - gxy * by) / det;
-  const ty = (mxx * by - gxy * bx) / det;
-  if (Math.abs(tx) > MAX_OFFSET || Math.abs(ty) > MAX_OFFSET) return false;
-  const left = change - 2 * (bx * tx + by * ty) + gxx * tx * tx + 2 * gxy * tx * ty + gyy * ty * ty;
-  return left <= UNEXPLAINED * change;
+  if (!(det > 0)) return null;
+  return [(myy * bx - gxy * by) / det, (mxx * by - gxy * bx) / det];
+}
+
+/** What a move by (tx, ty) leaves of the change: the sum of d² less 2 b·t plus tᵀ M t. */
+const left = ({ gxx, gxy, gyy, bx, by, change }: Moments, [tx, ty]: readonly [number, number]) =>
+  change - 2 * (bx * tx + by * ty) + gxx * tx * tx + 2 * gxy * tx * ty + gyy * ty * ty;
+
+/**
+ * Whether a move of `image` by under `MAX_OFFSET` explains the change to `other` over the window,
+ * and agrees with the move fitted over the whole tile around it.
+ */
+function explainedByMove(tile: Tile, window: Box): boolean {
+  const here = moments(tile, window);
+  const own = offset(here);
+  if (!own || Math.abs(own[0]) > MAX_OFFSET || Math.abs(own[1]) > MAX_OFFSET) return false;
+  if (left(here, own) > UNEXPLAINED * here.change) return false;
+  const around = offset(moments(tile, tile.cell));
+  return (
+    around !== null &&
+    Math.abs(own[0] - around[0]) <= AGREEMENT &&
+    Math.abs(own[1] - around[1]) <= AGREEMENT
+  );
 }
 
 /** Levels per channel a colour may lie off the line between the two colours it mixes. */

@@ -10,25 +10,27 @@
   across a flat panel, a dark theme a shade lighter, a GPU readback drifting by two levels. That
   range test stays, and the 5×5 window around the pixel must now also show that nothing but a
   move happened: each channel's mean over it changed by at most 1.5 levels, or a move of under
-  0.75 px explains the change, found by registering the window (one Lucas–Kanade step). An edge
+  0.75 px explains the change, found by registering the window (one Lucas–Kanade step) and
+  agreeing within 0.4 px with the move of the 32×32 tile around it. An edge
   resampled differently, a mixture in both images of the same two colours on either side of it
   that kept their colour, also passes. Texture has no offset that explains a change of colour
   over it, so of a translucent overlay made 5 points more transparent over terrain, 89% of the
-  pixels past ΔE00 1 now count, against 0.1% in 0.1.0 (92% of the synthetic reproduction in the
-  accuracy benchmark, against none). Windows are clipped at the image's border, so slivers and small element
+  pixels past ΔE00 1 now count, against 0.1% in 0.1.0 (93% of the synthetic reproduction in the
+  accuracy benchmark, against none), and of a drift of one to three levels over a whole textured
+  frame, 98%, against none. Windows are clipped at the image's border, so slivers and small element
   screenshots are judged as well: a tint on a 200×2, 1×50 or 2×2 panel counts in full.
 - **Renders whose colour drifts by two levels or more over an area now fail.** In a renderer's
   golden set of 56 pairs of identical input, 10 failed with 0.1.0 and 11 now: one scene's first
   capture is one to two levels darker over nearly half the frame (37,240 pixels counted against
   each of the other two captures).
 - **Pairs that already differed gain counted pixels.** Self-noise in that golden set: a map label
-  one pixel over between loads, 139 → 859 pixels, which still passes with 0.1% allowed. In this
+  one pixel over between loads, 139 → 869 pixels, which still passes with 0.1% allowed. In this
   repository's benchmark, among pairs that should match and already failed: the 2D map through
-  the GPU against software at 2×, 5,067 → 10,069; the map and 3D view moved 0.3 px, by up to
-  1,056; the chart through the GPU against software at 2×, 2 → 248, inside 0.1%; the CSS effects
-  through the GPU against software, 3 → 58 at 1×, inside 0.1%, where it also fails at ΔE00 1.5
+  the GPU against software at 2×, 5,067 → 10,415; the map and 3D view moved 0.3 px, by up to
+  2,254; the chart through the GPU against software at 2×, 2 → 248, inside 0.1%; the CSS effects
+  through the GPU against software, 3 → 59 at 1×, inside 0.1%, where it also fails at ΔE00 1.5
   (11 pixels: near-white drifting two levels in blue over an area). Text and SVG moved 0.3 px
-  lose counted pixels: 333 → 260, 222 → 200.
+  lose counted pixels: 333 → 260, 222 → 204.
 - **Anti-aliasing detection asks that the flat area beside a slope keep its colour**, give or take
   a level. A uniform change of colour no longer passes there as anti-aliasing.
 - If a test starts failing, look at the diff image: red is what counts. If the change is

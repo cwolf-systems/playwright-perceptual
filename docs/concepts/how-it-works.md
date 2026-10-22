@@ -34,9 +34,11 @@ Two images of the same size are compared pixel by pixel.
      it adds everywhere; a drift of two levels over an area counts.
    - **A move explains it:** the window is registered. The change is fitted as the expected
      image's gradient times one offset (a single, damped Lucas–Kanade step: Lucas and Kanade,
-     1981), and the offset must lie within 0.75 px along each axis and explain at least 40% of
-     the squared change. Texture moved one way and back averages to no change, so a change of
-     colour over texture has no offset that explains it.
+     1981), and the offset must lie within 0.75 px along each axis, explain at least 40% of the
+     squared change, and agree within 0.4 px with the offset fitted over the 32×32 tile around
+     the pixel. Texture moved one way and back averages to no change, so a change of colour over
+     texture has no offset that explains it; where a window of smooth texture does fit one, the
+     offset turns with the texture and disagrees with the tile's.
 
    A pixel is also shifted if, in both images, it is a mixture of the same two colours found on
    opposite sides of it in the window, each of which kept its colour give or take a level: an edge
@@ -71,7 +73,8 @@ lightness, chroma and hue, and for blues, where earlier formulas were least accu
   moves by only part of the change, and beside a line or edge a change of colour can fit a move
   of the line. There shift tolerance still takes part of a faint uniform change for noise: about
   a tenth of the pixels of a translucent overlay made 5 points more transparent, in the cases
-  measured.
+  measured. Over high-contrast texture a drift of a few levels fits offsets so small that they
+  agree with any tile, and passes as a move.
 - A drift of one level per channel everywhere passes as rounding while shift tolerance is on,
   even where it passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over an
   area counts, down to images a pixel wide.

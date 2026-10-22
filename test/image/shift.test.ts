@@ -160,6 +160,52 @@ describe('isShifted, on the colour of an area and on moves', () => {
   });
 });
 
+describe('isShifted, on smooth texture', () => {
+  const SIDE = 96;
+
+  /** Dark, smooth texture moved by (dx, dy), plus `drift(x, y, channel)` levels. */
+  function texture(dx: number, dy: number, drift?: (x: number, y: number, c: number) => number) {
+    const image = solid(SIDE, SIDE, WHITE);
+    for (let y = 0; y < SIDE; y++) {
+      for (let x = 0; x < SIDE; x++) {
+        const [u, v] = [x - dx, y - dy];
+        const level = 40 + 25 * Math.sin(u / 17) * Math.cos(v / 23) + 10 * Math.sin((u + v) / 5);
+        const [r, g, b] = [0, 8, 16].map((offset, c) =>
+          Math.round(level + offset + (drift?.(x, y, c) ?? 0)),
+        );
+        setPixel(image, x, y, [r!, g!, b!, 255]);
+      }
+    }
+    return image;
+  }
+
+  /** The share of changed pixels taken for a move. */
+  function shiftedShare(before: RgbaImage, after: RgbaImage): number {
+    let changed = 0;
+    let moved = 0;
+    for (let y = 0; y < SIDE; y++) {
+      for (let x = 0; x < SIDE; x++) {
+        if (sameAt(before, after, x, y)) continue;
+        changed++;
+        if (shifted(before, after, x, y)) moved++;
+      }
+    }
+    return moved / changed;
+  }
+
+  it('accepts the texture moved by part of a pixel', () => {
+    expect(shiftedShare(texture(0, 0), texture(0.3, 0))).toBe(1);
+  });
+
+  it('rejects a drift of one to three levels, though over five pixels it fits a move', () => {
+    // A drift of two levels on average, over texture rising a few levels per pixel, is what a move
+    // of under a pixel would leave in any one 5×5 window. Over the tile the texture turns, and the
+    // offsets a drift fits disagree with the tile's.
+    const drift = (x: number, y: number, c: number) => 1 + ((y * SIDE + x + c) % 3);
+    expect(shiftedShare(texture(0, 0), texture(0, 0, drift))).toBeLessThan(0.01);
+  });
+});
+
 describe('isShifted, on an edge resampled rather than moved', () => {
   /** A 9×9 image: dark left of column 4, light right of it, and column 4 a mixture. */
   const edge = (mixed: number, left = 40, right = 220) =>

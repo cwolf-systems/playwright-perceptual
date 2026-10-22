@@ -129,20 +129,48 @@ Tried and dropped:
 The mixture rule belongs to shift tolerance, not to anti-aliasing: with `ignoreShifts: false`, as
 an anti-aliasing rule, it passed film grain (a mixture of two near colours, within two levels).
 
+## 5. Content that moved moves together
+
+A drift of one to three levels over smooth, dark texture (a test the judge added late: two levels
+on average, a different one per pixel and channel) still passed in two places of five. The
+texture rises a few levels per pixel, so in any one 5×5 window a two-level drift is what a move of
+under a pixel would leave, and the fit explains 86% of it. Over a larger area the texture turns,
+and the offsets the drift fits turn with it. A real move is the same offset all over.
+
+| check on the window's move                                     | drift counted       | brighter texture, drift | verdicts lost                                                       |
+| -------------------------------------------------------------- | ------------------- | ----------------------- | ------------------------------------------------------------------- |
+| none                                                           | 60.9%               |                         | 0                                                                   |
+| registration window 7×7, 9×9, 13×13                            | 65.0%, 70.0%, 82.8% |                         |                                                                     |
+| agrees within 0.25 px with an 11×11 fit                        | 80.1%               |                         |                                                                     |
+| agrees within 0.25 px with a 17×17 fit                         | 97.0%               |                         | 2                                                                   |
+| agrees within 0.4 px with a 21×21 fit                          | 96.0%               |                         | 0, but the wider tables cost the bench's full change 15% over 0.1.0 |
+| the tile's own offset leaves under 60% of the window's change  | 76.3%               | 52.5%                   |                                                                     |
+| agrees within 0.4 px with the tile's offset, 32×32             | 98.0%               | 10.3%                   | 0                                                                   |
+| both of the last two                                           | 98.3%               | 52.5%                   | 2                                                                   |
+| an absolute cap on what the fit leaves, 0.5 level² per channel | 100%                |                         | 6                                                                   |
+
+The tile is the cell the sums are kept for, so its offset costs five lookups. Kept: the window's
+offset must agree with the tile's within 0.4 px. On brighter texture (40 to 200 levels) the same
+drift fits offsets under 0.2 px everywhere, which agree with any tile, and only a tenth of it
+counts; the GPU-against-software pairs that should match fit no move a tile agrees with, so a
+stricter test loses them.
+
 ## Kept
 
 A changed pixel is a shift if it passes the 3×3 range test both ways and the 5×5 window either
 keeps its colour (each channel's mean within 1.5 levels) or is explained by a move (one damped
 Lucas–Kanade step over the window finds an offset within ±0.75 px that leaves at most 60% of the
-squared change); or if it is, in both images, a mixture of two colours on opposite sides of it in
-the 5×5 window that kept theirs within a level.
+squared change, and within 0.4 px of the offset fitted over its 32×32 tile); or if it is, in both
+images, a mixture of two colours on opposite sides of it in the 5×5 window that kept theirs within
+a level.
 
 |                                          | PR #1 | register first                   |
 | ---------------------------------------- | ----- | -------------------------------- |
 | verdicts lost, either allowance          | –     | 0                                |
 | verdicts gained                          | –     | 3 benchmark pairs, 1 golden pair |
-| overlay change counted                   | 73.2% | 88.6%                            |
-| synthetic overlay change counted         | 66.1% | 91.9%                            |
+| overlay change counted                   | 73.2% | 88.9%                            |
+| synthetic overlay change counted         | 66.1% | 92.7%                            |
+| textured drift of 1–3 levels counted     | 0%    | 98.0%                            |
 | tint on a 200×2, 1×50, 2×2 panel counted | 0%    | 100%                             |
 
 At ΔE00 1.5 one pair turns: the CSS effects through the GPU, where 11 pixels of near-white drift

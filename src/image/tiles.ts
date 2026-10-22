@@ -114,12 +114,15 @@ export class Planes {
 /** A tile of a pair of images: their channels and summed-area tables of what detectors sum. */
 export class Tile {
   readonly planes: Planes;
+  /** The tile's own pixels. */
+  readonly cell: Box;
   /** Where the tables start, and their row length: one more than the summed box is wide. */
   private readonly box: Box;
   private readonly stride: number;
   private readonly tables: Float64Array;
 
   constructor(image: Pixels, other: Pixels, tile: Box) {
+    this.cell = tile;
     // Planes reach a pixel beyond the summed box for the gradient. At the image's border they
     // stop, and clamping to them is clamping to the image.
     this.box = grown(image, tile, WINDOW_RADIUS);

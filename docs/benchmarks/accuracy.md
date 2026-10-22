@@ -252,7 +252,7 @@ Three changes to the noise detection, each judged on these pairs before it was a
 
 - **Shift tolerance asks the 5×5 window around a pixel to show a move:** each channel's mean
   over it changes by at most 1.5 levels, or one registration step finds an offset under 0.75 px
-  that explains the change; or the pixel is a mixture, in both images, of two colours on either
+  that explains the change and agrees with the offset of the 32×32 tile around it; or the pixel is a mixture, in both images, of two colours on either
   side of it that kept theirs. Windows are clipped at the image's border.
 - **Rounding is its own class**: while shift tolerance is on, a pixel within one level in every
   channel is not counted.
@@ -266,11 +266,11 @@ pixel at 1×), where near-white drifts two levels in blue over an area. Five pai
 none allowed now pass at some thresholds: the SVG page through the GPU, the 3D view through the
 GPU, and the SVG page moved 0.3 px at 2× in Chromium and Firefox. Regressions gain counted pixels,
 and so do some pairs that should match and already failed: the 2D map through the GPU at 2×, from
-5,067 to 10,069; the map and 3D view moved 0.3 px, by up to 1,056. Two come close to the 0.1%
+5,067 to 10,415; the map and 3D view moved 0.3 px, by up to 2,254. Two come close to the 0.1%
 allowance and still pass it: the chart through the GPU at 2×, from 2 to 248 against 256 allowed,
-and the CSS effects page through the GPU at 1×, from 3 to 58 against 64. Text and SVG moved 0.3 px
+and the CSS effects page through the GPU at 1×, from 3 to 59 against 64. Text and SVG moved 0.3 px
 at 1× lose counted pixels. In the synthetic set the faint overlay change, 0 counted pixels in
-0.1.0, now has 20,960 at ΔE00 1, 92% of its pixels past the threshold.
+0.1.0, now has 21,156 at ΔE00 1, 93% of its pixels past the threshold.
 
 Comparison is faster than 0.1.0 wherever the whole frame changes. On a downstream renderer's
 captures (1346×819, not included), a whole-frame real change took 350 ms against 421 ms, and a
