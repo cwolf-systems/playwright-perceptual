@@ -266,8 +266,8 @@ the faint overlay change, 0 counted pixels before, now has 15,074 at ΔE00 1.
 
 Comparison is slower where shift tolerance must test conservation at many pixels, and faster on
 grainy images, where rounding is checked before the detectors. On a downstream renderer's captures
-(1346×819, not included), a whole-frame real change took about 1.7 times as long (758–881 ms
-against 464–477 ms), and a film-grain scene 51–62 ms against 280 ms. A synthetic worst case, a
+(1346×819, not included), a whole-frame real change took about twice as long (830–900 ms
+against 422–480 ms), and a film-grain scene 50–59 ms against 240–255 ms. A synthetic worst case, a
 drift of one to three levels over a whole textured frame of that size, took 3.6 times as long
 (2.0 s against 0.56 s). `npm run bench` changes a solid block of colour, which shift tolerance
 rejects at once, so its times are unchanged within run-to-run noise.

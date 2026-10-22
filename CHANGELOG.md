@@ -14,7 +14,7 @@
   judged too.
 - **Renders whose colour drifts by two levels or more over an area now fail.** In a renderer's
   golden set of 56 pairs of identical input, 10 failed with 0.1.0 and 12 now: one scene's first
-  capture is one to two levels darker over nearly half the frame (41,370 pixels counted against
+  capture is one to two levels darker over nearly half the frame (41,872 pixels counted against
   each of the other two captures).
 - **Pairs that already differed gain counted pixels.** Self-noise in that golden set: a map label
   one pixel over between loads, 139 → 150 pixels; a second scene's label and box edge, 82 → 94.
