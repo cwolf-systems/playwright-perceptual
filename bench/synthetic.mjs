@@ -1,7 +1,7 @@
-// Synthetic image pairs that reproduce findings from a downstream renderer's test suite (Trace,
-// 2026-10-22), for the accuracy benchmark and the unit tests. The original captures contain
-// third-party basemap tiles and are not redistributed; these are generated from scratch and
-// reproduce each phenomenon, so the same pixel classes reach the comparator.
+// Synthetic image pairs that reproduce findings from a downstream WebGL map renderer's test
+// suite (reported 2026-10-22), for the accuracy benchmark and the unit tests. The original
+// captures contain third-party basemap tiles and are not redistributed; these are generated from
+// scratch and reproduce each phenomenon, so the same pixel classes reach the comparator.
 //
 // Every generator is deterministic: the same arguments give the same bytes on every platform.
 // Images are 8-bit RGBA, { data, width, height }, row by row from the top left.
@@ -174,7 +174,7 @@ export function surfacePanned(pan = 0.3) {
   return { expected: renderArea(surfaceScene(0.35)), actual: renderArea(surfaceScene(0.35, pan)) };
 }
 
-// Finding 2: a drone label, a translucent box with text, placed at a projected position. Two
+// Finding 2: a map label, a translucent box with text, placed at a projected position. Two
 // loads of the same scene land the anchor either side of a pixel boundary, so the label moves by
 // a whole pixel, or one edge of its box covers one more row.
 
@@ -186,7 +186,7 @@ const GLYPHS = {
   5: ['#####', '#    ', '#### ', '    #', '    #', '#   #', ' ### '],
   m: ['     ', '     ', '## # ', '# # #', '# # #', '# # #', '# # #'],
 };
-const LABEL_TEXT = '3165m';
+const LABEL_TEXT = '1563m';
 const LABEL_BOX = [24, 72, 34, 14];
 const LABEL_FILL = [24, 26, 32];
 const LABEL_OPACITY = 0.8;
