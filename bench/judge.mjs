@@ -12,9 +12,10 @@
 //    the synthetic set and real captures. PR #1's verdicts (this repository's own dist/) are taken
 //    on the same bytes in the same run, so any pair PR #1 gets right and the candidate gets wrong
 //    is listed by name.
-// 2. Issue #2's residual: the share of a faint uniform change that is counted. The denominator is
-//    every pixel past ΔE00 1 as PR #1 measures it with all noise detection off, so it is the same
-//    for every candidate.
+// 2. Issue #2's residual: the share of a faint uniform change that is counted, and likewise the
+//    share of a drift of one to three levels over a whole textured frame. The denominator is every
+//    pixel past ΔE00 1 as PR #1 measures it with all noise detection off, so it is the same for
+//    every candidate.
 // 3. Slivers: a tint of three levels of blue on a flat dark panel (ΔE00 2.11) at 200×2, 1×50 and
 //    2×2, and the smallest side at which panels of every shape count all of it.
 // 4. Speed: the scenes of `npm run bench` (bench/speed.mjs), a textured whole-frame drift of one
@@ -191,12 +192,19 @@ async function benchmarkPairs() {
   return [...fixtures, ...rendered];
 }
 
-const syntheticSet = () =>
-  SYNTHETIC_PAIRS.map((p) => ({
+const TEXTURED_DRIFT = 'synthetic/judge/textured drift of 1–3 levels';
+const TEXTURE_MOVED = 'synthetic/judge/fine texture moved 0.3, 0.2 px';
+
+/** bench/synthetic.mjs's pairs, and the judge's own textured drift and its control. */
+const syntheticSet = () => [
+  ...SYNTHETIC_PAIRS.map((p) => ({
     id: `synthetic/${p.finding}/${p.name}`,
     set: 'synthetic',
     load: p.make,
-  }));
+  })),
+  { id: TEXTURED_DRIFT, set: 'synthetic', load: texturedDrift },
+  { id: TEXTURE_MOVED, set: 'synthetic', load: textureMoved },
+];
 
 /** A real pair, labelled by the hashes of its files. */
 function realPair(id, set, role, expectedFile, actualFile) {
@@ -282,9 +290,14 @@ function countedBy(pkg, adapter, expected, actual) {
 // ---------------------------------------------------------------------------------------------
 // Counting: one build's counted pixels on every pair, residual case and sliver panel
 
-/** The faint uniform changes of issue #2. */
+const DRIFT_CASE = 'synthetic textured drift';
+
+/** The faint uniform changes of issue #2, and a drift of one to three levels over texture. */
 function residualCases(opacity) {
-  const cases = [['synthetic surfaceOpacity', surfaceOpacity]];
+  const cases = [
+    ['synthetic surfaceOpacity', surfaceOpacity],
+    [DRIFT_CASE, texturedDrift],
+  ];
   if (opacity) {
     cases.push([
       'real opacity pair',
@@ -543,6 +556,47 @@ function texturedFrame() {
   return { data, width, height };
 }
 
+/**
+ * The textured frame with every channel of every pixel one to three levels lighter, in a fixed
+ * pattern: a drift of colour, not a move, which win condition 2 asks to be counted. It is the
+ * speed section's textured worst case too.
+ */
+function texturedDrift() {
+  const frame = texturedFrame();
+  return { expected: frame, actual: adjusted(frame, (i, c) => 1 + (((i >> 2) + c) % 3)) };
+}
+
+/**
+ * The control for the drift: a textured frame, and the same scene moved 0.3 px right and 0.2 px
+ * down, each pixel the average over its area. A true sub-pixel move, so it should match. The
+ * texture has finer detail than texturedFrame's, whose own move changes no pixel past ΔE00 1:
+ * moved, this one changes about 230,000 pixels past ΔE00 1, up to 1.65. A build that counts
+ * every drift without telling it from a move fails here.
+ */
+function textureMoved() {
+  const [width, height] = FRAME;
+  const scene = (x, y) =>
+    40 + 25 * Math.sin(x / 17) * Math.cos(y / 23) + 15 * Math.sin((x + y) / 2);
+  const SAMPLES = 4;
+  const render = (dx, dy) => {
+    const data = new Uint8Array(width * height * 4);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        let sum = 0;
+        for (let j = 0; j < SAMPLES; j++) {
+          for (let i = 0; i < SAMPLES; i++) {
+            sum += scene(x + (i + 0.5) / SAMPLES + dx, y + (j + 0.5) / SAMPLES + dy);
+          }
+        }
+        const t = Math.round(sum / SAMPLES ** 2);
+        data.set([t, t + 8, t + 16, 255], (y * width + x) * 4);
+      }
+    }
+    return { data, width, height };
+  };
+  return { expected: render(0, 0), actual: render(0.3, 0.2) };
+}
+
 function adjusted(image, change) {
   const data = Uint8Array.from(image.data);
   for (let i = 0; i < data.length; i += 4) {
@@ -584,10 +638,7 @@ async function speedWorker({ dist, adapter: adapterName, pairs }) {
     }
   }
   const frame = texturedFrame();
-  cases.push([
-    WHOLE_FRAME[3],
-    () => ({ expected: frame, actual: adjusted(frame, (i, c) => 1 + (((i >> 2) + c) % 3)) }),
-  ]);
+  cases.push([WHOLE_FRAME[3], texturedDrift]);
   const random = lcg(1);
   cases.push([
     WHOLE_FRAME[4],
@@ -707,11 +758,15 @@ function conditions(result) {
   const { accuracy: acc, residual: res, slivers: sl, speed, size: sz } = result;
   const regressions =
     acc.changes.none.regressions.length + acc.changes.allowance.regressions.length;
-  const shares = Object.values(res);
+  const shares = Object.entries(res)
+    .filter(([name]) => name !== DRIFT_CASE)
+    .map(([, r]) => r);
   const residualImproved =
     shares.length > 0 &&
     shares.every((r) => r.share >= r.pr1Share) &&
     shares.some((r) => r.share > r.pr1Share);
+  const drift = res[DRIFT_CASE];
+  const driftImproved = drift.share > drift.pr1Share;
   const sliverImproved = sl.limit !== null && (sl.pr1Limit === null || sl.limit < sl.pr1Limit);
   let slower = null;
   let worstRatio = null;
@@ -724,7 +779,12 @@ function conditions(result) {
   }
   return {
     1: { pass: regressions === 0, regressions },
-    2: { pass: residualImproved && sliverImproved, residualImproved, sliverImproved },
+    2: {
+      pass: residualImproved && driftImproved && sliverImproved,
+      residualImproved,
+      driftImproved,
+      sliverImproved,
+    },
     3: { pass: slower === null ? null : slower.length === 0, worstRatio, slower },
     4: { pass: sz.candidate.image.code < sz.pr1.image.code, code: sz.candidate.image.code },
   };
@@ -775,7 +835,7 @@ function markdown(r) {
     for (const id of fixes) out.push(`- gained: ${id}`);
   }
 
-  out.push("\n## 2. Issue #2's residual\n");
+  out.push("\n## 2. Issue #2's residual, and textured drift\n");
   out.push(
     table(
       ['Pair', 'Past ΔE00 1', 'Counted', 'Share', 'PR #1 counted', 'PR #1 share'],
@@ -850,9 +910,9 @@ function markdown(r) {
       [
         ['1. No verdict PR #1 gets right goes wrong', yes(c[1].pass), `${c[1].regressions} lost`],
         [
-          "2. Issue #2's residual and the sliver limit improve",
+          "2. Issue #2's residual, textured drift and the sliver limit improve",
           yes(c[2].pass),
-          `residual ${yes(c[2].residualImproved)}, slivers ${yes(c[2].sliverImproved)}`,
+          `residual ${yes(c[2].residualImproved)}, textured drift ${yes(c[2].driftImproved)}, slivers ${yes(c[2].sliverImproved)}`,
         ],
         [
           '3. Whole-frame speed no slower than 0.1.0',
@@ -885,8 +945,9 @@ function compare(files) {
         a.c[4].code - b.c[4].code,
     );
   const residuals = (r) =>
-    Object.values(r.residual)
-      .map((x) => pct(x.share))
+    Object.entries(r.residual)
+      .filter(([name]) => name !== DRIFT_CASE)
+      .map(([, x]) => pct(x.share))
       .join(' / ');
   const side = (s) => (s === null ? `>${SLIVER_SIDES.at(-1)}` : String(s));
   console.log(
@@ -897,6 +958,7 @@ function compare(files) {
         'Commit',
         '1. Lost (none / 0.1%)',
         '2. Residual (synthetic / real)',
+        '2. Textured drift',
         '2. Sliver limit',
         '3. Worst whole-frame vs 0.1.0',
         '4. src/image code (types)',
@@ -908,6 +970,7 @@ function compare(files) {
         `${r.candidate.commit?.slice(0, 7) ?? '?'}${r.candidate.dirty ? '+' : ''}`,
         `${r.accuracy.changes.none.regressions.length} / ${r.accuracy.changes.allowance.regressions.length}`,
         residuals(r),
+        pct(r.residual[DRIFT_CASE]?.share),
         `${side(r.slivers.limit)} px`,
         c[3].worstRatio === null ? 'n/a' : `${c[3].worstRatio.toFixed(2)}×`,
         `${r.size.candidate.image.code} (${r.size.candidate.image.types})`,

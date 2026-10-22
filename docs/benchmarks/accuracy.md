@@ -7,7 +7,7 @@ Does each comparator pass what it should and fail what it should? Reproduce with
 
 Labelled pairs from four sources.
 
-- **Playwright's own image-comparison fixtures** (`tests/image_tools/fixtures` at v1.60.0): 13 pairs
+- **Playwright's own image-comparison fixtures** (`tests/image_tools/fixtures` at v1.60.0): 12 pairs
   that should match (Chrome's non-deterministic rendering, WebKit rendering artefacts,
   anti-aliasing cases from looks-same's tests, trivial cases) and 9 that should not (colour changes,
   a missing caret, single pixels, and traps for SSIM-based comparison). They are downloaded on
