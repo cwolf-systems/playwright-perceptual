@@ -1,0 +1,4340 @@
+{
+ "judge": {
+  "labels": "782953413847b78f",
+  "commit": "85f8275deb2b1febecb3ff7178dd2330b50cb657"
+ },
+ "candidate": {
+  "name": "main",
+  "commit": "892555e1d4ff9c4204fea50c4a673f6916f343d4",
+  "dirty": false
+ },
+ "machine": {
+  "cpu": "Apple M4",
+  "node": "v22.22.2",
+  "platform": "darwin"
+ },
+ "notices": [],
+ "accuracy": {
+  "summary": {
+   "design": {
+    "pairs": 107,
+    "none": {
+     "wrong": 20,
+     "pr1Wrong": 20,
+     "failing": 77,
+     "pr1Failing": 77
+    },
+    "allowance": {
+     "wrong": 16,
+     "pr1Wrong": 16,
+     "failing": 69,
+     "pr1Failing": 69
+    }
+   },
+   "held-out": {
+    "pairs": 86,
+    "none": {
+     "wrong": 18,
+     "pr1Wrong": 18,
+     "failing": 66,
+     "pr1Failing": 66
+    },
+    "allowance": {
+     "wrong": 10,
+     "pr1Wrong": 10,
+     "failing": 58,
+     "pr1Failing": 58
+    }
+   },
+   "synthetic": {
+    "pairs": 7,
+    "none": {
+     "wrong": 5,
+     "pr1Wrong": 4,
+     "failing": 4,
+     "pr1Failing": 5
+    },
+    "allowance": {
+     "wrong": 1,
+     "pr1Wrong": 0,
+     "failing": 0,
+     "pr1Failing": 1
+    }
+   },
+   "real golden": {
+    "pairs": 56,
+    "none": {
+     "wrong": 11,
+     "pr1Wrong": 9,
+     "failing": 10,
+     "pr1Failing": 12
+    },
+    "allowance": {
+     "wrong": 2,
+     "pr1Wrong": 0,
+     "failing": 1,
+     "pr1Failing": 3
+    }
+   },
+   "real findings": {
+    "pairs": 2,
+    "none": {
+     "wrong": 0,
+     "pr1Wrong": 0,
+     "failing": 1,
+     "pr1Failing": 1
+    },
+    "allowance": {
+     "wrong": 1,
+     "pr1Wrong": 0,
+     "failing": 0,
+     "pr1Failing": 1
+    }
+   }
+  },
+  "changes": {
+   "none": {
+    "regressions": [
+     "synthetic/1/surface opacity 35% → 30%",
+     "golden/28/0v1",
+     "golden/28/0v2"
+    ],
+    "fixes": []
+   },
+   "allowance": {
+    "regressions": [
+     "synthetic/1/surface opacity 35% → 30%",
+     "golden/28/0v1",
+     "golden/28/0v2",
+     "findings/opacity"
+    ],
+    "fixes": []
+   }
+  },
+  "notRun": 0,
+  "pairs": [
+   {
+    "id": "playwright/should-match/crbug-919955/example-1",
+    "set": "design",
+    "match": true,
+    "pixels": 147200,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-match/crbug-919955/example-2",
+    "set": "design",
+    "match": true,
+    "pixels": 484,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-match/looks-same-tests/antialiasing",
+    "set": "design",
+    "match": true,
+    "pixels": 180,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-match/looks-same-tests/antialiasing-tolerance-1",
+    "set": "design",
+    "match": true,
+    "pixels": 918,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-match/looks-same-tests/antialiasing-tolerance-2",
+    "set": "design",
+    "match": true,
+    "pixels": 432,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-match/tiny-antialiasing-sample/tiny",
+    "set": "design",
+    "match": true,
+    "pixels": 100,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-match/trivial/black",
+    "set": "design",
+    "match": true,
+    "pixels": 400,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-match/trivial/white",
+    "set": "design",
+    "match": true,
+    "pixels": 400,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-corner-2x",
+    "set": "design",
+    "match": true,
+    "pixels": 10404,
+    "counted": 4,
+    "pr1Counted": 4,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-corner-pixel",
+    "set": "design",
+    "match": true,
+    "pixels": 2500,
+    "counted": 1,
+    "pr1Counted": 1,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-four-pixels",
+    "set": "design",
+    "match": true,
+    "pixels": 1575,
+    "counted": 4,
+    "pr1Counted": 4,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-pixel",
+    "set": "design",
+    "match": true,
+    "pixels": 1575,
+    "counted": 1,
+    "pr1Counted": 1,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-fail/julia-ssim-trap/1",
+    "set": "design",
+    "match": false,
+    "pixels": 400,
+    "counted": 400,
+    "pr1Counted": 400,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "playwright/should-fail/looks-same-tests/blue",
+    "set": "design",
+    "match": false,
+    "pixels": 2500,
+    "counted": 1300,
+    "pr1Counted": 1300,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "playwright/should-fail/looks-same-tests/green",
+    "set": "design",
+    "match": false,
+    "pixels": 2500,
+    "counted": 1300,
+    "pr1Counted": 1300,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "playwright/should-fail/looks-same-tests/no-caret",
+    "set": "design",
+    "match": false,
+    "pixels": 4576,
+    "counted": 1,
+    "pr1Counted": 1,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "playwright/should-fail/looks-same-tests/red",
+    "set": "design",
+    "match": false,
+    "pixels": 2500,
+    "counted": 1300,
+    "pr1Counted": 1300,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "playwright/should-fail/original-ssim-trap/sample",
+    "set": "design",
+    "match": false,
+    "pixels": 10000,
+    "counted": 10000,
+    "pr1Counted": 10000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "playwright/should-fail/trivial/equal-luma",
+    "set": "design",
+    "match": false,
+    "pixels": 10000,
+    "counted": 10000,
+    "pr1Counted": 10000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "playwright/should-fail/trivial/opposite",
+    "set": "design",
+    "match": false,
+    "pixels": 400,
+    "counted": 400,
+    "pr1Counted": 400,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "playwright/should-fail/trivial/single-red-pixel",
+    "set": "design",
+    "match": false,
+    "pixels": 503424,
+    "counted": 1,
+    "pr1Counted": 1,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/chromium/effects",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/chromium/image",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/chromium/terrain",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/chromium/map",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/chromium/viewer",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/chromium/text",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 333,
+    "pr1Counted": 333,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/chromium/svg",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 222,
+    "pr1Counted": 222,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/chromium/chart",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/chromium/map",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 383,
+    "pr1Counted": 383,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/chromium/viewer",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 161,
+    "pr1Counted": 161,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/chromium/text",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 493,
+    "pr1Counted": 525,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/chromium/svg",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 145,
+    "pr1Counted": 145,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/chromium/effects",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 10731,
+    "pr1Counted": 14910,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/chromium/image",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 62880,
+    "pr1Counted": 64000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/chromium/chart",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 626,
+    "pr1Counted": 747,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/chromium/terrain",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 54772,
+    "pr1Counted": 59149,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/chromium/map",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 4487,
+    "pr1Counted": 4535,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/chromium/viewer",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 191,
+    "pr1Counted": 191,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/chromium/text",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 1215,
+    "pr1Counted": 1219,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/chromium/svg",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 705,
+    "pr1Counted": 707,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/chromium/effects",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 6275,
+    "pr1Counted": 7378,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/chromium/image",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 63146,
+    "pr1Counted": 64000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/chromium/chart",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 18252,
+    "pr1Counted": 18276,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/chromium/terrain",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 18841,
+    "pr1Counted": 32650,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/chromium/map",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 3262,
+    "pr1Counted": 3430,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/chromium/viewer",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 2839,
+    "pr1Counted": 3008,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/colour/firefox/effects",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/firefox/image",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/firefox/terrain",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/firefox/map",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/firefox/viewer",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/firefox/text",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 325,
+    "pr1Counted": 325,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/firefox/svg",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 228,
+    "pr1Counted": 228,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/firefox/chart",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/firefox/map",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 519,
+    "pr1Counted": 519,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/firefox/viewer",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 163,
+    "pr1Counted": 163,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/firefox/text",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 481,
+    "pr1Counted": 513,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/firefox/svg",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 147,
+    "pr1Counted": 147,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/firefox/effects",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 10245,
+    "pr1Counted": 15220,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/firefox/image",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 62880,
+    "pr1Counted": 64000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/firefox/chart",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 626,
+    "pr1Counted": 747,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/firefox/terrain",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 56303,
+    "pr1Counted": 58870,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/firefox/map",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 4450,
+    "pr1Counted": 4539,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/firefox/viewer",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 191,
+    "pr1Counted": 191,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/firefox/text",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 1222,
+    "pr1Counted": 1225,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/firefox/svg",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 706,
+    "pr1Counted": 708,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/firefox/effects",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 5490,
+    "pr1Counted": 7338,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/firefox/image",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 63146,
+    "pr1Counted": 64000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/firefox/chart",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 18252,
+    "pr1Counted": 18276,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/firefox/terrain",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 18131,
+    "pr1Counted": 31914,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/firefox/map",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 3257,
+    "pr1Counted": 3443,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/firefox/viewer",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 2837,
+    "pr1Counted": 3015,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/colour/webkit/effects",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/webkit/image",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/webkit/terrain",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/webkit/map",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/colour/webkit/viewer",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/webkit/text",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 438,
+    "pr1Counted": 438,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/webkit/svg",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 253,
+    "pr1Counted": 253,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/webkit/chart",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/webkit/map",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 564,
+    "pr1Counted": 564,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/sub-pixel shift/webkit/viewer",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 163,
+    "pr1Counted": 163,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/webkit/text",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 468,
+    "pr1Counted": 503,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/webkit/svg",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 191,
+    "pr1Counted": 193,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/webkit/effects",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 8224,
+    "pr1Counted": 11392,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/webkit/image",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 62892,
+    "pr1Counted": 64000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/webkit/chart",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 660,
+    "pr1Counted": 740,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/webkit/terrain",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 56303,
+    "pr1Counted": 58870,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/webkit/map",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 4472,
+    "pr1Counted": 4538,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/regression/webkit/viewer",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 191,
+    "pr1Counted": 191,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/webkit/text",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 1150,
+    "pr1Counted": 1159,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/webkit/svg",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 715,
+    "pr1Counted": 715,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/webkit/effects",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 4595,
+    "pr1Counted": 6113,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/webkit/image",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 63276,
+    "pr1Counted": 64000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/webkit/chart",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 18257,
+    "pr1Counted": 18260,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/webkit/terrain",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 18131,
+    "pr1Counted": 31914,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/webkit/map",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 3296,
+    "pr1Counted": 3471,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/faint regression/webkit/viewer",
+    "set": "design",
+    "match": false,
+    "pixels": 64000,
+    "counted": 2823,
+    "pr1Counted": 2997,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/software vs GPU/chromium/text",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/software vs GPU/chromium/svg",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 26,
+    "pr1Counted": 26,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/software vs GPU/chromium/effects",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 3,
+    "pr1Counted": 9,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/software vs GPU/chromium/image",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/software vs GPU/chromium/chart",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/software vs GPU/chromium/terrain",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered/software vs GPU/chromium/map",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 894,
+    "pr1Counted": 895,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered/software vs GPU/chromium/viewer",
+    "set": "design",
+    "match": true,
+    "pixels": 64000,
+    "counted": 2,
+    "pr1Counted": 2,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/chromium/effects",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/chromium/image",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/chromium/terrain",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/chromium/map",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/chromium/viewer",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/chromium/text",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 3,
+    "pr1Counted": 3,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/chromium/svg",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 1,
+    "pr1Counted": 1,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/chromium/chart",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 2428,
+    "pr1Counted": 2428,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/chromium/map",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 1276,
+    "pr1Counted": 1277,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/chromium/viewer",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 572,
+    "pr1Counted": 576,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/chromium/text",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 2463,
+    "pr1Counted": 2814,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/chromium/svg",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 775,
+    "pr1Counted": 797,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/chromium/effects",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 41630,
+    "pr1Counted": 61957,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/chromium/image",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 239846,
+    "pr1Counted": 256000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/chromium/chart",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 4491,
+    "pr1Counted": 4694,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/chromium/terrain",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 162604,
+    "pr1Counted": 240193,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/chromium/map",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 18454,
+    "pr1Counted": 18799,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/chromium/viewer",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 706,
+    "pr1Counted": 991,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/chromium/text",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 7643,
+    "pr1Counted": 7709,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/chromium/svg",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 3229,
+    "pr1Counted": 3239,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/chromium/effects",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 26289,
+    "pr1Counted": 29819,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/chromium/image",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 241825,
+    "pr1Counted": 256000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/chromium/chart",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 70241,
+    "pr1Counted": 70785,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/chromium/terrain",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 73275,
+    "pr1Counted": 133556,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/chromium/map",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 15146,
+    "pr1Counted": 15652,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/chromium/viewer",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 13864,
+    "pr1Counted": 15050,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/colour/firefox/effects",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/firefox/image",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/firefox/terrain",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/firefox/map",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/firefox/viewer",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/firefox/text",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 3,
+    "pr1Counted": 3,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/firefox/svg",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 1,
+    "pr1Counted": 1,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/firefox/chart",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 2428,
+    "pr1Counted": 2428,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/firefox/map",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 1994,
+    "pr1Counted": 2066,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/firefox/viewer",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 576,
+    "pr1Counted": 587,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/firefox/text",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 2449,
+    "pr1Counted": 2824,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/firefox/svg",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 774,
+    "pr1Counted": 797,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/firefox/effects",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 46137,
+    "pr1Counted": 62171,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/firefox/image",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 240182,
+    "pr1Counted": 256000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/firefox/chart",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 4486,
+    "pr1Counted": 4691,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/firefox/terrain",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 174068,
+    "pr1Counted": 239305,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/firefox/map",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 18420,
+    "pr1Counted": 18784,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/firefox/viewer",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 702,
+    "pr1Counted": 990,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/firefox/text",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 7613,
+    "pr1Counted": 7665,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/firefox/svg",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 3219,
+    "pr1Counted": 3231,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/firefox/effects",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 26669,
+    "pr1Counted": 39127,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/firefox/image",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 242148,
+    "pr1Counted": 256000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/firefox/chart",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 70239,
+    "pr1Counted": 70782,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/firefox/terrain",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 69042,
+    "pr1Counted": 133851,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/firefox/map",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 15122,
+    "pr1Counted": 15689,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/firefox/viewer",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 13932,
+    "pr1Counted": 15076,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/colour/webkit/effects",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/webkit/image",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/webkit/terrain",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/webkit/map",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/colour/webkit/viewer",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/webkit/text",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 4,
+    "pr1Counted": 4,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/webkit/svg",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/webkit/chart",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 4881,
+    "pr1Counted": 4881,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/webkit/map",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 5509,
+    "pr1Counted": 5563,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/sub-pixel shift/webkit/viewer",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 1141,
+    "pr1Counted": 1151,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/webkit/text",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 2296,
+    "pr1Counted": 2740,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/webkit/svg",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 776,
+    "pr1Counted": 802,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/webkit/effects",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 35086,
+    "pr1Counted": 50131,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/webkit/image",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 164365,
+    "pr1Counted": 256000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/webkit/chart",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 4191,
+    "pr1Counted": 4594,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/webkit/terrain",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 152692,
+    "pr1Counted": 238265,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/webkit/map",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 18106,
+    "pr1Counted": 18692,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/regression/webkit/viewer",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 653,
+    "pr1Counted": 950,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/webkit/text",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 7103,
+    "pr1Counted": 7232,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/webkit/svg",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 3164,
+    "pr1Counted": 3178,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/webkit/effects",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 23185,
+    "pr1Counted": 28779,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/webkit/image",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 190464,
+    "pr1Counted": 256000,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/webkit/chart",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 70308,
+    "pr1Counted": 73484,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/webkit/terrain",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 66879,
+    "pr1Counted": 133806,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/webkit/map",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 15196,
+    "pr1Counted": 15867,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/faint regression/webkit/viewer",
+    "set": "held-out",
+    "match": false,
+    "pixels": 256000,
+    "counted": 14371,
+    "pr1Counted": 15028,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/software vs GPU/chromium/text",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/software vs GPU/chromium/svg",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/software vs GPU/chromium/effects",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 48,
+    "pr1Counted": 116,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/software vs GPU/chromium/image",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/software vs GPU/chromium/chart",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 2,
+    "pr1Counted": 2,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/software vs GPU/chromium/terrain",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "rendered 2×/software vs GPU/chromium/map",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 5067,
+    "pr1Counted": 5581,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "rendered 2×/software vs GPU/chromium/viewer",
+    "set": "held-out",
+    "match": true,
+    "pixels": 256000,
+    "counted": 43,
+    "pr1Counted": 45,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "synthetic/1/surface opacity 35% → 30%",
+    "set": "synthetic",
+    "match": false,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 15074,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "synthetic/1/surface panned 0.3 px",
+    "set": "synthetic",
+    "match": true,
+    "pixels": 64000,
+    "counted": 8,
+    "pr1Counted": 10,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "synthetic/2/label moved a pixel",
+    "set": "synthetic",
+    "match": true,
+    "pixels": 64000,
+    "counted": 2,
+    "pr1Counted": 2,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "synthetic/2/label box one row taller",
+    "set": "synthetic",
+    "match": true,
+    "pixels": 64000,
+    "counted": 5,
+    "pr1Counted": 5,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "synthetic/3/terrain, snapped vertices",
+    "set": "synthetic",
+    "match": true,
+    "pixels": 64000,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "synthetic/3/geofence, snapped vertices",
+    "set": "synthetic",
+    "match": true,
+    "pixels": 64000,
+    "counted": 27,
+    "pr1Counted": 29,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "synthetic/4/bilinear in half precision",
+    "set": "synthetic",
+    "match": true,
+    "pixels": 4096,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/1/0v1",
+    "set": "real golden",
+    "match": false,
+    "pixels": 1102374,
+    "counted": 543821,
+    "pr1Counted": 1053571,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "golden/1/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/2/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/2/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/3/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/3/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/4/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/4/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/5/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/5/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/6/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/6/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/7/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/7/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/8/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/8/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/9/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/9/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/10/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/10/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/11/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/11/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/12/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/12/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/13/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/13/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/14/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/14/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/15/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/15/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/16/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/16/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/17/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 8,
+    "pr1Counted": 11,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/17/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 82,
+    "pr1Counted": 94,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/18/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 57,
+    "pr1Counted": 57,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/18/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 8,
+    "pr1Counted": 8,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/19/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 2,
+    "pr1Counted": 2,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/19/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/20/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 1,
+    "pr1Counted": 1,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/20/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/21/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 22,
+    "pr1Counted": 22,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/21/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/22/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/22/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 1,
+    "pr1Counted": 1,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/23/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/23/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/24/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/24/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/25/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 139,
+    "pr1Counted": 150,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/25/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/26/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/26/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/27/0v1",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/27/0v2",
+    "set": "real golden",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "golden/28/0v1",
+    "set": "real golden",
+    "match": false,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 41872,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "golden/28/0v2",
+    "set": "real golden",
+    "match": false,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 41872,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "findings/opacity",
+    "set": "real findings",
+    "match": false,
+    "pixels": 1102374,
+    "counted": 9,
+    "pr1Counted": 7374,
+    "pass": {
+     "none": false,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
+    "id": "findings/bilinear",
+    "set": "real findings",
+    "match": true,
+    "pixels": 4096,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   }
+  ]
+ },
+ "residual": {
+  "synthetic surfaceOpacity": {
+   "past": 22810,
+   "counted": 0,
+   "share": 0,
+   "pr1Counted": 15074,
+   "pr1Share": 0.66085050416484
+  },
+  "real opacity pair": {
+   "past": 10069,
+   "counted": 9,
+   "share": 0.000893832555367961,
+   "pr1Counted": 7374,
+   "pr1Share": 0.7323468070314828
+  }
+ },
+ "slivers": {
+  "sizes": [
+   {
+    "width": 200,
+    "height": 2,
+    "pixels": 400,
+    "candidate": 0,
+    "pr1": 0
+   },
+   {
+    "width": 1,
+    "height": 50,
+    "pixels": 50,
+    "candidate": 0,
+    "pr1": 0
+   },
+   {
+    "width": 2,
+    "height": 2,
+    "pixels": 4,
+    "candidate": 0,
+    "pr1": 0
+   }
+  ],
+  "limit": null,
+  "pr1Limit": 3
+ },
+ "speed": null,
+ "size": {
+  "candidate": {
+   "image": {
+    "files": 5,
+    "code": 133,
+    "types": 16,
+    "comments": 25
+   },
+   "src": {
+    "files": 27,
+    "code": 923,
+    "types": 241,
+    "comments": 170
+   }
+  },
+  "pr1": {
+   "image": {
+    "files": 5,
+    "code": 204,
+    "types": 18,
+    "comments": 82
+   },
+   "src": {
+    "files": 27,
+    "code": 1017,
+    "types": 245,
+    "comments": 251
+   }
+  }
+ },
+ "conditions": {
+  "1": {
+   "pass": false,
+   "regressions": 7
+  },
+  "2": {
+   "pass": false,
+   "residualImproved": false,
+   "sliverImproved": false
+  },
+  "3": {
+   "pass": null,
+   "worstRatio": null,
+   "slower": null
+  },
+  "4": {
+   "pass": true,
+   "code": 133
+  }
+ }
+}

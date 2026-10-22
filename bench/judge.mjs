@@ -838,7 +838,7 @@ function markdown(r) {
   out.push(
     table(
       ['Build', 'src/image code', 'types', 'comments', 'src code', 'src types'],
-      [sizeRow(r.candidate.name, r.size.candidate), sizeRow('PR #1', r.size.pr1)],
+      [sizeRow(`${r.candidate.name} (candidate)`, r.size.candidate), sizeRow('PR #1', r.size.pr1)],
     ),
   );
 
@@ -958,8 +958,10 @@ async function judge(args) {
     const isV010 = config.v010 !== null && resolve(config.v010) === resolve(candidateDir);
     if (config.v010) builds['0.1.0'] = timeBuild(config.v010, 'default', realPairs);
     builds['PR #1'] = timeBuild(ROOT, 'default', realPairs);
-    if (!self && !isV010) builds[name] = timeBuild(candidateDir, adapterName, realPairs);
-    const timed = builds[self ? 'PR #1' : isV010 ? '0.1.0' : name];
+    // The candidate's column, apart from the references' even when it shares their name.
+    const column = name in builds ? `${name} (candidate)` : name;
+    if (!self && !isV010) builds[column] = timeBuild(candidateDir, adapterName, realPairs);
+    const timed = builds[self ? 'PR #1' : isV010 ? '0.1.0' : column];
     let ratios = null;
     if (builds['0.1.0']) {
       ratios = {};
