@@ -106,6 +106,8 @@ function parseArgs(argv) {
     else if (arg === '--skip-speed') args.speed = false;
     else if (arg === '--render') args.render = true;
     else if (arg === '--speed-worker') args.speedWorker = JSON.parse(value());
+    else if (arg === '--count-worker') args.countWorker = JSON.parse(value());
+    else if (arg === '--render-worker') args.renderWorker = JSON.parse(value());
     else throw new Error(`Unknown argument ${arg}`);
     if (args.compare) break;
   }
@@ -155,22 +157,24 @@ function captureConfig(notices) {
  * The benchmark's rendered pairs, rendered once into bench/data and reused, so every candidate is
  * judged on the same bytes. `--render` renders them again.
  */
-async function benchmarkPairs(render) {
-  const manifestFile = join(RENDERS, 'manifest.json');
-  if (render || !existsSync(manifestFile)) {
-    const pairs = [...(await renderedPairs(1)), ...(await renderedPairs(2))];
-    const staging = `${RENDERS}.${process.pid}`;
-    mkdirSync(staging, { recursive: true });
-    const manifest = pairs.map((p, n) => {
-      writeFileSync(join(staging, `${n}-expected.png`), p.expectedPng);
-      writeFileSync(join(staging, `${n}-actual.png`), p.actualPng);
-      return { id: p.id, set: p.corpus === 'rendered' ? 'design' : 'held-out', n };
-    });
-    writeFileSync(join(staging, 'manifest.json'), JSON.stringify(manifest, null, 1));
-    rmSync(RENDERS, { recursive: true, force: true });
-    renameSync(staging, RENDERS);
-  }
-  const manifest = JSON.parse(readFileSync(manifestFile, 'utf8'));
+async function renderWorker() {
+  const pairs = [...(await renderedPairs(1)), ...(await renderedPairs(2))];
+  const staging = `${RENDERS}.${process.pid}`;
+  mkdirSync(staging, { recursive: true });
+  const manifest = pairs.map((p, n) => {
+    writeFileSync(join(staging, `${n}-expected.png`), p.expectedPng);
+    writeFileSync(join(staging, `${n}-actual.png`), p.actualPng);
+    return { id: p.id, set: p.corpus === 'rendered' ? 'design' : 'held-out', n };
+  });
+  writeFileSync(join(staging, 'manifest.json'), JSON.stringify(manifest, null, 1));
+  rmSync(RENDERS, { recursive: true, force: true });
+  renameSync(staging, RENDERS);
+  process.stdout.write('{}');
+}
+
+/** The benchmark's pairs: Playwright's fixtures, and the rendered pairs from bench/data. */
+async function benchmarkPairs() {
+  const manifest = JSON.parse(readFileSync(join(RENDERS, 'manifest.json'), 'utf8'));
   const rendered = manifest.map(({ id, set, n }) => ({
     id,
     set,
@@ -247,7 +251,19 @@ function build(dir) {
   execFileSync('npm', ['run', 'build'], { cwd: dir, stdio: ['ignore', 'ignore', 'inherit'] });
 }
 
-const loadBuild = (dir) => import(pathToFileURL(join(dir, 'dist', 'index.js')).href);
+/**
+ * Runs bench/judge.mjs again in a child process with one of the worker flags. Each build is loaded
+ * in a process of its own: builds bring their own copies of @playwright/test, which refuses to be
+ * loaded twice in one process, and timings stay apart.
+ */
+function worker(flag, input) {
+  const output = execFileSync(
+    process.execPath,
+    [fileURLToPath(import.meta.url), flag, JSON.stringify(input ?? {})],
+    { encoding: 'utf8', maxBuffer: 1 << 26, stdio: ['ignore', 'pipe', 'inherit'] },
+  );
+  return JSON.parse(output);
+}
 
 /** A build's verdict-relevant number on one pair: counted pixels, or Infinity if it threw. */
 function countedBy(pkg, adapter, expected, actual) {
@@ -264,31 +280,96 @@ function countedBy(pkg, adapter, expected, actual) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Counting: one build's counted pixels on every pair, residual case and sliver panel
+
+/** The faint uniform changes of issue #2. */
+function residualCases(opacity) {
+  const cases = [['synthetic surfaceOpacity', surfaceOpacity]];
+  if (opacity) {
+    cases.push([
+      'real opacity pair',
+      () => ({
+        expected: decode(readFileSync(opacity[0])),
+        actual: decode(readFileSync(opacity[1])),
+      }),
+    ]);
+  }
+  return cases;
+}
+
+/** In a child process: one build's counted pixels, or null where it threw. */
+async function countWorker({ dist, adapter: adapterName, golden, findings, past }) {
+  const pkg = await import(pathToFileURL(dist).href);
+  const adapter = ADAPTERS[adapterName];
+  if (adapterName === 'default' && typeof pkg.compareImages !== 'function') {
+    throw new Error('The build exports no compareImages; add an adapter to bench/judge.mjs');
+  }
+  const count = ({ expected, actual }) => countedBy(pkg, adapter, expected, actual);
+
+  const list = [...(await benchmarkPairs()), ...syntheticSet()];
+  if (golden) list.push(...goldenSet(golden));
+  for (const [role, paths] of Object.entries(findings)) {
+    if (paths) list.push(realPair(`findings/${role}`, 'real findings', role, ...paths));
+  }
+  const pairs = {};
+  for (const p of list) {
+    const images = p.load();
+    pairs[p.id] = {
+      set: p.set,
+      labelKey: p.labelKey ?? p.id,
+      pixels: images.expected.width * images.expected.height,
+      counted: count(images),
+    };
+  }
+
+  const residual = {};
+  for (const [name, make] of residualCases(findings.opacity)) {
+    const images = make();
+    residual[name] = { counted: count(images) };
+    // Every pixel past ΔE00 1, with no noise detection: the same denominator for every build.
+    if (past) {
+      residual[name].past = pkg.compareImages(images.expected, images.actual, {
+        ignoreShifts: false,
+        ignoreAntialiasing: false,
+        ignoreRounding: false,
+      }).differing;
+    }
+  }
+
+  const slivers = {};
+  for (const [width, height] of sliverPanels()) {
+    slivers[`${width}×${height}`] = count(tint(width, height));
+  }
+  process.stdout.write(JSON.stringify({ pairs, residual, slivers }));
+}
+
+/** Counts as JSON carries them: null for a comparison that threw. */
+const counted = (x) => (x === null ? Number.POSITIVE_INFINITY : x);
+
+// ---------------------------------------------------------------------------------------------
 // 1. Accuracy
 
 const allowed = (pixels) => Math.floor(ALLOWANCE * pixels);
 const SETS = ['design', 'held-out', 'synthetic', 'real golden', 'real findings'];
 
-function accuracy(pairs, labels, run, notices) {
+function accuracy(candidatePairs, pr1Pairs, labels, notices) {
   const rows = [];
   const seen = new Set();
-  for (const p of pairs) {
-    const key = p.labelKey ?? p.id;
-    const label = labels[key];
+  for (const [id, p] of Object.entries(pr1Pairs)) {
+    const label = labels[p.labelKey];
     if (!label) {
-      notices.push(`No frozen label for ${p.id} (${key}): not judged.`);
+      notices.push(`No frozen label for ${id} (${p.labelKey}): not judged.`);
       continue;
     }
-    seen.add(key);
-    const { expected, actual } = p.load();
-    const pixels = expected.width * expected.height;
-    const { candidate, pr1 } = run(expected, actual);
-    const verdict = (counted) => ({ none: counted === 0, allowance: counted <= allowed(pixels) });
+    seen.add(p.labelKey);
+    const candidate = counted(candidatePairs[id].counted);
+    const pr1 = counted(p.counted);
+    const verdict = (n) => ({ none: n === 0, allowance: n <= allowed(p.pixels) });
     rows.push({
-      id: p.id,
+      id,
       set: p.set,
       match: label.match,
-      pixels,
+      pixels: p.pixels,
       counted: candidate,
       pr1Counted: pr1,
       pass: verdict(candidate),
@@ -333,17 +414,17 @@ function accuracy(pairs, labels, run, notices) {
 // ---------------------------------------------------------------------------------------------
 // 2. Issue #2's residual
 
-function residual(cases, pr1Pkg, run) {
+function residual(candidate, pr1) {
   const out = {};
-  for (const [name, { expected, actual }] of Object.entries(cases)) {
-    const past = pr1Pkg.compareImages(expected, actual, {
-      ignoreShifts: false,
-      ignoreAntialiasing: false,
-      ignoreRounding: false,
-    }).differing;
-    const { candidate, pr1 } = run(expected, actual);
-    out[name] = { past, counted: candidate, share: candidate / past, pr1Counted: pr1 };
-    out[name].pr1Share = pr1 / past;
+  for (const [name, { past, counted: pr1Counted }] of Object.entries(pr1)) {
+    const candidateCounted = counted(candidate[name].counted);
+    out[name] = {
+      past,
+      counted: candidateCounted,
+      share: candidateCounted / past,
+      pr1Counted: counted(pr1Counted),
+      pr1Share: counted(pr1Counted) / past,
+    };
   }
   return out;
 }
@@ -368,10 +449,26 @@ function tint(width, height) {
   return { expected: panel(30), actual: panel(33) };
 }
 
-function slivers(run) {
+/** The panels tried: the three sizes reported, then 200×s, s×50 and s×s for each side s. */
+const sliverPanels = () => [
+  ...SLIVER_SIZES,
+  ...SLIVER_SIDES.flatMap((s) => [
+    [200, s],
+    [s, 50],
+    [s, s],
+  ]),
+];
+
+function slivers(candidate, pr1) {
   const measure = (width, height) => {
-    const { expected, actual } = tint(width, height);
-    return { width, height, pixels: width * height, ...run(expected, actual) };
+    const key = `${width}×${height}`;
+    return {
+      width,
+      height,
+      pixels: width * height,
+      candidate: counted(candidate[key]),
+      pr1: counted(pr1[key]),
+    };
   };
   const sizes = SLIVER_SIZES.map(([w, h]) => measure(w, h));
   // The smallest side from which every panel of 200×s, s×50 and s×s, and every larger side
@@ -531,15 +628,8 @@ async function quietMachine(notices) {
   return true;
 }
 
-function timeBuild(dir, adapter, pairs) {
-  const input = JSON.stringify({ dist: join(dir, 'dist', 'index.js'), adapter, pairs });
-  const output = execFileSync(
-    process.execPath,
-    [fileURLToPath(import.meta.url), '--speed-worker', input],
-    { encoding: 'utf8', maxBuffer: 1 << 24, stdio: ['ignore', 'pipe', 'inherit'] },
-  );
-  return JSON.parse(output);
-}
+const timeBuild = (dir, adapter, pairs) =>
+  worker('--speed-worker', { dist: join(dir, 'dist', 'index.js'), adapter, pairs });
 
 // ---------------------------------------------------------------------------------------------
 // 5. Size
@@ -837,45 +927,29 @@ async function judge(args) {
   const labels = { ...labelsFile.benchmark, ...labelsFile.synthetic, ...labelsFile.real };
   const config = captureConfig(notices);
   const adapterName = args.adapter ?? 'default';
-  const adapter = ADAPTERS[adapterName];
-  if (!adapter) throw new Error(`No adapter named ${adapterName}`);
+  if (!ADAPTERS[adapterName]) throw new Error(`No adapter named ${adapterName}`);
 
   const candidateDir = args.candidate;
   const self = resolve(candidateDir) === ROOT;
   const name = args.name ?? (self ? 'pr1' : basename(candidateDir));
   if (args.build) build(candidateDir);
   if (!existsSync(join(ROOT, 'dist', 'index.js'))) build(ROOT);
-  const candidate = await loadBuild(candidateDir);
-  const pr1 = self ? candidate : await loadBuild(ROOT);
-  if (typeof candidate.compareImages !== 'function' && adapterName === 'default') {
-    throw new Error('The candidate exports no compareImages; add an adapter to bench/judge.mjs');
-  }
-  const run = (expected, actual) => {
-    const counted = countedBy(candidate, adapter, expected, actual);
-    return {
-      candidate: counted,
-      pr1: self ? counted : countedBy(pr1, ADAPTERS.default, expected, actual),
-    };
-  };
+  if (args.render || !existsSync(join(RENDERS, 'manifest.json'))) worker('--render-worker');
 
-  const pairs = [...(await benchmarkPairs(args.render)), ...syntheticSet()];
-  if (config.golden) pairs.push(...goldenSet(config.golden));
-  for (const role of ['opacity', 'bilinear']) {
-    const paths = config.pairs[role];
-    if (paths) pairs.push(realPair(`findings/${role}`, 'real findings', role, ...paths));
-  }
-  const acc = accuracy(pairs, labels, run, notices);
-
-  const residualCases = { 'synthetic surfaceOpacity': surfaceOpacity() };
-  if (config.pairs.opacity) {
-    const [e, a] = config.pairs.opacity;
-    residualCases['real opacity pair'] = {
-      expected: decode(readFileSync(e)),
-      actual: decode(readFileSync(a)),
-    };
-  }
-  const res = residual(residualCases, pr1, run);
-  const sl = slivers(run);
+  const countInput = (dir, adapterName, past) => ({
+    dist: join(dir, 'dist', 'index.js'),
+    adapter: adapterName,
+    golden: config.golden,
+    findings: { opacity: config.pairs.opacity, bilinear: config.pairs.bilinear },
+    past,
+  });
+  const pr1Counts = worker('--count-worker', countInput(ROOT, 'default', true));
+  const candidateCounts = self
+    ? pr1Counts
+    : worker('--count-worker', countInput(candidateDir, adapterName, false));
+  const acc = accuracy(candidateCounts.pairs, pr1Counts.pairs, labels, notices);
+  const res = residual(candidateCounts.residual, pr1Counts.residual);
+  const sl = slivers(candidateCounts.slivers, pr1Counts.slivers);
 
   let speed = null;
   if (args.speed && (await quietMachine(notices))) {
@@ -921,5 +995,7 @@ async function judge(args) {
 
 const args = parseArgs(process.argv.slice(2));
 if (args.speedWorker) await speedWorker(args.speedWorker);
+else if (args.countWorker) await countWorker(args.countWorker);
+else if (args.renderWorker) await renderWorker();
 else if (args.compare) compare(args.compare);
 else await judge(args);

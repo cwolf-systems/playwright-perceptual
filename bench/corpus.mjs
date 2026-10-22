@@ -12,7 +12,6 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { platform } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { chromium, firefox, webkit } from '@playwright/test';
 import { PNG } from 'pngjs';
 import { SYNTHETIC_PAIRS } from './synthetic.mjs';
 
@@ -129,6 +128,9 @@ async function screenshot(page, name, variant) {
  * no GPU to compare with) are left out.
  */
 export async function renderedPairs(deviceScaleFactor) {
+  // Imported here, not above: a process that loads another checkout's build, which brings its own
+  // copy of @playwright/test, may still read the other pairs from this module.
+  const { chromium, firefox, webkit } = await import('@playwright/test');
   const plan = renderedPlan(deviceScaleFactor);
   const pairs = [];
   const types = { chromium, firefox, webkit };
