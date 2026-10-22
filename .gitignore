@@ -7,4 +7,7 @@ playwright-report/
 *.tgz
 .DS_Store
 bench/data/
-bench/results/
+bench/results/*
+!bench/results/judge-baseline-*.json
+# The judge's local paths to real captures, which are not part of this repository.
+bench/judge.local.json

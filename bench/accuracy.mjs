@@ -14,23 +14,18 @@
 // experimental ssim-cie94 (loaded from Playwright's own bundle, as its tests do), looks-same, and
 // this package. Each is judged at two tolerances: no changed pixels, and 0.1% of the image.
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { platform } from 'node:os';
 import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { chromium, firefox, webkit } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 import looksSame from 'looks-same';
 import pixelmatch from 'pixelmatch';
-import { PNG } from 'pngjs';
 import { decodePng, PerceptualComparator } from '../dist/index.js';
+import { playwrightPairs, renderedPairs, syntheticPairs } from './corpus.mjs';
 import { structural } from './experiments/detectors.mjs';
-import { SYNTHETIC_PAIRS } from './synthetic.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
-const DATA = join(ROOT, 'bench', 'data', 'playwright-v1.60.0');
-const PLAYWRIGHT_COMMIT = '87bb9ddbd78f329df18c2b24847bc9409240cd07';
-const FIXTURE_PREFIX = 'tests/image_tools/fixtures/';
 const TOLERANCES = [0, 0.001];
 
 const require = createRequire(import.meta.url);
@@ -38,147 +33,13 @@ const playwrightCore = require(
   join(dirname(require.resolve('playwright-core/package.json')), 'lib', 'coreBundle.js'),
 );
 
-/** A labelled pair: expected and actual, as PNG bytes and decoded. */
-function pair(corpus, category, name, shouldMatch, expectedPng, actualPng) {
-  return {
-    corpus,
-    category,
-    name,
-    shouldMatch,
-    expectedPng,
-    actualPng,
-    expected: decodePng(expectedPng),
-    actual: decodePng(actualPng),
-  };
-}
-
-async function playwrightCorpus() {
-  if (!existsSync(DATA)) {
-    const tree = await fetch(
-      `https://api.github.com/repos/microsoft/playwright/git/trees/${PLAYWRIGHT_COMMIT}?recursive=1`,
-    ).then((r) => r.json());
-    const files = tree.tree
-      .map((entry) => entry.path)
-      .filter((path) => path.startsWith(FIXTURE_PREFIX) && path.endsWith('.png'));
-    for (const path of files) {
-      const url = `https://raw.githubusercontent.com/microsoft/playwright/${PLAYWRIGHT_COMMIT}/${path}`;
-      const bytes = Buffer.from(await fetch(url).then((r) => r.arrayBuffer()));
-      const target = join(DATA, path.slice(FIXTURE_PREFIX.length));
-      mkdirSync(dirname(target), { recursive: true });
-      writeFileSync(target, bytes);
-    }
-  }
-  const pairs = [];
-  for (const [label, shouldMatch] of [
-    ['should-match', true],
-    ['should-fail', false],
-  ]) {
-    const root = join(DATA, label);
-    for (const group of readdirNames(root)) {
-      for (const file of readdirNames(join(root, group)).filter((f) => f.endsWith('-actual.png'))) {
-        const stem = file.slice(0, -'-actual.png'.length);
-        const read = (suffix) => readFileSync(join(root, group, `${stem}-${suffix}.png`));
-        pairs.push(
-          pair(
-            'playwright',
-            group,
-            `${group}/${stem}`,
-            shouldMatch,
-            read('expected'),
-            read('actual'),
-          ),
-        );
-      }
-    }
-  }
-  return pairs;
-}
-
-function readdirNames(dir) {
-  return existsSync(dir) ? readdirSync(dir) : [];
-}
-
-const COLOUR = ['effects', 'image', 'terrain', 'map', 'viewer'];
-const SHIFTED = ['text', 'svg', 'chart', 'map', 'viewer'];
-const ALL = ['text', 'svg', 'effects', 'image', 'chart', 'terrain', 'map', 'viewer'];
-const WEBGL = ['terrain', 'viewer'];
-const VIEWPORT = { width: 320, height: 200 };
-
-async function screenshot(page, name, variant) {
-  const url = pathToFileURL(join(ROOT, 'test', 'browser', 'fixtures', `${name}.html`));
-  if (variant) url.searchParams.set('variant', variant);
-  await page.goto(url.href);
-  if (WEBGL.includes(name)) {
-    const webgl = await page.locator('body').getAttribute('data-webgl');
-    if (webgl !== 'available') return null;
-  }
-  return page.screenshot({ animations: 'disabled', caret: 'hide' });
-}
-
-async function renderedCorpus(deviceScaleFactor) {
-  const corpus = deviceScaleFactor === 1 ? 'rendered' : `rendered ${deviceScaleFactor}×`;
-  const pairs = [];
-  const browsers = [
-    ['chromium', chromium, {}],
-    ['firefox', firefox, {}],
-    ['webkit', webkit, {}],
-  ];
-  for (const [browserName, type, options] of browsers) {
-    const browser = await type.launch(options);
-    const page = await browser.newPage({ viewport: VIEWPORT, deviceScaleFactor });
-    const add = async (category, name, variant, shouldMatch) => {
-      const expected = await screenshot(page, name);
-      const actual = await screenshot(page, name, variant);
-      if (expected && actual) {
-        pairs.push(pair(corpus, category, `${browserName}/${name}`, shouldMatch, expected, actual));
-      }
-    };
-    for (const name of COLOUR) await add('colour', name, 'subtle', true);
-    for (const name of SHIFTED) await add('sub-pixel shift', name, 'shifted', true);
-    for (const name of ALL) await add('regression', name, 'regression', false);
-    for (const name of ALL) await add('faint regression', name, 'faint', false);
-    await browser.close();
-  }
-
-  // The same page through Chromium's software rasteriser and through the GPU: the case this
-  // package is built for. Only where there is a GPU to compare against.
-  if (platform() === 'darwin') {
-    const software = await chromium.launch();
-    const gpu = await chromium.launch({ args: ['--use-angle=metal', '--enable-gpu'] });
-    const softwarePage = await software.newPage({ viewport: VIEWPORT, deviceScaleFactor });
-    const gpuPage = await gpu.newPage({ viewport: VIEWPORT, deviceScaleFactor });
-    for (const name of ALL) {
-      const expected = await screenshot(softwarePage, name);
-      const actual = await screenshot(gpuPage, name);
-      if (expected && actual) {
-        pairs.push(pair(corpus, 'software vs GPU', `chromium/${name}`, true, expected, actual));
-      }
-    }
-    await software.close();
-    await gpu.close();
-  }
-  return pairs;
-}
-
-const encodePng = ({ data, width, height }) => {
-  const png = new PNG({ width, height });
-  png.data = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
-  return PNG.sync.write(png);
-};
-
-function syntheticCorpus() {
-  return SYNTHETIC_PAIRS.map(({ name, finding, category, shouldMatch, make }) => {
-    const { expected, actual } = make();
-    return pair(
-      'synthetic',
-      category,
-      `${finding}: ${name}`,
-      shouldMatch,
-      encodePng(expected),
-      encodePng(actual),
-    );
-  });
-}
+/** A labelled pair from bench/corpus.mjs, decoded. */
+const decoded = (pairs) =>
+  pairs.map((p) => ({
+    ...p,
+    expected: decodePng(p.expectedPng),
+    actual: decodePng(p.actualPng),
+  }));
 
 const pixelmatchAt = (threshold) => (p) =>
   pixelmatch(p.expected.data, p.actual.data, null, p.expected.width, p.expected.height, {
@@ -257,9 +118,9 @@ const VERDICT = {
 };
 
 const SETS = {
-  'design set': [...(await playwrightCorpus()), ...(await renderedCorpus(1))],
-  'held-out set': await renderedCorpus(2),
-  'synthetic set': syntheticCorpus(),
+  'design set': decoded([...(await playwrightPairs()), ...(await renderedPairs(1))]),
+  'held-out set': decoded(await renderedPairs(2)),
+  'synthetic set': decoded(syntheticPairs()),
 };
 
 const results = [];

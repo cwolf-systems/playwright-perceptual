@@ -68,4 +68,6 @@ in order, and is tested against all 34 of their published pairs.
   baselines on disk and report attachments.
 - `bench/`: speed, and accuracy against other comparators on labelled pairs, including
   synthetic pairs that reproduce findings reported from other projects (`bench/synthetic.mjs`,
-  which the unit tests also use). Results are in `docs/benchmarks/`.
+  which the unit tests also use). Results are in `docs/benchmarks/`. The pairs are built in
+  `bench/corpus.mjs`. `bench/judge.mjs` judges a build against expected verdicts frozen in
+  `bench/judge-labels.json`, and against earlier releases, on accuracy, speed and size.
