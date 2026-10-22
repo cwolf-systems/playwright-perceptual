@@ -54,13 +54,13 @@
 
 ### Speed
 
-- Fully changed images compare about a fifth faster than in 0.1.0: 4.4 s for 3200×2000 in
-  `npm run bench`, from 5.5 s. Shift tolerance reads each neighbourhood once for all three
+- Fully changed images compare about a sixth faster than in 0.1.0: 4.4 s for 3200×2000 in
+  `npm run bench`, from 5.3 s. Shift tolerance reads each neighbourhood once for all three
   channels, and measures a window's border only until it explains the change.
-- Where many changed pixels need the conservation test, comparison is up to about 1.3 times
-  slower than 0.1.0: a drift of one to three levels over a whole textured 1346×819 frame takes
-  220 ms, from 170 ms. Grainy images are about five times faster (42 ms, from 233 ms), since
-  rounding is checked before the detectors.
+- Where many changed pixels need the conservation test, comparison is slower than in 0.1.0: the
+  benchmark's 320×200 overlay change takes 41 ms, from 17 ms, and a drift of one to three levels
+  over a whole textured 1346×819 frame 220 ms, from 170 ms. Grainy images are about five times
+  faster (42 ms, from 233 ms), since rounding is checked before the detectors.
 
 ### Other
 
