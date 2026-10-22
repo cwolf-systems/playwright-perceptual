@@ -1,7 +1,7 @@
 {
  "judge": {
-  "labels": "782953413847b78f",
-  "commit": "85f8275deb2b1febecb3ff7178dd2330b50cb657"
+  "labels": "62225992109e0375",
+  "commit": "dfbfeccc89f767ec5e01bfacb799e0f5aab4d468"
  },
  "candidate": {
   "name": "PR #1",
@@ -47,16 +47,16 @@
     }
    },
    "synthetic": {
-    "pairs": 7,
+    "pairs": 9,
     "none": {
-     "wrong": 4,
-     "pr1Wrong": 4,
+     "wrong": 5,
+     "pr1Wrong": 5,
      "failing": 5,
      "pr1Failing": 5
     },
     "allowance": {
-     "wrong": 0,
-     "pr1Wrong": 0,
+     "wrong": 1,
+     "pr1Wrong": 1,
      "failing": 1,
      "pr1Failing": 1
     }
@@ -3305,6 +3305,38 @@
     }
    },
    {
+    "id": "synthetic/judge/textured drift of 1–3 levels",
+    "set": "synthetic",
+    "match": false,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "synthetic/judge/fine texture moved 0.3, 0.2 px",
+    "set": "synthetic",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
     "id": "golden/1/0v1",
     "set": "real golden",
     "match": false,
@@ -4242,6 +4274,13 @@
    "pr1Counted": 15074,
    "pr1Share": 0.66085050416484
   },
+  "synthetic textured drift": {
+   "past": 740228,
+   "counted": 0,
+   "share": 0,
+   "pr1Counted": 0,
+   "pr1Share": 0
+  },
   "real opacity pair": {
    "past": 10069,
    "counted": 7374,
@@ -4281,50 +4320,68 @@
   "runs": 5,
   "builds": {
    "0.1.0": {
-    "bench 1280×720 0%": 4.2,
-    "bench 1280×720 1%": 9.1,
-    "bench 1280×720 10%": 73.5,
-    "bench 1280×720 100%": 814.9,
-    "bench 1920×1080 0%": 9.3,
-    "bench 1920×1080 1%": 22.3,
-    "bench 1920×1080 10%": 149,
-    "bench 1920×1080 100%": 1833.9,
-    "bench 3200×2000 0%": 34.6,
-    "bench 3200×2000 1%": 78.9,
-    "bench 3200×2000 10%": 536.6,
-    "bench 3200×2000 100%": 5004.1,
-    "textured drift of 1–3 levels, 1346×819": 618.9,
-    "film grain of ±1 level, 1346×819": 467.9,
-    "real whole-frame change": 470.1,
-    "real film grain": 274.5
+    "bench 1280×720 0%": 4.5,
+    "bench 1280×720 1%": 10.5,
+    "bench 1280×720 10%": 78.4,
+    "bench 1280×720 100%": 788.7,
+    "bench 1920×1080 0%": 10,
+    "bench 1920×1080 1%": 22.6,
+    "bench 1920×1080 10%": 153.3,
+    "bench 1920×1080 100%": 1660.2,
+    "bench 3200×2000 0%": 30.6,
+    "bench 3200×2000 1%": 67.8,
+    "bench 3200×2000 10%": 442.6,
+    "bench 3200×2000 100%": 4770,
+    "textured drift of 1–3 levels, 1346×819": 572.8,
+    "film grain of ±1 level, 1346×819": 421.6,
+    "real whole-frame change": 423.6,
+    "real film grain": 246.6
    },
    "PR #1": {
     "bench 1280×720 0%": 4.1,
-    "bench 1280×720 1%": 7.4,
-    "bench 1280×720 10%": 58,
-    "bench 1280×720 100%": 632.1,
+    "bench 1280×720 1%": 7.7,
+    "bench 1280×720 10%": 53.9,
+    "bench 1280×720 100%": 566.6,
     "bench 1920×1080 0%": 9.3,
-    "bench 1920×1080 1%": 18.7,
-    "bench 1920×1080 10%": 119,
-    "bench 1920×1080 100%": 1408.9,
-    "bench 3200×2000 0%": 29.7,
-    "bench 3200×2000 1%": 54.8,
-    "bench 3200×2000 10%": 331.4,
-    "bench 3200×2000 100%": 3844.2,
-    "textured drift of 1–3 levels, 1346×819": 721.1,
-    "film grain of ±1 level, 1346×819": 51.5,
-    "real whole-frame change": 1030.1,
-    "real film grain": 55.8
+    "bench 1920×1080 1%": 18,
+    "bench 1920×1080 10%": 113.9,
+    "bench 1920×1080 100%": 1108,
+    "bench 3200×2000 0%": 28.2,
+    "bench 3200×2000 1%": 51.9,
+    "bench 3200×2000 10%": 281.2,
+    "bench 3200×2000 100%": 3368.8,
+    "textured drift of 1–3 levels, 1346×819": 708.6,
+    "film grain of ±1 level, 1346×819": 51.8,
+    "real whole-frame change": 996.2,
+    "real film grain": 49.9
+   },
+   "PR #1 (candidate)": {
+    "bench 1280×720 0%": 4.1,
+    "bench 1280×720 1%": 8.4,
+    "bench 1280×720 10%": 54.5,
+    "bench 1280×720 100%": 609.3,
+    "bench 1920×1080 0%": 9.2,
+    "bench 1920×1080 1%": 17.8,
+    "bench 1920×1080 10%": 110,
+    "bench 1920×1080 100%": 1179.7,
+    "bench 3200×2000 0%": 28.6,
+    "bench 3200×2000 1%": 53,
+    "bench 3200×2000 10%": 303.8,
+    "bench 3200×2000 100%": 3325,
+    "textured drift of 1–3 levels, 1346×819": 690.8,
+    "film grain of ±1 level, 1346×819": 50.3,
+    "real whole-frame change": 990.7,
+    "real film grain": 52.1
    }
   },
   "ratios": {
-   "bench 1280×720 100%": 0.78,
-   "bench 1920×1080 100%": 0.77,
-   "bench 3200×2000 100%": 0.77,
-   "textured drift of 1–3 levels, 1346×819": 1.17,
-   "film grain of ±1 level, 1346×819": 0.11,
-   "real whole-frame change": 2.19,
-   "real film grain": 0.2
+   "bench 1280×720 100%": 0.77,
+   "bench 1920×1080 100%": 0.71,
+   "bench 3200×2000 100%": 0.7,
+   "textured drift of 1–3 levels, 1346×819": 1.21,
+   "film grain of ±1 level, 1346×819": 0.12,
+   "real whole-frame change": 2.34,
+   "real film grain": 0.21
   }
  },
  "size": {
@@ -4365,11 +4422,12 @@
   "2": {
    "pass": false,
    "residualImproved": false,
+   "driftImproved": false,
    "sliverImproved": false
   },
   "3": {
    "pass": false,
-   "worstRatio": 2.19,
+   "worstRatio": 2.34,
    "slower": [
     "textured drift of 1–3 levels, 1346×819",
     "real whole-frame change"

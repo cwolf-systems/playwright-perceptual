@@ -1,7 +1,7 @@
 {
  "judge": {
-  "labels": "782953413847b78f",
-  "commit": "85f8275deb2b1febecb3ff7178dd2330b50cb657"
+  "labels": "62225992109e0375",
+  "commit": "dfbfeccc89f767ec5e01bfacb799e0f5aab4d468"
  },
  "candidate": {
   "name": "0.1.0",
@@ -47,16 +47,16 @@
     }
    },
    "synthetic": {
-    "pairs": 7,
+    "pairs": 9,
     "none": {
-     "wrong": 5,
-     "pr1Wrong": 4,
+     "wrong": 6,
+     "pr1Wrong": 5,
      "failing": 4,
      "pr1Failing": 5
     },
     "allowance": {
-     "wrong": 1,
-     "pr1Wrong": 0,
+     "wrong": 2,
+     "pr1Wrong": 1,
      "failing": 0,
      "pr1Failing": 1
     }
@@ -3314,6 +3314,38 @@
     }
    },
    {
+    "id": "synthetic/judge/textured drift of 1–3 levels",
+    "set": "synthetic",
+    "match": false,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "synthetic/judge/fine texture moved 0.3, 0.2 px",
+    "set": "synthetic",
+    "match": true,
+    "pixels": 1102374,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
     "id": "golden/1/0v1",
     "set": "real golden",
     "match": false,
@@ -4251,6 +4283,13 @@
    "pr1Counted": 15074,
    "pr1Share": 0.66085050416484
   },
+  "synthetic textured drift": {
+   "past": 740228,
+   "counted": 0,
+   "share": 0,
+   "pr1Counted": 0,
+   "pr1Share": 0
+  },
   "real opacity pair": {
    "past": 10069,
    "counted": 9,
@@ -4325,6 +4364,7 @@
   "2": {
    "pass": false,
    "residualImproved": false,
+   "driftImproved": false,
    "sliverImproved": false
   },
   "3": {
