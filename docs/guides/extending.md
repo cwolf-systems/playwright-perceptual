@@ -55,7 +55,10 @@ both `null`, every changed pixel counts. While a shift detector is in use, pixel
 in every channel are set aside as rounding before either detector is asked; `ignoreRounding`
 overrides that either way. A detector reads both
 images through `Pixels`, whose `rgbAt(x, y)` gives a colour as `0xRRGGBB`. The built-in ones are
-exported as `isAntialiased` and `isShifted`, so a detector can build on them:
+exported as `isAntialiased` and `isShifted`, so a detector can build on them. They read a pair of
+images in tiles, kept with the `Pixels` objects one row of tiles at a time: asked about the same
+objects row by row, as the comparator asks, they read each tile once. An image's pixels must not
+change between questions.
 
 ```ts
 import {

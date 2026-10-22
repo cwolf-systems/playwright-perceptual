@@ -21,12 +21,12 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    decoding the screenshot, so this is mostly paid by failing tests.
 5. The thresholds are rules of thumb. ΔE00 1 as "just noticeable" comes from the formula's design
    and from viewing uniform patches, not from people looking at screenshots.
-6. Part of a faint uniform change still passes as shifts. The noise detectors no longer explain a
-   translucent overlay made 5 points more transparent over terrain (from a renderer's tests), but
-   along contour lines and other edges a move could carry as much colour across a 5×5 window as
-   the change adds, so shift tolerance still sets aside a quarter to a third of its pixels. The
-   rest fail the test, so the verdict is right; a test with an allowance of thousands of pixels
-   would not be.
+6. Part of a faint uniform change still passes as shifts. Of a translucent overlay made 5 points
+   more transparent over terrain (from a renderer's tests), about a tenth of the pixels past
+   ΔE00 1 are still set aside: along the rim of the surface, where the 5×5 window reaches past it
+   and its mean moves by only part of the change, and beside contour lines, where the change
+   fits a move of the line. The rest fail the test, so the verdict is right; a test with an
+   allowance of thousands of pixels would not be.
 7. The same scene can land on different pixels between page loads or rasterisers. A label whose
    projected anchor falls either side of a pixel boundary moves by a whole pixel; an aliased
    overlay edge within 1/32 px of a row of pixel centres covers the row in a rasteriser that
@@ -38,9 +38,9 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    drift of two over an area counts. A renderer whose exposure differs by one or two levels
    between loads of the same scene used to pass through shift tolerance and now fails, as in one
    of 28 scenes of the renderer's golden set.
-9. Shift tolerance cannot test conservation along a side under three pixels long, since what lies
-   beyond the image there is unknown: in such slivers any change within three levels of the
-   colours nearby passes as a shift.
+9. Some GPU-against-software pairs that should match only pass with an allowance, and closer to
+   it than before: a chart drawn by the GPU at 2× leaves 248 pixels counted against an allowance
+   of 256, where its gradients are filtered differently rather than moved.
 
 Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pixel by pixel.
 

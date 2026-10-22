@@ -46,7 +46,7 @@ Labelled pairs from four sources.
 The first two make the **design set**: the noise detectors were developed while looking at these
 results. The third is the **held-out set**, which holds no Playwright fixtures, since those exist
 only at their own scale. Shift tolerance's neighbourhood rule and its slack of three levels were
-fixed before it was first rendered, but the conservation rule and the rounding class added since
+fixed before it was first rendered, but the window tests and the rounding class added since
 0.1.0 were measured on it while being developed (see the end of this page). The two GIS scenes
 were added to both sets after the noise detectors were designed. The fourth is the **synthetic
 set**, reported pair by pair; it was written alongside the changes it motivated, so it shows what
@@ -247,30 +247,37 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
 ## Changes since 0.1.0
 
 Three changes to the noise detection, each judged on these pairs before it was adopted, against
-0.1.0 on the same machine:
+0.1.0 and the first draft of 0.2.0 on the same machine (the
+[design log](../design/registration.md) has the steps):
 
-- **Shift tolerance requires a move to conserve colour** over the 5×5 window around a pixel,
-  moved inward near the image's border.
+- **Shift tolerance asks the 5×5 window around a pixel to show a move:** each channel's mean
+  over it changes by at most 1.5 levels, or one registration step finds an offset under 0.75 px
+  that explains the change; or the pixel is a mixture, in both images, of two colours on either
+  side of it that kept theirs. Windows are clipped at the image's border.
 - **Rounding is its own class**: while shift tolerance is on, a pixel within one level in every
   channel is not counted.
 - **Anti-aliasing detection requires the flat side of a slope to keep its colour**, give or take a
   level.
 
-In the design and held-out sets, one verdict changed: at ΔE00 1.5 with no pixels allowed,
-Chromium's CSS effects page through the GPU against its software rasteriser at 2× fails with 11
-pixels (it already failed at ΔE00 1, with 48 pixels before and 116 now). Nothing else changed at
-any threshold or allowance. Regressions gain counted pixels, and some pairs that should match gain
-a few: the 2D map through the GPU at 2×, from 5,067 to 5,581; the map and 3D view moved 0.3 px
-at 2×, by up to 72; the CSS effects page through the GPU at 1×, from 3 to 9. In the synthetic set
-the faint overlay change, 0 counted pixels before, now has 15,074 at ΔE00 1.
+In the design and held-out sets, against 0.1.0, four verdicts changed for the worse, all with no
+pixels allowed and none at the default ΔE00 1: Chromium's CSS effects page through the GPU against
+its software rasteriser fails at ΔE00 1.5 (11 pixels at 1×, 2 at 2×) and at ΔE00 2 and 2.3 (1
+pixel at 1×), where near-white drifts two levels in blue over an area. Five pairs that failed with
+none allowed now pass at some thresholds: the SVG page through the GPU, the 3D view through the
+GPU, and the SVG page moved 0.3 px at 2× in Chromium and Firefox. Regressions gain counted pixels,
+and so do some pairs that should match and already failed: the 2D map through the GPU at 2×, from
+5,067 to 10,069; the map and 3D view moved 0.3 px, by up to 1,056. Two come close to the 0.1%
+allowance and still pass it: the chart through the GPU at 2×, from 2 to 248 against 256 allowed,
+and the CSS effects page through the GPU at 1×, from 3 to 58 against 64. Text and SVG moved 0.3 px
+at 1× lose counted pixels. In the synthetic set the faint overlay change, 0 counted pixels in
+0.1.0, now has 20,960 at ΔE00 1, 92% of its pixels past the threshold.
 
-Comparison is slower where shift tolerance must test conservation at many pixels, and faster on
-grainy images, where rounding is checked before the detectors. On a downstream renderer's captures
-(1346×819, not included), a whole-frame real change took about twice as long (830–900 ms
-against 422–480 ms), and a film-grain scene 50–59 ms against 240–255 ms. A synthetic worst case, a
-drift of one to three levels over a whole textured frame of that size, took 3.6 times as long
-(2.0 s against 0.56 s). `npm run bench` changes a solid block of colour, which shift tolerance
-rejects at once, so its times are unchanged within run-to-run noise.
+Comparison is faster than 0.1.0 wherever the whole frame changes. On a downstream renderer's
+captures (1346×819, not included), a whole-frame real change took 350 ms against 421 ms, and a
+film-grain scene 77 ms against 255 ms; a drift of one to three levels over a whole textured frame
+of that size, 402 ms against 586 ms; `npm run bench`'s fully changed 3200×2000 image, 3.4 s against
+4.4 s. The detectors read each pair of images once per tile and sum windows from summed-area
+tables.
 
 These rules were measured on the held-out set while being developed, so for them it is no longer
 unseen.

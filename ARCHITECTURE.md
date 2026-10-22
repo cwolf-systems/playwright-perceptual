@@ -11,7 +11,8 @@ src/
   errors.ts     PerceptualError and one subclass per failure
   defaults.ts   default options and their validation
   color/        packed RGB, sRGB to CIELAB, CIEDE2000
-  image/        pixel access, PNG decoding, the anti-aliasing and shift detectors
+  image/        pixel access, PNG decoding, the anti-aliasing and shift detectors, and the tiles
+                of window sums they share
   compare/      PerceptualComparator, its histogram and diff image
   snapshot/     the toHaveScreenshot workflow: capture until stable, update policy, storage,
                 failure messages

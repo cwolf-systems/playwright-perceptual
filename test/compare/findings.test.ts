@@ -41,15 +41,16 @@ describe('finding 1: a translucent surface from 35% to 30% opacity', () => {
   });
 
   it('fails: the detectors no longer take a change of colour over an area for noise', () => {
-    expect(result.differing).toBeGreaterThan(0.6 * strict.differing);
+    expect(result.differing).toBeGreaterThan(0.9 * strict.differing);
     expect(result.differing).toBeGreaterThan(allowance(expected));
   });
 
-  it('sets aside at most a third of it as shifts, near edges a move could carry colour across', () => {
-    // A known gap: some of it still passes as shifts. Only the wrong behaviour is bounded, so a
-    // fix that sets aside less passes too.
+  it('sets aside under a tenth of it as shifts, along the rim of the surface', () => {
+    // A known gap: a window that reaches past the surface's rim is partly unchanged, so its mean
+    // moves by less than the change. Only the wrong behaviour is bounded, so a fix that sets
+    // aside less passes too.
     expect(result.antialiased).toBeLessThan(0.01 * strict.differing);
-    expect(result.shifted).toBeLessThan(0.4 * strict.differing);
+    expect(result.shifted).toBeLessThan(0.1 * strict.differing);
   });
 
   it('has a control: the same scene panned 0.3 px leaves few pixels counted', () => {

@@ -7,21 +7,28 @@
 - **Shift tolerance no longer takes a change of colour for a move.** In 0.1.0 it passed any pixel
   within three levels per channel of the colours around it, and a pixel's own old colour is
   always around it, so any change of up to three levels per channel passed as a shift: a tint
-  across a flat panel, a dark theme a shade lighter, a GPU readback drifting by two levels. A
-  pixel now counts as shifted only if the colour in the 5×5 window around it is also conserved,
-  as a move of under a pixel conserves it, give or take a level per pixel for rounding. Near the
-  image's border the window moves inward, so the border and small element screenshots are
-  judged too.
+  across a flat panel, a dark theme a shade lighter, a GPU readback drifting by two levels. That
+  range test stays, and the 5×5 window around the pixel must now also show that nothing but a
+  move happened: each channel's mean over it changed by at most 1.5 levels, or a move of under
+  0.75 px explains the change, found by registering the window (one Lucas–Kanade step). An edge
+  resampled differently, a mixture in both images of the same two colours on either side of it
+  that kept their colour, also passes. Texture has no offset that explains a change of colour
+  over it, so of a translucent overlay made 5 points more transparent over terrain, 89% of the
+  pixels past ΔE00 1 now count, against 0.1% in 0.1.0 (92% of the synthetic reproduction in the
+  accuracy benchmark, against none). Windows are clipped at the image's border, so slivers and small element
+  screenshots are judged as well: a tint on a 200×2, 1×50 or 2×2 panel counts in full.
 - **Renders whose colour drifts by two levels or more over an area now fail.** In a renderer's
-  golden set of 56 pairs of identical input, 10 failed with 0.1.0 and 12 now: one scene's first
-  capture is one to two levels darker over nearly half the frame (41,872 pixels counted against
+  golden set of 56 pairs of identical input, 10 failed with 0.1.0 and 11 now: one scene's first
+  capture is one to two levels darker over nearly half the frame (37,240 pixels counted against
   each of the other two captures).
 - **Pairs that already differed gain counted pixels.** Self-noise in that golden set: a map label
-  one pixel over between loads, 139 → 150 pixels; a second scene's label and box edge, 82 → 94.
-  In this repository's benchmark, among pairs that should match: the 2D map through the GPU
-  against software at 2×, 5,067 → 5,581; the map and 3D view moved 0.3 px at 2×, by up to 72;
-  CSS effects through the GPU against software, 3 → 9 at 1× and 48 → 116 at 2×, where it now
-  also fails at ΔE00 1.5 (11 pixels).
+  one pixel over between loads, 139 → 859 pixels, which still passes with 0.1% allowed. In this
+  repository's benchmark, among pairs that should match and already failed: the 2D map through
+  the GPU against software at 2×, 5,067 → 10,069; the map and 3D view moved 0.3 px, by up to
+  1,056; the chart through the GPU against software at 2×, 2 → 248, inside 0.1%; the CSS effects
+  through the GPU against software, 3 → 58 at 1×, inside 0.1%, where it also fails at ΔE00 1.5
+  (11 pixels: near-white drifting two levels in blue over an area). Text and SVG moved 0.3 px
+  lose counted pixels: 333 → 260, 222 → 200.
 - **Anti-aliasing detection asks that the flat area beside a slope keep its colour**, give or take
   a level. A uniform change of colour no longer passes there as anti-aliasing.
 - If a test starts failing, look at the diff image: red is what counts. If the change is
@@ -46,24 +53,18 @@
   gains `'default'`; `matchSnapshot` callers who passed `'missing'` to get a failing write should
   pass `'default'`.
 
-### Limits
-
-- In an image under three pixels high or wide, shift tolerance cannot test whether colour was
-  conserved along that side, since what lies beyond the image is unknown, so 0.1.0's rule still
-  applies there. Use `ignoreShifts: false` for such slivers.
-
 ### Speed
 
-- Fully changed images compare about a fifth faster than in 0.1.0: 4.4 s for 3200×2000 in
-  `npm run bench`, from 5.5 s. Shift tolerance reads each neighbourhood once for all three
-  channels, and measures a window's border only until it explains the change.
-- Where many changed pixels need the conservation test, comparison is up to about 1.3 times
-  slower than 0.1.0: a drift of one to three levels over a whole textured 1346×819 frame takes
-  220 ms, from 170 ms. Grainy images are about five times faster (42 ms, from 233 ms), since
-  rounding is checked before the detectors.
+- Changed images compare faster than in 0.1.0 wherever the whole frame changed: 3.4 s for a fully
+  changed 3200×2000 image in `npm run bench`, from 4.4 s; a drift of one to three levels over a
+  whole textured 1346×819 frame, 402 ms from 586 ms; a real whole-frame change in a renderer's
+  capture, 350 ms from 421 ms; grainy images about eight times faster (53 ms from 422 ms), since
+  rounding is checked before the detectors. The detectors read a pair of images once per 32×32
+  tile, where they need to, and sum each window from summed-area tables in a few lookups.
 
 ### Other
 
+- `docs/design/registration.md` records how the shift detector was chosen, with the numbers.
 - The accuracy benchmark has a synthetic set reproducing four findings from a renderer's tests,
   and reports it pair by pair.
 - Source maps carry the TypeScript sources, so stack traces and debuggers show them.
