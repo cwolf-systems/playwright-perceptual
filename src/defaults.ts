@@ -5,6 +5,7 @@ import type { Tolerance } from './snapshot/types.js';
 export const DEFAULT_MAX_DELTA_E = 1;
 export const DEFAULT_IGNORE_ANTIALIASING = true;
 export const DEFAULT_IGNORE_SHIFTS = true;
+export const DEFAULT_IGNORE_ROUNDING = true;
 export const DEFAULT_MAX_DIFF_PIXELS = 0;
 export const DEFAULT_WITHIN = 1;
 
@@ -15,6 +16,7 @@ export interface ResolvedCompareOptions {
   readonly maxDeltaE: number;
   readonly ignoreAntialiasing: boolean;
   readonly ignoreShifts: boolean;
+  readonly ignoreRounding: boolean;
 }
 
 export function resolveCompareOptions(options: CompareOptions = {}): ResolvedCompareOptions {
@@ -24,6 +26,7 @@ export function resolveCompareOptions(options: CompareOptions = {}): ResolvedCom
     maxDeltaE,
     ignoreAntialiasing: options.ignoreAntialiasing ?? DEFAULT_IGNORE_ANTIALIASING,
     ignoreShifts: options.ignoreShifts ?? DEFAULT_IGNORE_SHIFTS,
+    ignoreRounding: options.ignoreRounding ?? DEFAULT_IGNORE_ROUNDING,
   };
 }
 

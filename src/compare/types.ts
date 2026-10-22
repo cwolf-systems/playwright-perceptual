@@ -8,6 +8,8 @@ export interface CompareOptions {
   readonly ignoreAntialiasing?: boolean;
   /** Skip pixels that differ only because content moved by less than a pixel. */
   readonly ignoreShifts?: boolean;
+  /** Skip pixels within one level of each other in every channel: rounding, not a change. */
+  readonly ignoreRounding?: boolean;
 }
 
 /** What any comparator reports. */
@@ -43,8 +45,10 @@ export interface DeltaEStats {
 
 /** What the perceptual comparator reports. */
 export interface PerceptualComparison extends Comparison {
-  /** Pixels past `maxDeltaE`, excluding anti-aliasing and shifts. */
+  /** Pixels past `maxDeltaE`, excluding rounding, anti-aliasing and shifts. */
   readonly differing: number;
+  /** Pixels past `maxDeltaE` skipped as rounding: no channel differs by more than one level. */
+  readonly rounded: number;
   /** Pixels past `maxDeltaE` skipped as anti-aliasing. */
   readonly antialiased: number;
   /** Pixels past `maxDeltaE` skipped as sub-pixel shifts. */

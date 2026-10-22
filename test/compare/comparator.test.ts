@@ -64,13 +64,30 @@ describe('PerceptualComparator', () => {
     expect(result.shifted).toBe(0);
   });
 
+  it('sets aside a pixel no channel of which moved by more than one level, unless told not to', () => {
+    // A greyish cyan one level up in green and down in blue: past ΔE00 1, within rounding.
+    const dark: Rgba = [69, 123, 136, 255];
+    const actual = solid(3, 3, dark);
+    setPixel(actual, 1, 1, [69, 124, 135, 255]);
+    const none = { ignoreAntialiasing: false, ignoreShifts: false };
+    const ignored = compareImages(solid(3, 3, dark), actual, none);
+    expect(ignored.deltaE.max).toBeGreaterThan(1);
+    expect(ignored.rounded).toBe(1);
+    expect(ignored.differing).toBe(0);
+    expect(
+      compareImages(solid(3, 3, dark), actual, { ...none, ignoreRounding: false }),
+    ).toMatchObject({ rounded: 0, differing: 1 });
+    setPixel(actual, 1, 1, [69, 125, 135, 255]);
+    expect(compareImages(solid(3, 3, dark), actual, none).differing).toBe(1);
+  });
+
   it('judges transparent pixels as they appear over white', () => {
     expect(
       compareImages(solid(2, 2, [0, 0, 0, 0]), solid(2, 2, [255, 255, 255, 255])).differing,
     ).toBe(0);
   });
 
-  it('paints changes red, anti-aliasing yellow, shifts blue and the rest faded', () => {
+  it('paints changes red, anti-aliasing yellow, shifts blue, rounding green and the rest faded', () => {
     const actual = edge(5);
     setPixel(actual, 8, 0, [255, 0, 0, 255]);
     const { diff } = new PerceptualComparator().diff(edge(4), actual);
@@ -79,6 +96,9 @@ describe('PerceptualComparator', () => {
     expect(pixelAt(diff, 8, 8)[0]).toBeGreaterThan(240);
     const shifts = new PerceptualComparator({ ignoreAntialiasing: false });
     expect(pixelAt(shifts.diff(edge(4), edge(5)).diff, 4, 4)).toEqual([0, 160, 255, 255]);
+    const rounded = solid(1, 1, [69, 124, 135, 255]);
+    const roundingDiff = new PerceptualComparator().diff(solid(1, 1, [69, 123, 136, 255]), rounded);
+    expect(pixelAt(roundingDiff.diff, 0, 0)).toEqual([0, 200, 120, 255]);
   });
 
   it('takes its colour difference and noise detectors as parts', () => {
@@ -105,6 +125,10 @@ describe('PerceptualComparator', () => {
     );
     expect(compareImages(edge(4), edge(5), { ignoreAntialiasing: false }).notes).toContain(
       '18 pixels shifted by less than a pixel were not counted.',
+    );
+    const rounded = solid(2, 1, [69, 124, 135, 255]);
+    expect(compareImages(solid(2, 1, [69, 123, 136, 255]), rounded).notes).toContain(
+      '2 pixels within one level in every channel were not counted.',
     );
   });
 

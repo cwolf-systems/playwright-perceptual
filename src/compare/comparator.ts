@@ -1,5 +1,6 @@
 import { deltaE2000 } from '../color/ciede2000.js';
 import { rgbToLab } from '../color/cielab.js';
+import { withinLevels } from '../color/rgb.js';
 import { resolveCompareOptions, type ResolvedCompareOptions } from '../defaults.js';
 import { ImageSizeError } from '../errors.js';
 import { isAntialiased } from '../image/antialiasing.js';
@@ -28,17 +29,25 @@ const LAB_CACHE_LIMIT = 1 << 20;
 const DELTA_CACHE_LIMIT = 1 << 20;
 const PAIR_KEY_SHIFT = 2 ** 24;
 
+// Two renderings of the same colour, each rounded to the nearest of 256 levels, can differ by one
+// level in each channel. In dark and greyish colours that alone can pass ΔE00 1.
+const ROUNDING_LEVELS = 1;
+
 const fixed = (value: number): string => value.toFixed(2);
 
 function notes(
   maxDeltaE: number,
   deltaE: DeltaEStats,
+  rounded: number,
   antialiased: number,
   shifted: number,
 ): string[] {
   const lines = [
     `Changed means ΔE00 above ${maxDeltaE}. Over all pixels: median ${fixed(deltaE.median)}, p95 ${fixed(deltaE.p95)}, p99 ${fixed(deltaE.p99)}, max ${fixed(deltaE.max)}.`,
   ];
+  if (rounded > 0) {
+    lines.push(`${rounded} pixels within one level in every channel were not counted.`);
+  }
   if (antialiased > 0) lines.push(`${antialiased} anti-aliased pixels were not counted.`);
   if (shifted > 0) lines.push(`${shifted} pixels shifted by less than a pixel were not counted.`);
   return lines;
@@ -103,6 +112,7 @@ export class PerceptualComparator implements ImageComparator {
     const actualWords = actual.words;
     let identical = 0;
     let differing = 0;
+    let rounded = 0;
     let antialiased = 0;
     let shifted = 0;
 
@@ -119,6 +129,11 @@ export class PerceptualComparator implements ImageComparator {
       histogram.add(delta);
       if (delta <= this.options.maxDeltaE) {
         diff?.unchanged(index, a);
+        continue;
+      }
+      if (this.options.ignoreRounding && withinLevels(a, b, ROUNDING_LEVELS)) {
+        rounded++;
+        diff?.rounded(index);
         continue;
       }
       const x = index % expected.width;
@@ -150,10 +165,11 @@ export class PerceptualComparator implements ImageComparator {
       width: expected.width,
       height: expected.height,
       differing,
+      rounded,
       antialiased,
       shifted,
       deltaE,
-      notes: notes(this.options.maxDeltaE, deltaE, antialiased, shifted),
+      notes: notes(this.options.maxDeltaE, deltaE, rounded, antialiased, shifted),
     };
   }
 }

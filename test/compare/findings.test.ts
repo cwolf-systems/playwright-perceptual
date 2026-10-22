@@ -15,7 +15,8 @@ import type { RgbaImage } from '../../src/image/types.js';
 // Each test pins down what the comparator does with them, right or wrong; the accuracy benchmark
 // reports the same pairs.
 
-const STRICT = { ignoreAntialiasing: false, ignoreShifts: false } as const;
+/** Every pixel past ΔE00 1 counted: nothing set aside as noise. */
+const STRICT = { ignoreAntialiasing: false, ignoreShifts: false, ignoreRounding: false } as const;
 
 /** The largest difference in any colour channel, in levels. */
 function maxLevels(expected: RgbaImage, actual: RgbaImage): number {
@@ -98,9 +99,15 @@ describe('finding 4: bilinear filtering in half precision against exact filterin
     expect(compareImages(expected, actual, STRICT).differing).toBeGreaterThan(0);
   });
 
-  it('passes by default only because shift tolerance takes the pixels for a shift', () => {
+  it('passes as rounding, not as a shift', () => {
     const result = compareImages(expected, actual);
     expect(result.differing).toBe(0);
-    expect(result.shifted).toBeGreaterThan(0);
+    expect(result.shifted).toBe(0);
+    expect(result.rounded).toBeGreaterThan(0);
+  });
+
+  it('passes with the noise detectors off, as GPU readbacks may want', () => {
+    const detectorsOff = { ignoreAntialiasing: false, ignoreShifts: false };
+    expect(compareImages(expected, actual, detectorsOff).differing).toBe(0);
   });
 });

@@ -13,6 +13,12 @@ export const red = (rgb: number): number => rgb >> 16;
 export const green = (rgb: number): number => (rgb >> 8) & 0xff;
 export const blue = (rgb: number): number => rgb & 0xff;
 
+/** Whether no channel of two colours differs by more than `levels`. */
+export const withinLevels = (a: number, b: number, levels: number): boolean =>
+  Math.abs(red(a) - red(b)) <= levels &&
+  Math.abs(green(a) - green(b)) <= levels &&
+  Math.abs(blue(a) - blue(b)) <= levels;
+
 /** Brightness from 0 to 255. */
 export const luma = (rgb: number): number =>
   LUMA_R * red(rgb) + LUMA_G * green(rgb) + LUMA_B * blue(rgb);
