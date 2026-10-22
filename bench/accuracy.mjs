@@ -7,6 +7,8 @@
 // - This repository's fixture pages, rendered now in each browser, with labelled variants.
 // - The same pages at 2× device scale: a held-out set, kept apart from the two the noise detectors
 //   were designed on, and reported separately.
+// - Synthetic pairs that reproduce findings from a renderer's test suite (bench/synthetic.mjs),
+//   also reported separately, pair by pair.
 //
 // Comparators: exact bytes, pixelmatch at its default threshold and at Playwright's, Playwright's
 // experimental ssim-cie94 (loaded from Playwright's own bundle, as its tests do), looks-same, and
@@ -20,8 +22,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium, firefox, webkit } from '@playwright/test';
 import looksSame from 'looks-same';
 import pixelmatch from 'pixelmatch';
+import { PNG } from 'pngjs';
 import { decodePng, PerceptualComparator } from '../dist/index.js';
 import { structural } from './experiments/detectors.mjs';
+import { SYNTHETIC_PAIRS } from './synthetic.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const DATA = join(ROOT, 'bench', 'data', 'playwright-v1.60.0');
@@ -156,6 +160,26 @@ async function renderedCorpus(deviceScaleFactor) {
   return pairs;
 }
 
+const encodePng = ({ data, width, height }) => {
+  const png = new PNG({ width, height });
+  png.data = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+  return PNG.sync.write(png);
+};
+
+function syntheticCorpus() {
+  return SYNTHETIC_PAIRS.map(({ name, finding, category, shouldMatch, make }) => {
+    const { expected, actual } = make();
+    return pair(
+      'synthetic',
+      category,
+      `${finding}: ${name}`,
+      shouldMatch,
+      encodePng(expected),
+      encodePng(actual),
+    );
+  });
+}
+
 const pixelmatchAt = (threshold) => (p) =>
   pixelmatch(p.expected.data, p.actual.data, null, p.expected.width, p.expected.height, {
     threshold,
@@ -235,6 +259,7 @@ const VERDICT = {
 const SETS = {
   'design set': [...(await playwrightCorpus()), ...(await renderedCorpus(1))],
   'held-out set': await renderedCorpus(2),
+  'synthetic set': syntheticCorpus(),
 };
 
 const results = [];
@@ -274,11 +299,29 @@ function report(set, rows) {
   }
 }
 
-for (const set of Object.keys(SETS))
-  report(
-    set,
-    results.filter((r) => r.set === set),
+/** Changed pixels by comparator for each pair, with wrong verdicts at no allowance in bold. */
+function reportPairs(rows) {
+  console.log(`### Changed pixels by pair\n`);
+  console.log(
+    `| Comparator | ${rows.map((r) => `${r.name} (${r.shouldMatch ? 'match' : 'fail'})`).join(' | ')} |`,
   );
+  console.log(`|---|${rows.map(() => '---').join('|')}|`);
+  for (const name of Object.keys(COMPARATORS)) {
+    const cells = rows.map((r) => {
+      const count = r.counts[name];
+      const shown = Number.isFinite(count) ? String(count) : 'differ';
+      return (count === 0) === r.shouldMatch ? shown : `**${shown}**`;
+    });
+    console.log(`| ${name} | ${cells.join(' | ')} |`);
+  }
+  console.log('');
+}
+
+for (const set of Object.keys(SETS)) {
+  const rows = results.filter((r) => r.set === set);
+  report(set, rows);
+  if (set === 'synthetic set') reportPairs(rows);
+}
 
 const resultsDir = join(ROOT, 'bench', 'results');
 mkdirSync(resultsDir, { recursive: true });
