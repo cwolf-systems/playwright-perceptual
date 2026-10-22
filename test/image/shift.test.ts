@@ -64,6 +64,74 @@ describe('isShifted', () => {
   it('accepts a hard shape moved by a whole pixel, which it cannot tell apart', () => {
     expect(shifted(columns([0, 0, 255, 255]), columns([0, 255, 255, 255]), 1, 2)).toBe(true);
   });
+
+  it('rejects a speck in either image, though the window around it keeps nearly its colour', () => {
+    // Twenty levels over 49 pixels moves the window's mean by less than half a level.
+    const speck = solid(9, 9, GREY);
+    setPixel(speck, 4, 4, [120, 100, 100, 255]);
+    expect(shifted(solid(9, 9, GREY), speck, 4, 4)).toBe(false);
+    expect(shifted(speck, solid(9, 9, GREY), 4, 4)).toBe(false);
+  });
+});
+
+describe('isShifted, on a uniform change over a gradient', () => {
+  /** A ramp of four levels per pixel along x, `offset` levels lighter. */
+  const ramp = (offset: number) => {
+    const image = solid(15, 9, WHITE);
+    for (let y = 0; y < 9; y++)
+      for (let x = 0; x < 15; x++) setPixel(image, x, y, grey(60 + 4 * x + offset));
+    return image;
+  };
+
+  it('takes it for a move where the offset slides along the ramp, which looks the same', () => {
+    // Two levels lighter is the ramp moved half a pixel.
+    expect(shifted(ramp(0), ramp(2), 7, 4)).toBe(true);
+  });
+
+  it('rejects it where the ramp is too shallow for a move of a pixel to make up', () => {
+    expect(shifted(ramp(0), ramp(6), 7, 4)).toBe(false);
+  });
+});
+
+describe('isShifted, on any pixels', () => {
+  /** A textured image, the same moved by `dx` along x, and a hash for its texture. */
+  function texture(width: number, height: number, dx: number): RgbaImage {
+    const image = solid(width, height, WHITE);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const t = x - dx;
+        const v = 128 + 60 * Math.sin(t / 3) * Math.cos(y / 4) + 20 * Math.sin((t + y) / 2);
+        setPixel(image, x, y, [Math.round(v), Math.round(255 - v), Math.round(v / 2), 255]);
+      }
+    }
+    return image;
+  }
+
+  /** Read access with no raster behind it, as a custom detector may pass. */
+  const plain = (image: RgbaImage) => {
+    const raster = new Raster(image);
+    return {
+      width: raster.width,
+      height: raster.height,
+      rgbAt: (x: number, y: number) => raster.rgbAt(x, y),
+    };
+  };
+
+  it('judges a raster as it judges the same pixels read one by one, in any order', () => {
+    const expected = texture(70, 40, 0);
+    const actual = texture(70, 40, 0.4);
+    const rasters = [new Raster(expected), new Raster(actual)] as const;
+    const pixels = [plain(expected), plain(actual)] as const;
+    const verdicts: [boolean, boolean][] = [];
+    // Bottom to top and right to left, so the window totals are not filled in reading order.
+    for (let y = 39; y >= 0; y--) {
+      for (let x = 69; x >= 0; x--) {
+        verdicts.push([isShifted(...rasters, x, y), isShifted(...pixels, x, y)]);
+      }
+    }
+    expect(verdicts.filter(([a, b]) => a !== b)).toEqual([]);
+    expect(verdicts.filter(([a]) => a).length).toBeGreaterThan(1_000);
+  });
 });
 
 describe('isShifted, on colour a move would have to conserve', () => {
@@ -157,8 +225,12 @@ describe('isShifted, on a faint tint over a flat dark panel, at every size', () 
     expect(shiftedPixels(width, height)).toBe(0);
   });
 
-  it('takes all of a panel under three pixels high for a move: what lies beyond is unknown', () => {
-    expect(shiftedPixels(200, 2)).toBe(400);
-    expect(shiftedPixels(1, 50)).toBe(50);
+  it.each([
+    [200, 2],
+    [1, 50],
+    [2, 2],
+    [1, 1],
+  ])('takes none of a %i×%i sliver for a move either', (width, height) => {
+    expect(shiftedPixels(width, height)).toBe(0);
   });
 });
