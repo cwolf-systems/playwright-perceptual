@@ -23,20 +23,29 @@ const POLICY: Readonly<Record<Situation, Readonly<Record<UpdateMode, Decision>>>
   missing: {
     none: fail(),
     // Written so the next run has a baseline, but still a failure: nothing was checked.
-    missing: { pass: false, writeBaseline: true, record: ['expected', 'actual'] },
+    default: { pass: false, writeBaseline: true, record: ['expected', 'actual'] },
+    missing: { pass: true, writeBaseline: true, record: ['expected', 'actual'] },
     changed: { pass: true, writeBaseline: true, record: ['expected', 'actual'] },
     all: { pass: true, writeBaseline: true, record: ['expected', 'actual'] },
   },
-  matching: { none: PASS, missing: PASS, changed: PASS, all: UPDATE },
-  different: { none: fail(...COMPARED), missing: fail(...COMPARED), changed: UPDATE, all: UPDATE },
+  matching: { none: PASS, default: PASS, missing: PASS, changed: PASS, all: UPDATE },
+  different: {
+    none: fail(...COMPARED),
+    default: fail(...COMPARED),
+    missing: fail(...COMPARED),
+    changed: UPDATE,
+    all: UPDATE,
+  },
   resized: {
     none: fail('expected', 'actual'),
+    default: fail('expected', 'actual'),
     missing: fail('expected', 'actual'),
     changed: UPDATE,
     all: UPDATE,
   },
   unstable: {
     none: fail('actual', 'diff'),
+    default: fail('actual', 'diff'),
     missing: fail('actual', 'diff'),
     changed: fail('actual', 'diff'),
     all: fail('actual', 'diff'),
@@ -44,3 +53,20 @@ const POLICY: Readonly<Record<Situation, Readonly<Record<UpdateMode, Decision>>>
 };
 
 export const decide = (situation: Situation, mode: UpdateMode): Decision => POLICY[situation][mode];
+
+/** The first Playwright release with `'default'`, which took over what `'missing'` had meant. */
+const DEFAULT_MODE_SINCE: readonly [number, number] = [1, 64];
+
+/**
+ * The mode as Playwright `version` means it. Before 1.64, `'missing'` wrote a missing baseline and
+ * failed, as `'default'` does now; from 1.64 it passes. An unreadable version is taken as current.
+ */
+export function updateModeOf(mode: UpdateMode, version: string): UpdateMode {
+  if (mode !== 'missing') return mode;
+  const release = /^(\d+)\.(\d+)/.exec(version);
+  if (!release) return mode;
+  const [major, minor] = [Number(release[1]), Number(release[2])];
+  const [sinceMajor, sinceMinor] = DEFAULT_MODE_SINCE;
+  const older = major < sinceMajor || (major === sinceMajor && minor < sinceMinor);
+  return older ? 'default' : mode;
+}

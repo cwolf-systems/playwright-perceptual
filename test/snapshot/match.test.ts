@@ -41,9 +41,18 @@ class CountingComparator extends PerceptualComparator {
 describe('matchSnapshot', () => {
   it('writes a missing baseline and fails, and says so', async () => {
     const store = new MemoryStore();
-    const result = await run(store, 'missing', [GREY]);
+    const result = await run(store, 'default', [GREY]);
     expect(result.pass).toBe(false);
     expect(result.message).toMatch(/didn't exist at memory:\/\/baseline\.png/);
+    expect(store.baseline).toEqual(GREY);
+    expect(store.recorded).toEqual(['expected', 'actual']);
+  });
+
+  it('writes a missing baseline and passes when only missing baselines are asked for', async () => {
+    const store = new MemoryStore();
+    const result = await run(store, 'missing', [GREY]);
+    expect(result).toMatchObject({ pass: true, wroteBaseline: true });
+    expect(result.message).toBe('Updated memory://baseline.png.');
     expect(store.baseline).toEqual(GREY);
     expect(store.recorded).toEqual(['expected', 'actual']);
   });
@@ -64,7 +73,7 @@ describe('matchSnapshot', () => {
 
   it('passes a matching screenshot on the first capture, recording nothing', async () => {
     const store = new MemoryStore(GREY);
-    const result = await run(store, 'missing', [GREY]);
+    const result = await run(store, 'default', [GREY]);
     expect(result).toMatchObject({ pass: true, wroteBaseline: false });
     expect(result.log).toContain('matched after 1 screenshot');
     expect(store.recorded).toEqual([]);
@@ -72,7 +81,7 @@ describe('matchSnapshot', () => {
 
   it('fails a visible change with the ΔE distribution, and attaches a diff', async () => {
     const store = new MemoryStore(GREY);
-    const result = await run(store, 'missing', [RED]);
+    const result = await run(store, 'default', [RED]);
     expect(result.pass).toBe(false);
     expect(result.message).toMatch(/16 pixels \(100\.00% of the image\) changed\./);
     expect(result.message).toMatch(/median \d+\.\d\d, p95/);
@@ -92,7 +101,7 @@ describe('matchSnapshot', () => {
   });
 
   it('waits for the page to settle before comparing', async () => {
-    const result = await run(new MemoryStore(GREY), 'missing', [RED, GREY, GREY]);
+    const result = await run(new MemoryStore(GREY), 'default', [RED, GREY, GREY]);
     expect(result.pass).toBe(true);
     expect(result.log).toContain('stable after 3 screenshots');
   });
@@ -101,8 +110,8 @@ describe('matchSnapshot', () => {
     const speck = solid(4, 4, [128, 128, 128, 255]);
     speck.data.set([255, 0, 0, 255], 0);
     const shot = encodePng(speck);
-    expect((await run(new MemoryStore(GREY), 'missing', [shot])).pass).toBe(false);
-    expect((await run(new MemoryStore(GREY), 'missing', [shot], { maxDiffPixels: 1 })).pass).toBe(
+    expect((await run(new MemoryStore(GREY), 'default', [shot])).pass).toBe(false);
+    expect((await run(new MemoryStore(GREY), 'default', [shot], { maxDiffPixels: 1 })).pass).toBe(
       true,
     );
   });
@@ -114,7 +123,7 @@ describe('matchSnapshot', () => {
       store: new MemoryStore(GREY),
       comparator: new PerceptualComparator(),
       tolerance: {},
-      mode: 'missing',
+      mode: 'default',
     });
     expect(result.pass).toBe(false);
     expect(result.message).toMatch(/kept changing for 20 ms\.\nThe last two:/);
@@ -122,7 +131,7 @@ describe('matchSnapshot', () => {
 
   it('reports a change of size instead of comparing', async () => {
     const store = new MemoryStore(WIDE);
-    const result = await run(store, 'missing', [GREY]);
+    const result = await run(store, 'default', [GREY]);
     expect(result).toMatchObject({ pass: false, message: 'Expected an image 6×4, got 4×4.' });
     expect(store.recorded).toEqual(['expected', 'actual']);
   });
@@ -134,7 +143,7 @@ describe('matchSnapshot', () => {
       store: new MemoryStore(GREY),
       comparator: passing,
       tolerance: {},
-      mode: 'missing',
+      mode: 'default',
     });
     expect(passing.diffs).toBe(0);
 
@@ -145,7 +154,7 @@ describe('matchSnapshot', () => {
       store,
       comparator: failing,
       tolerance: {},
-      mode: 'missing',
+      mode: 'default',
     });
     expect(failing.diffs).toBe(1);
     expect(store.recorded).toContain('diff');
@@ -173,7 +182,7 @@ describe('matchSnapshot', () => {
       store,
       comparator: new PerceptualComparator(),
       tolerance: {},
-      mode: 'missing',
+      mode: 'default',
     });
     expect(result.message).toBe('Screenshots kept changing for 20 ms.');
     expect(store.recorded).toEqual(['actual']);

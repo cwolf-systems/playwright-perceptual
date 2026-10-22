@@ -10,6 +10,7 @@ import type {
 import { allowedDiffPixels, CAPTURE_DEFAULTS } from '../defaults.js';
 import { decodePng } from '../image/png.js';
 import { matchSnapshot } from '../snapshot/match.js';
+import { updateModeOf } from '../snapshot/policy.js';
 import { FileSnapshotStore } from '../snapshot/store.js';
 import type { MatcherDefaults, PerceptualScreenshotOptions, ToMatchPerceptually } from './types.js';
 import { comparatorFor } from './shared.js';
@@ -119,7 +120,7 @@ export function createToMatchPerceptually(defaults: MatcherDefaults): ToMatchPer
       store,
       comparator,
       tolerance: options,
-      mode: testInfo.config.updateSnapshots,
+      mode: updateModeOf(testInfo.config.updateSnapshots, testInfo.config.version),
     });
     // Playwright announces regenerated snapshots on the console; do the same.
     if (result.pass && result.wroteBaseline) console.log(`${store.location} updated.`);

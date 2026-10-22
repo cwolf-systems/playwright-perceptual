@@ -23,8 +23,9 @@ It behaves like `toHaveScreenshot`:
 - Screenshots are retaken until two in a row agree, or until the timeout. A first
   screenshot that already matches the baseline is accepted at once.
 - Update modes follow `--update-snapshots`: a missing baseline is written and the test fails
-  (`missing`, the default), or passes (`changed`, `all`); `changed` rewrites baselines that differ;
-  `all` rewrites every one; `none` writes nothing.
+  (`default`, the default), or passes (`missing`, `changed`, `all`); `changed` rewrites baselines
+  that differ; `all` rewrites every one; `none` writes nothing. Before Playwright 1.64, which added
+  `default`, `missing` was the default and failed; the matcher follows the installed version.
 - Failures attach `<name>-expected`, `-actual` and `-diff` images, which the HTML report shows
   as an image diff, and the message gives the changed pixels and the ΔE00 distribution. In the diff
   image, changes are red, anti-aliasing yellow and sub-pixel shifts blue.
