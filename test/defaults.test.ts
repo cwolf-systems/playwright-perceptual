@@ -8,7 +8,6 @@ describe('options', () => {
       maxDeltaE: 1,
       ignoreAntialiasing: true,
       ignoreShifts: true,
-      ignoreRounding: true,
     });
     expect(allowedDiffPixels({}, 1_000)).toBe(0);
   });

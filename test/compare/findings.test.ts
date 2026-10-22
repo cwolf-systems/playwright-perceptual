@@ -45,9 +45,10 @@ describe('finding 1: a translucent surface from 35% to 30% opacity', () => {
     expect(result.differing).toBeGreaterThan(allowance(expected));
   });
 
-  it('still sets a third of it aside as shifts, near edges a move could carry colour across', () => {
+  it('sets aside at most a third of it as shifts, near edges a move could carry colour across', () => {
+    // A known gap: some of it still passes as shifts. Only the wrong behaviour is bounded, so a
+    // fix that sets aside less passes too.
     expect(result.antialiased).toBeLessThan(0.01 * strict.differing);
-    expect(result.shifted).toBeGreaterThan(0.2 * strict.differing);
     expect(result.shifted).toBeLessThan(0.4 * strict.differing);
   });
 
@@ -107,8 +108,11 @@ describe('finding 4: bilinear filtering in half precision against exact filterin
     expect(result.rounded).toBeGreaterThan(0);
   });
 
-  it('passes with the noise detectors off, as GPU readbacks may want', () => {
+  it('passes with the noise detectors off when rounding is asked for, as GPU readbacks may want', () => {
     const detectorsOff = { ignoreAntialiasing: false, ignoreShifts: false };
-    expect(compareImages(expected, actual, detectorsOff).differing).toBe(0);
+    expect(compareImages(expected, actual, detectorsOff).differing).toBeGreaterThan(0);
+    expect(
+      compareImages(expected, actual, { ...detectorsOff, ignoreRounding: true }).differing,
+    ).toBe(0);
   });
 });

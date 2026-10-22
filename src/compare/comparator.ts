@@ -55,6 +55,7 @@ export class PerceptualComparator implements ImageComparator {
   private readonly colorDifference: ColorDifference;
   private readonly antialiasing: NoiseDetector | null;
   private readonly shift: NoiseDetector | null;
+  private readonly ignoreRounding: boolean;
   private readonly labs = new Map<number, Lab>();
   private readonly deltas = new Map<number, number>();
 
@@ -65,6 +66,10 @@ export class PerceptualComparator implements ImageComparator {
     const shift = parts.shift === undefined ? isShifted : parts.shift;
     this.antialiasing = this.options.ignoreAntialiasing ? antialiasing : null;
     this.shift = this.options.ignoreShifts ? shift : null;
+    // 0.1.0's shift tolerance took every pixel within three levels for a move, rounding included.
+    // Rounding is set aside by default only while shift tolerance is on, so turning shift
+    // tolerance off still counts every pixel past the threshold, as it did then.
+    this.ignoreRounding = options.ignoreRounding ?? this.shift !== null;
   }
 
   compare(expected: RgbaImage, actual: RgbaImage): PerceptualComparison {
@@ -128,7 +133,7 @@ export class PerceptualComparator implements ImageComparator {
         continue;
       }
       // Rounding alone can pass ΔE00 1 in dark and greyish colours.
-      if (this.options.ignoreRounding && withinLevels(a, b, ROUNDING_LEVELS)) {
+      if (this.ignoreRounding && withinLevels(a, b, ROUNDING_LEVELS)) {
         rounded++;
         diff?.rounded(index);
         continue;

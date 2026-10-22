@@ -69,16 +69,35 @@ describe('PerceptualComparator', () => {
     const dark: Rgba = [69, 123, 136, 255];
     const actual = solid(3, 3, dark);
     setPixel(actual, 1, 1, [69, 124, 135, 255]);
-    const none = { ignoreAntialiasing: false, ignoreShifts: false };
-    const ignored = compareImages(solid(3, 3, dark), actual, none);
+    const ignored = compareImages(solid(3, 3, dark), actual);
     expect(ignored.deltaE.max).toBeGreaterThan(1);
-    expect(ignored.rounded).toBe(1);
-    expect(ignored.differing).toBe(0);
+    expect(ignored).toMatchObject({ rounded: 1, differing: 0, shifted: 0 });
+    expect(compareImages(solid(3, 3, dark), actual, { ignoreRounding: false }).rounded).toBe(0);
+    const none = { ignoreAntialiasing: false, ignoreShifts: false };
     expect(
-      compareImages(solid(3, 3, dark), actual, { ...none, ignoreRounding: false }),
-    ).toMatchObject({ rounded: 0, differing: 1 });
+      compareImages(solid(3, 3, dark), actual, { ...none, ignoreRounding: true }),
+    ).toMatchObject({ rounded: 1, differing: 0 });
     setPixel(actual, 1, 1, [69, 125, 135, 255]);
-    expect(compareImages(solid(3, 3, dark), actual, none).differing).toBe(1);
+    expect(
+      compareImages(solid(3, 3, dark), actual, { ...none, ignoreRounding: true }).differing,
+    ).toBe(1);
+  });
+
+  it('counts rounding by default once shift tolerance is off, as 0.1.0 did', () => {
+    const dark: Rgba = [69, 123, 136, 255];
+    const actual = solid(3, 3, dark);
+    setPixel(actual, 1, 1, [69, 124, 135, 255]);
+    const none = { ignoreAntialiasing: false, ignoreShifts: false };
+    expect(compareImages(solid(3, 3, dark), actual, none)).toMatchObject({
+      rounded: 0,
+      differing: 1,
+    });
+    const noShift = new PerceptualComparator({}, { shift: null });
+    expect(noShift.compare(solid(3, 3, dark), actual)).toMatchObject({ rounded: 0, differing: 1 });
+    // With shift tolerance on, rounding still covers a lowered threshold: 0.1.0 took these
+    // pixels for shifts.
+    const strictThreshold = compareImages(solid(3, 3, dark), actual, { maxDeltaE: 0.5 });
+    expect(strictThreshold).toMatchObject({ rounded: 1, differing: 0 });
   });
 
   it('judges transparent pixels as they appear over white', () => {
@@ -87,7 +106,7 @@ describe('PerceptualComparator', () => {
     ).toBe(0);
   });
 
-  it('paints changes red, anti-aliasing yellow, shifts blue, rounding green and the rest faded', () => {
+  it('paints changes red, anti-aliasing yellow, shifts blue, rounding pale blue, the rest faded', () => {
     const actual = edge(5);
     setPixel(actual, 8, 0, [255, 0, 0, 255]);
     const { diff } = new PerceptualComparator().diff(edge(4), actual);
@@ -98,7 +117,7 @@ describe('PerceptualComparator', () => {
     expect(pixelAt(shifts.diff(edge(4), edge(5)).diff, 4, 4)).toEqual([0, 160, 255, 255]);
     const rounded = solid(1, 1, [69, 124, 135, 255]);
     const roundingDiff = new PerceptualComparator().diff(solid(1, 1, [69, 123, 136, 255]), rounded);
-    expect(pixelAt(roundingDiff.diff, 0, 0)).toEqual([0, 200, 120, 255]);
+    expect(pixelAt(roundingDiff.diff, 0, 0)).toEqual([150, 200, 240, 255]);
   });
 
   it('takes its colour difference and noise detectors as parts', () => {
