@@ -20,18 +20,18 @@ Node 22.22, Apple M4, milliseconds.
 
 | Size      | Changed | PNG decode ×2 | perceptual | perceptual + diff | pixelmatch | looks-same (incl. decode) |
 | --------- | ------- | ------------- | ---------- | ----------------- | ---------- | ------------------------- |
-| 1280×720  | 0%      | 41.8          | 3.9        | 21.7              | 0.7        | 0.0                       |
-| 1280×720  | 1%      | 43.6          | 7.5        | 25.6              | 1.3        | 65.8                      |
-| 1280×720  | 10%     | 47.3          | 47.8       | 69.5              | 1.9        | 115.1                     |
-| 1280×720  | 100%    | 47.4          | 461.2      | 490.3             | 5.6        | 678.8                     |
-| 1920×1080 | 0%      | 108.3         | 7.6        | 50.5              | 2.1        | 0.0                       |
-| 1920×1080 | 1%      | 111.5         | 17.9       | 60.5              | 3.5        | 165.4                     |
-| 1920×1080 | 10%     | 111.7         | 113.3      | 150.1             | 4.2        | 296.7                     |
-| 1920×1080 | 100%    | 112.2         | 1179.1     | 1200.5            | 12.6       | 1511.3                    |
-| 3200×2000 | 0%      | 334.5         | 23.6       | 156.6             | 6.5        | 0.1                       |
-| 3200×2000 | 1%      | 331.5         | 73.2       | 203.6             | 10.3       | 422.6                     |
-| 3200×2000 | 10%     | 331.4         | 537.4      | 672.3             | 12.8       | 807.2                     |
-| 3200×2000 | 100%    | 335.1         | 5513.2     | 5917.4            | 39.4       | 4703.6                    |
+| 1280×720  | 0%      | 53.8          | 4.8        | 24.2              | 0.8        | 0.0                       |
+| 1280×720  | 1%      | 43.6          | 5.9        | 24.1              | 1.2        | 66.0                      |
+| 1280×720  | 10%     | 53.5          | 48.7       | 77.6              | 3.3        | 127.9                     |
+| 1280×720  | 100%    | 47.8          | 334.3      | 351.7             | 5.5        | 673.7                     |
+| 1920×1080 | 0%      | 110.9         | 7.8        | 49.1              | 2.2        | 0.0                       |
+| 1920×1080 | 1%      | 111.1         | 14.0       | 57.5              | 3.3        | 159.6                     |
+| 1920×1080 | 10%     | 113.7         | 74.5       | 132.8             | 4.2        | 328.7                     |
+| 1920×1080 | 100%    | 110.3         | 858.1      | 906.4             | 12.5       | 1553.3                    |
+| 3200×2000 | 0%      | 336.8         | 23.3       | 159.8             | 6.7        | 0.1                       |
+| 3200×2000 | 1%      | 336.0         | 66.5       | 222.5             | 12.5       | 464.6                     |
+| 3200×2000 | 10%     | 345.3         | 465.2      | 578.8             | 12.8       | 839.8                     |
+| 3200×2000 | 100%    | 335.2         | 4390.4     | 4622.0            | 38.6       | 4585.6                    |
 
 ## Reading the results
 
@@ -43,7 +43,7 @@ Node 22.22, Apple M4, milliseconds.
   anti-aliasing check and a shift check. A heavily changed image is a failing test, so this cost
   is paid on failure.
 - Against looks-same, compare like with like. Its times include decoding, so set them against
-  decode plus perceptual: at 3200×2000 that is 405 against 423 ms with 1% changed, 869 against
-  807 ms with 10%, and 5,848 against 4,704 ms with everything changed. Close on small changes,
-  looks-same ahead on large ones. It returns at once for identical files, since it compares the
-  encoded bytes first.
+  decode plus perceptual: at 3200×2000 that is 403 against 465 ms with 1% changed, 811 against
+  840 ms with 10%, and 4,726 against 4,586 ms with everything changed. Close throughout, with
+  looks-same a little ahead only when everything changed. It returns at once for identical files,
+  since it compares the encoded bytes first.
