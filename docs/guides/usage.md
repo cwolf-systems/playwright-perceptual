@@ -27,7 +27,7 @@ It behaves like `toHaveScreenshot`:
   `all` rewrites every one; `none` writes nothing.
 - Failures attach `<name>-expected`, `-actual` and `-diff` images, which the HTML report shows
   as an image diff, and the message gives the changed pixels and the ΔE00 distribution. In the diff
-  image, changes are red, anti-aliasing yellow and sub-pixel shifts blue.
+  image, changes are red, anti-aliasing yellow, sub-pixel shifts blue and rounding green.
 - `.not` passes when the screenshot differs from its baseline; it never writes one.
 
 ## Pixels: `toBePerceptuallyNear`
@@ -50,6 +50,7 @@ Both arguments are `{ data, width, height }` with 8-bit RGBA data.
 | `maxDiffPixelRatio`  |                    | Changed pixels allowed, as a share of all pixels               |
 | `ignoreAntialiasing` | `true`             | Skip pixels that look like anti-aliasing                       |
 | `ignoreShifts`       | `true`             | Skip pixels that differ only by a sub-pixel move               |
+| `ignoreRounding`     | `true`             | Skip pixels within one level of each other in every channel    |
 | `within`             | `1`                | `toBePerceptuallyNear`: share of pixels that must be unchanged |
 | `timeout`            | the expect timeout | How long to wait for a stable screenshot                       |
 | `comparator`         | perceptual         | Any `ImageComparator`, replacing the built-in one              |
@@ -65,6 +66,10 @@ Out-of-range options throw `InvalidOptionError`; an unreadable baseline throws `
 Start with the defaults. Renders that differ only in colour, such as the same scene through
 another GPU, usually pass. Sub-pixel movement often does not: see the
 [limits](../concepts/how-it-works.md#limits).
+
+Pixels read back from a GPU may differ from an exact reference by a level in some channels, which
+in dark or greyish colours can pass ΔE00 1. Those count as rounding and pass; set
+`ignoreRounding: false` to count them.
 
 Set `ignoreShifts: false` where a one-pixel move is itself a regression, such as pixel-aligned
 icons or borders. Shift tolerance cannot tell a hard edge moved by a whole pixel from one moved by

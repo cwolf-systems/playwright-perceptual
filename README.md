@@ -8,7 +8,7 @@
 # playwright-perceptual
 
 [![CI](https://github.com/cwolf-systems/playwright-perceptual/actions/workflows/ci.yml/badge.svg)](https://github.com/cwolf-systems/playwright-perceptual/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-168-brightgreen)](https://github.com/cwolf-systems/playwright-perceptual/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-185-brightgreen)](https://github.com/cwolf-systems/playwright-perceptual/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@cwolf-systems/playwright-perceptual)](https://www.npmjs.com/package/@cwolf-systems/playwright-perceptual)
 
 Screenshot and pixel assertions for Playwright that judge a change the way a person sees it: by
@@ -16,7 +16,7 @@ CIEDE2000 colour difference, where 1.0 is about the smallest difference anyone c
 
 Built for pages a GPU draws: maps, charts, 3D, canvas, gradients. Two machines render them a little
 differently, so exact comparison fails on changes nobody can see, while Playwright's default
-comparator passes changes people can. On 193 labelled pairs it caught all 48 faint regressions;
+comparator passes changes people can. On 200 labelled pairs it caught all 49 faint regressions;
 Playwright's default caught none. Baselines, update modes and the HTML report's image diff work as
 they do for `toHaveScreenshot`.
 

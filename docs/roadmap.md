@@ -12,7 +12,7 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    thousands of changed pixels. Shift tolerance passes about 95% of the changed pixels in these
    cases, but rarely all of them, and a few hundred left over still fails the test.
 2. The 2D map through Chromium's GPU and through its software rasteriser fails: 1.4% of pixels at
-   1× scale, 2% at 2×. The differences are hairlines along the seams between raster tiles and
+   1× scale, 2.2% at 2×. The differences are hairlines along the seams between raster tiles and
    along the edges of thick stroked lines.
 3. Shift tolerance passes a hard edge moved by exactly one pixel. That is the price of looking one
    pixel around; `ignoreShifts: false` turns it off.
@@ -21,6 +21,23 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    decoding the screenshot, so this is mostly paid by failing tests.
 5. The thresholds are rules of thumb. ΔE00 1 as "just noticeable" comes from the formula's design
    and from viewing uniform patches, not from people looking at screenshots.
+6. Part of a faint uniform change still passes as shifts. The noise detectors no longer explain a
+   translucent overlay made 5 points more transparent over terrain (from a renderer's tests), but
+   along contour lines and other edges a move could carry as much colour across a 5×5 window as
+   the change adds, so shift tolerance still sets aside a quarter to a third of its pixels. The
+   rest fail the test, so the verdict is right; a test with an allowance of thousands of pixels
+   would not be.
+7. The same scene can land on different pixels between page loads or rasterisers. A label whose
+   projected anchor falls either side of a pixel boundary moves by a whole pixel; an aliased
+   overlay edge within 1/32 px of a row of pixel centres covers the row in a rasteriser that
+   snaps vertices to 1/16 px and not in one that does not. Over a translucent box or textured
+   ground, a few such pixels bring colours that were not nearby, so the test fails with no
+   allowance. An allowance or a mask hides them; the renderer snapping labels to whole pixels
+   removes them. The synthetic pairs in the benchmark reproduce both.
+8. A drift of one level per channel everywhere passes as rounding; a drift of two over an area
+   counts. A renderer whose exposure differs by one or two levels between loads of the same scene
+   used to pass through shift tolerance and now fails, as in one of 28 scenes of the renderer's
+   golden set.
 
 Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pixel by pixel.
 
@@ -45,6 +62,12 @@ Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pi
   and dark themes.
 - **Self-noise.** Each page should be rendered several times in the same browser to measure how
   much it differs from itself. WebKit's map differs between two loads by two pixels at ΔE00 1.05.
+  The synthetic set reproduces two kinds of self-noise reported by a renderer (a label on another
+  pixel, a box one row taller), but this repository's own pages are still rendered once.
+- **Synthetic pairs.** The synthetic set reproduces reported findings from images generated from
+  scratch, since the original captures carry third-party map tiles. Each was checked to produce
+  the same classes of pixel as the capture it stands for, but seven pairs written alongside a fix
+  are evidence for that fix, not a test of it; the design and held-out sets are.
 
 ## Directions
 
@@ -81,7 +104,9 @@ as a reference when choosing filter settings and thresholds, or as an opt-in com
 
 SSIM (Wang et al., 2004) passes scattered rendering noise but, measured here, calls faint uniform
 colour changes noise too. A structural test that also requires the mean colour of the
-neighbourhood to stay within the threshold might keep the first without the second. Multi-scale
+neighbourhood to stay within the threshold might keep the first without the second. Shift
+tolerance now applies a version of that requirement: a move may change a window's total colour
+only by what crosses its border. Anti-aliasing detection could take the same test. Multi-scale
 SSIM (Wang, Simoncelli and Bovik, 2003) is the natural variant to measure alongside.
 
 ### Other colour differences
