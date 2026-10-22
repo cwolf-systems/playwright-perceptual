@@ -39,10 +39,14 @@ describe('finding 1: a translucent surface from 35% to 30% opacity', () => {
     expect(maxLevels(expected, actual)).toBeLessThanOrEqual(3);
   });
 
-  it('is set aside, today, as anti-aliasing and sub-pixel shifts: a missed regression', () => {
-    expect(result.differing).toBe(0);
-    expect(result.antialiased + result.shifted).toBe(strict.differing);
-    expect(result.shifted).toBeGreaterThan(result.antialiased);
+  it('fails: shift tolerance no longer takes a change of colour over an area for a move', () => {
+    expect(result.differing).toBeGreaterThan(0.4 * strict.differing);
+    expect(result.differing).toBeGreaterThan(allowance(expected));
+  });
+
+  it('still sets some of it aside, as anti-aliasing above all', () => {
+    expect(result.antialiased + result.shifted).toBeGreaterThan(0.4 * strict.differing);
+    expect(result.antialiased).toBeGreaterThan(0.2 * strict.differing);
   });
 
   it('has a control: the same scene panned 0.3 px leaves few pixels counted', () => {

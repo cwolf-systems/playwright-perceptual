@@ -65,3 +65,38 @@ describe('isShifted', () => {
     expect(shifted(columns([0, 0, 255, 255]), columns([0, 255, 255, 255]), 1, 2)).toBe(true);
   });
 });
+
+describe('isShifted, on colour a move would have to conserve', () => {
+  /** An 11×11 image whose pixel (x, y) is `rgba(x, y)`. */
+  function image(rgba: (x: number, y: number) => Rgba): RgbaImage {
+    const result = solid(11, 11, WHITE);
+    for (let y = 0; y < 11; y++) for (let x = 0; x < 11; x++) setPixel(result, x, y, rgba(x, y));
+    return result;
+  }
+
+  /** Faint texture: a checkerboard one level deep. */
+  const textured = (offset: number) => image((x, y) => grey(100 + ((x + y) % 2) + offset));
+
+  it('rejects a change of two levels over an area, though each pixel stays near its old colour', () => {
+    expect(shifted(textured(0), textured(-2), 5, 5)).toBe(false);
+    expect(shifted(solid(11, 11, GREY), solid(11, 11, grey(102)), 5, 5)).toBe(false);
+  });
+
+  it('accepts a change of one level over an area, which rounding alone explains', () => {
+    expect(shifted(textured(0), textured(-1), 5, 5)).toBe(true);
+  });
+
+  it('accepts a soft edge moved by part of a pixel, which carries colour across the window', () => {
+    const before = [0, 0, 0, 0, 64, 192, 255, 255, 255, 255, 255];
+    const after = [0, 0, 0, 0, 32, 160, 255, 255, 255, 255, 255];
+    const edge = (values: number[]) => image((x) => grey(values[x]!));
+    expect(shifted(edge(before), edge(after), 4, 5)).toBe(true);
+    expect(shifted(edge(before), edge(after), 5, 5)).toBe(true);
+  });
+
+  it('does not judge a window that reaches the border, where what lies beyond is unknown', () => {
+    expect(shifted(textured(0), textured(-2), 2, 5)).toBe(true);
+    expect(shifted(textured(0), textured(-2), 5, 8)).toBe(true);
+    expect(shifted(textured(0), textured(-2), 3, 7)).toBe(false);
+  });
+});
