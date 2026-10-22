@@ -1,4 +1,4 @@
-import { blue, green, red } from '../color/rgb.js';
+import { blue, green, red, ROUNDING_LEVELS } from '../color/rgb.js';
 import type { Pixels } from './types.js';
 
 // Content moved by less than a pixel is resampled between neighbours, so each image's colour at a
@@ -20,12 +20,6 @@ const SLACK = 3;
 const WINDOW_RADIUS = 2;
 
 const WINDOW_AREA = (2 * WINDOW_RADIUS + 1) ** 2;
-
-/**
- * Levels per pixel by which a window's total may drift without a change: two renderings of the
- * same colour, each rounded to the nearest level, differ by at most one.
- */
-const ROUNDING = 1;
 
 const MAX_CHANNEL = 255;
 
@@ -98,7 +92,8 @@ function unexplained(
   x0: number,
   y0: number,
 ): boolean {
-  const rounding = ROUNDING * WINDOW_AREA;
+  // Each pixel of the window may have rounded the other way.
+  const rounding = ROUNDING_LEVELS * WINDOW_AREA;
   if (Math.abs(change) <= rounding) return false;
   const x1 = x0 + 2 * WINDOW_RADIUS;
   const y1 = y0 + 2 * WINDOW_RADIUS;

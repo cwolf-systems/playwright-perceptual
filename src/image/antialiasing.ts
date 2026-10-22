@@ -1,10 +1,14 @@
-import { luma } from '../color/rgb.js';
+import { luma, ROUNDING_LEVELS, withinLevels } from '../color/rgb.js';
 import type { Pixels } from './types.js';
 import { contains, NEIGHBOURS, onEdge } from './raster.js';
 
 // Anti-aliasing detection after Vyšniauskas (2009), "Anti-aliased Pixel and Intensity Slope
 // Detector": a pixel on a slope between a darker and a brighter neighbour, one of which sits in a
 // flat area in both images. Rasterisers place such edge pixels differently.
+//
+// That flat neighbour must also keep its colour, give or take rounding. Placing an edge
+// differently changes the slope, not the flat area beside it; a change of colour over a whole
+// area, such as an overlay made more transparent, changes both.
 
 /** Neighbours of the same colour beyond which an area counts as flat. */
 const FLAT_NEIGHBOURS = 2;
@@ -57,6 +61,8 @@ export function isAntialiased(image: Pixels, other: Pixels, x: number, y: number
   if (darkest === 0 || brightest === 0) return false;
 
   const flatInBoth = (nx: number, ny: number) =>
-    inFlatArea(image, nx, ny) && inFlatArea(other, nx, ny);
+    inFlatArea(image, nx, ny) &&
+    inFlatArea(other, nx, ny) &&
+    withinLevels(image.rgbAt(nx, ny), other.rgbAt(nx, ny), ROUNDING_LEVELS);
   return flatInBoth(darkX, darkY) || flatInBoth(brightX, brightY);
 }

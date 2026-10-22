@@ -1,6 +1,6 @@
 import { deltaE2000 } from '../color/ciede2000.js';
 import { rgbToLab } from '../color/cielab.js';
-import { withinLevels } from '../color/rgb.js';
+import { ROUNDING_LEVELS, withinLevels } from '../color/rgb.js';
 import { resolveCompareOptions, type ResolvedCompareOptions } from '../defaults.js';
 import { ImageSizeError } from '../errors.js';
 import { isAntialiased } from '../image/antialiasing.js';
@@ -28,10 +28,6 @@ const BIN_COUNT = 12_800;
 const LAB_CACHE_LIMIT = 1 << 20;
 const DELTA_CACHE_LIMIT = 1 << 20;
 const PAIR_KEY_SHIFT = 2 ** 24;
-
-// Two renderings of the same colour, each rounded to the nearest of 256 levels, can differ by one
-// level in each channel. In dark and greyish colours that alone can pass ΔE00 1.
-const ROUNDING_LEVELS = 1;
 
 const fixed = (value: number): string => value.toFixed(2);
 
@@ -131,6 +127,7 @@ export class PerceptualComparator implements ImageComparator {
         diff?.unchanged(index, a);
         continue;
       }
+      // Rounding alone can pass ΔE00 1 in dark and greyish colours.
       if (this.options.ignoreRounding && withinLevels(a, b, ROUNDING_LEVELS)) {
         rounded++;
         diff?.rounded(index);

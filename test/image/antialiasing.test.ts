@@ -22,6 +22,22 @@ describe('isAntialiased', () => {
     expect(isAntialiased(image, new Raster(edge(5)), 4, 4)).toBe(true);
   });
 
+  it('rejects a slope whose flat sides changed colour, as a uniform change leaves it', () => {
+    /** Flat 40 to the left of column 4, 128 on it, flat 210 to the right, all `levels` lighter. */
+    const softEdge = (levels: number) => {
+      const image = solid(9, 9, [210 + levels, 210 + levels, 210 + levels, 255]);
+      for (let y = 0; y < 9; y++) {
+        for (let x = 0; x <= 4; x++) {
+          const v = (x < 4 ? 40 : 128) + levels;
+          setPixel(image, x, y, [v, v, v, 255]);
+        }
+      }
+      return new Raster(image);
+    };
+    expect(isAntialiased(softEdge(0), softEdge(1), 4, 4)).toBe(true);
+    expect(isAntialiased(softEdge(0), softEdge(3), 4, 4)).toBe(false);
+  });
+
   it('rejects a pixel inside a flat area', () => {
     const image = new Raster(edge(4));
     expect(isAntialiased(image, image, 1, 4)).toBe(false);
