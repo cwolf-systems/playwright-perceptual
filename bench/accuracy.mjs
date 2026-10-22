@@ -1,7 +1,7 @@
 // Does each comparator pass what it should and fail what it should? Run with
 // `npm run bench:accuracy`; it builds first.
 //
-// Labelled image pairs from three sources:
+// Labelled image pairs from four sources:
 // - Playwright's own image-comparison fixtures (tests/image_tools/fixtures at v1.60.0), downloaded
 //   on first run into bench/data. They are Playwright's files and are not redistributed here.
 // - This repository's fixture pages, rendered now in each browser, with labelled variants.

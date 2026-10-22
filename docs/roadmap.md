@@ -34,10 +34,13 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    ground, a few such pixels bring colours that were not nearby, so the test fails with no
    allowance. An allowance or a mask hides them; the renderer snapping labels to whole pixels
    removes them. The synthetic pairs in the benchmark reproduce both.
-8. A drift of one level per channel everywhere passes as rounding; a drift of two over an area
-   counts. A renderer whose exposure differs by one or two levels between loads of the same scene
-   used to pass through shift tolerance and now fails, as in one of 28 scenes of the renderer's
-   golden set.
+8. A drift of one level per channel everywhere passes as rounding while shift tolerance is on; a
+   drift of two over an area counts. A renderer whose exposure differs by one or two levels
+   between loads of the same scene used to pass through shift tolerance and now fails, as in one
+   of 28 scenes of the renderer's golden set.
+9. Shift tolerance cannot test conservation along a side under three pixels long, since what lies
+   beyond the image there is unknown: in such slivers any change within three levels of the
+   colours nearby passes as a shift.
 
 Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pixel by pixel.
 

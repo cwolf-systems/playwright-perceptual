@@ -15,7 +15,11 @@ Two images of the same size are compared pixel by pixel.
    pairs to four decimal places.
 4. A pixel past the threshold whose channels each differ by at most one level is rounding: two
    renderings of the same colour, each rounded to the nearest of 256 levels, can differ that much,
-   and in dark or greyish colours that alone can pass ΔE00 1. It is reported, not counted.
+   and in dark or greyish colours that alone can pass ΔE00 1. The most it reaches is ΔE00 2.45,
+   for (23, 24, 23) against (24, 23, 24): one level apart in each channel, in a near-black grey.
+   While shift tolerance is on, it is reported, not counted. Shift tolerance in 0.1.0 already
+   passed these pixels as shifts, so turning it off counts them again unless
+   `ignoreRounding: true` asks otherwise.
 5. A pixel that sits on a slope between a darker and a brighter neighbour, one of which lies in a
    flat area in both images and keeps its colour there give or take a level, is anti-aliasing
    that rasterisers place differently (Vyšniauskas, 2009). It is reported, not counted.
@@ -24,7 +28,8 @@ Two images of the same size are compared pixel by pixel.
    neighbourhood of the same place in the other image, channel by channel, give or take three
    levels for rounding. A move also conserves colour: over the 5×5 window around the pixel, each
    channel's total can change only by what a move of under a pixel carries across the window's
-   border, plus a level per pixel for rounding. A pixel that passes both tests, both ways round,
+   border, plus a level per pixel for rounding. Near the image's border the window moves inward,
+   so the colour just beyond it is known. A pixel that passes both tests, both ways round,
    is reported as shifted. A real change brings in a colour that was not nearby, such as a line
    that went away or a new colour on an edge, or changes the colour of a whole area at once,
    such as a translucent overlay made a little stronger or weaker over textured ground.
@@ -53,8 +58,12 @@ lightness, chroma and hue, and for blues, where earlier formulas were least accu
 - Along edges, shift tolerance can still take part of a uniform change for a move, where a move
   could carry as much colour across the window as the change adds: a quarter to a third of the
   pixels of a faint overlay change, in the cases measured.
-- A drift of one level everywhere passes as rounding, even where it passes ΔE00 1. A drift of two
-  levels over an area counts.
+- A drift of one level everywhere passes as rounding while shift tolerance is on, even where it
+  passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over an area counts.
+- In an image under three pixels high or wide, what lies beyond the image along that side is
+  unknown, so shift tolerance cannot test whether colour was conserved, and any change within
+  three levels of the colours nearby passes as a shift. Use `ignoreShifts: false` for such
+  slivers.
 - Not every sub-pixel move passes. Thin text, maps and 3D scenes moved 0.3 px still leave changed
   pixels where edges overlap and produce colours neither image has nearby.
 - Fine detail is judged at full resolution. CIEDE2000 was built for uniform patches; the eye blends
