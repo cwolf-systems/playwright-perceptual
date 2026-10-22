@@ -40,6 +40,11 @@
   an exact reference may want, or `ignoreRounding: false` to count it with shift tolerance on.
 - `PerceptualComparison.rounded` is new and optional in the type, so comparisons built by hand
   still type-check; the built-in comparator always sets it.
+- Playwright 1.64's `default` update mode is supported, and `missing` follows it there: a missing
+  baseline is written and the test fails in `default`, and passes in `missing`, as with
+  `toHaveScreenshot`. With Playwright before 1.64, `missing` still writes and fails. `UpdateMode`
+  gains `'default'`; `matchSnapshot` callers who passed `'missing'` to get a failing write should
+  pass `'default'`.
 
 ### Limits
 

@@ -84,6 +84,6 @@ const result = await matchSnapshot({
   store: myStore,
   comparator: new PerceptualComparator(),
   tolerance: { maxDiffPixels: 0 },
-  mode: 'missing',
+  mode: 'default',
 });
 ```

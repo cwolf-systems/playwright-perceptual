@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { updateModeOf } from '../../src/snapshot/policy.js';
 
 // Runs a real Playwright test with the matcher in each --update-snapshots mode and checks what it
 // did: the exit code, the baseline on disk and the images attached to the report.
@@ -12,11 +13,14 @@ const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const WORK = join(ROOT, 'test-results', 'runner');
 const BASELINE = join(WORK, 'baselines', 'swatch.png');
 const REPORT = join(WORK, 'report.json');
-const CLI = join(
-  createRequire(import.meta.url).resolve('@playwright/test/package.json'),
-  '..',
-  'cli.js',
-);
+const PACKAGE = createRequire(import.meta.url).resolve('@playwright/test/package.json');
+const CLI = join(PACKAGE, '..', 'cli.js');
+
+// Playwright 1.64 renamed the mode that writes a missing baseline and fails from 'missing' to
+// 'default', and made 'missing' pass instead.
+const { version } = JSON.parse(readFileSync(PACKAGE, 'utf8')) as { version: string };
+const HAS_DEFAULT_MODE = updateModeOf('missing', version) === 'missing';
+const DEFAULT_MODE = HAS_DEFAULT_MODE ? 'default' : 'missing';
 
 const SAME = 'rgb(80, 120, 160)';
 const INVISIBLE = 'rgb(80, 120, 161)';
@@ -97,12 +101,19 @@ describe('update modes, through the Playwright runner', () => {
     writeFileSync(join(WORK, 'playwright.config.ts'), CONFIG);
   });
 
-  it('missing: writes an absent baseline and fails', () => {
-    const first = run(SAME, 'missing');
+  it('the default mode: writes an absent baseline and fails', () => {
+    const first = run(SAME, DEFAULT_MODE);
     expect(first.passed).toBe(false);
     expect(baseline()).not.toBeNull();
     expect(first.attachments).toEqual(['swatch-actual.png', 'swatch-expected.png']);
-    expect(run(SAME, 'missing').passed).toBe(true);
+    expect(run(SAME, DEFAULT_MODE).passed).toBe(true);
+  });
+
+  it('missing: writes an absent baseline, and passes from Playwright 1.64 as toHaveScreenshot does', () => {
+    const first = run(SAME, 'missing');
+    expect(first.passed).toBe(HAS_DEFAULT_MODE);
+    expect(baseline()).not.toBeNull();
+    expect(run(VISIBLE, 'missing').passed).toBe(false);
   });
 
   it('none: writes nothing, and fails without a baseline', () => {
@@ -111,7 +122,7 @@ describe('update modes, through the Playwright runner', () => {
   });
 
   it('a visible change fails with the three images the report shows as a diff', () => {
-    run(SAME, 'missing');
+    run(SAME, DEFAULT_MODE);
     const before = baseline();
     const changed = run(VISIBLE, 'none');
     expect(changed.passed).toBe(false);
@@ -124,14 +135,14 @@ describe('update modes, through the Playwright runner', () => {
   });
 
   it('a change too small to see passes, and changed leaves the baseline alone', () => {
-    run(SAME, 'missing');
+    run(SAME, DEFAULT_MODE);
     const before = baseline();
     expect(run(INVISIBLE, 'changed').passed).toBe(true);
     expect(baseline()).toEqual(before);
   });
 
   it('changed: rewrites a baseline that differs, and passes', () => {
-    run(SAME, 'missing');
+    run(SAME, DEFAULT_MODE);
     const before = baseline();
     const updated = run(VISIBLE, 'changed');
     expect(updated.passed).toBe(true);
@@ -141,13 +152,13 @@ describe('update modes, through the Playwright runner', () => {
   });
 
   it('an expect timeout of 0 waits for a page that is still repainting to settle', () => {
-    run(SAME, 'missing');
+    run(SAME, DEFAULT_MODE);
     const settling = run(SAME, 'none', { EXPECT_TIMEOUT: '0', SETTLE_MS: '600' });
     expect(settling.passed).toBe(true);
   });
 
   it('all: rewrites even a matching baseline', () => {
-    run(SAME, 'missing');
+    run(SAME, DEFAULT_MODE);
     writeFileSync(BASELINE, Buffer.alloc(0));
     expect(run(SAME, 'all').passed).toBe(true);
     expect(baseline()?.length).toBeGreaterThan(0);
