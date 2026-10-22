@@ -60,9 +60,10 @@ export function isAntialiased(image: Pixels, other: Pixels, x: number, y: number
   }
   if (darkest === 0 || brightest === 0) return false;
 
+  // Whether the neighbour kept its colour is checked first: it is the cheapest test.
   const flatInBoth = (nx: number, ny: number) =>
+    withinLevels(image.rgbAt(nx, ny), other.rgbAt(nx, ny), ROUNDING_LEVELS) &&
     inFlatArea(image, nx, ny) &&
-    inFlatArea(other, nx, ny) &&
-    withinLevels(image.rgbAt(nx, ny), other.rgbAt(nx, ny), ROUNDING_LEVELS);
+    inFlatArea(other, nx, ny);
   return flatInBoth(darkX, darkY) || flatInBoth(brightX, brightY);
 }

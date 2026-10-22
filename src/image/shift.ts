@@ -28,29 +28,32 @@ const WINDOW_SIDE = 2 * WINDOW_RADIUS + 1;
 
 const MAX_CHANNEL = 255;
 
-const CHANNELS = [red, green, blue] as const;
-
-type Channel = (typeof CHANNELS)[number];
-
-function inRange(channel: Channel, value: number, pixels: Pixels, x: number, y: number): boolean {
-  let lo = MAX_CHANNEL;
-  let hi = 0;
+/** Whether each channel of `rgb` lies within the colours of `pixels` around (x, y). */
+function inNeighbourhood(rgb: number, pixels: Pixels, x: number, y: number): boolean {
+  // One pass over the neighbourhood for all three channels.
+  let loR = MAX_CHANNEL;
+  let loG = MAX_CHANNEL;
+  let loB = MAX_CHANNEL;
+  let hiR = 0;
+  let hiG = 0;
+  let hiB = 0;
   for (let ny = Math.max(0, y - RADIUS); ny <= Math.min(pixels.height - 1, y + RADIUS); ny++) {
     for (let nx = Math.max(0, x - RADIUS); nx <= Math.min(pixels.width - 1, x + RADIUS); nx++) {
-      const v = channel(pixels.rgbAt(nx, ny));
-      lo = Math.min(lo, v);
-      hi = Math.max(hi, v);
+      const v = pixels.rgbAt(nx, ny);
+      const r = red(v);
+      const g = green(v);
+      const b = blue(v);
+      if (r < loR) loR = r;
+      if (r > hiR) hiR = r;
+      if (g < loG) loG = g;
+      if (g > hiG) hiG = g;
+      if (b < loB) loB = b;
+      if (b > hiB) hiB = b;
     }
   }
-  return value >= lo - SLACK && value <= hi + SLACK;
-}
-
-/** Whether `rgb` lies within the colours of `pixels` around (x, y), channel by channel. */
-function inNeighbourhood(rgb: number, pixels: Pixels, x: number, y: number): boolean {
-  for (const channel of CHANNELS) {
-    if (!inRange(channel, channel(rgb), pixels, x, y)) return false;
-  }
-  return true;
+  const within = (value: number, lo: number, hi: number) =>
+    value >= lo - SLACK && value <= hi + SLACK;
+  return within(red(rgb), loR, hiR) && within(green(rgb), loG, hiG) && within(blue(rgb), loB, hiB);
 }
 
 /**
@@ -66,21 +69,46 @@ function span(centre: number, size: number): readonly [number, number] {
   return [first, Math.min(size - 2, first + WINDOW_SIDE - 1)];
 }
 
-/** A channel's value at (x, y), or `undefined` beyond the image. */
-const valueAt = (channel: Channel, pixels: Pixels, x: number, y: number): number | undefined =>
-  contains(pixels, x, y) ? channel(pixels.rgbAt(x, y)) : undefined;
+/** Red, green and blue totals over a window. */
+type Totals = [number, number, number];
+
+/** Where a colour would come from beyond the image's border, which is unknown. */
+const BEYOND = -1;
+
+const rgbOrBeyond = (pixels: Pixels, x: number, y: number): number =>
+  contains(pixels, x, y) ? pixels.rgbAt(x, y) : BEYOND;
+
+type Channel = typeof red;
 
 /**
- * The most a move can change a channel by replacing `out`, inside the window, with `into`. A value
- * beyond the image is unknown and may be anything from 0 to 255.
+ * The most a move can change a channel by replacing `out`, inside the window, with `into`. A
+ * colour from beyond the image is unknown and may be anything from 0 to 255.
  */
-const step = (into: number | undefined, out: number): number =>
-  into === undefined ? Math.max(out, MAX_CHANNEL - out) : Math.abs(into - out);
+function crossing(into: number, out: number, channel: Channel): number {
+  const level = channel(out);
+  return into === BEYOND ? Math.max(level, MAX_CHANNEL - level) : Math.abs(channel(into) - level);
+}
 
 /**
- * The most of `channel` a move of under a pixel can carry into or out of the window from x0 to x1
- * and y0 to y1: along each row and each column, moving one way brings in the pixel before the
- * window and takes out the last one inside; moving the other way, the pixel after and the first.
+ * Adds what a move can carry across the window along one row or column: moving one way brings in
+ * `before` and takes out `last`; moving the other way brings in `after` and takes out `first`.
+ */
+function addLine(totals: Totals, before: number, first: number, last: number, after: number): void {
+  totals[0] += Math.max(crossing(before, last, red), crossing(after, first, red));
+  totals[1] += Math.max(crossing(before, last, green), crossing(after, first, green));
+  totals[2] += Math.max(crossing(before, last, blue), crossing(after, first, blue));
+}
+
+/** The window over which a pixel's colour must be conserved, as [x0, y0, x1, y1]. */
+type Window = readonly [number, number, number, number];
+
+const reaches = (totals: Totals, need: Totals): boolean =>
+  totals[0] >= need[0] && totals[1] >= need[1] && totals[2] >= need[2];
+
+/**
+ * Whether a move of under a pixel in `pixels` can carry `need` of each channel into or out of the
+ * window from x0 to x1 and y0 to y1. What it can carry is summed into `carried` along each row and
+ * each column, and the sum stops once it covers the need, since more would not change the answer.
  *
  * A move of (tx, ty), resampled bilinearly, changes the window's total by tx·A + ty·B + tx·ty·C,
  * where A sums the rows, B the columns, and C reaches the pixels diagonally beyond the window's
@@ -89,89 +117,34 @@ const step = (into: number | undefined, out: number): number =>
  * carried in on its own border: 400,000 random bilinear moves found none that this rejects, while
  * adding C cost about a thousand counted pixels (6.5%) of the benchmark's faint overlay change.
  */
-function throughput(
-  channel: Channel,
-  pixels: Pixels,
-  x0: number,
-  y0: number,
-  x1: number,
-  y1: number,
-): number {
-  if (x0 < 1 || y0 < 1 || x1 > pixels.width - 2 || y1 > pixels.height - 2) {
-    return throughputBeyond(channel, pixels, x0, y0, x1, y1);
-  }
-  let total = 0;
+function carries(pixels: Pixels, [x0, y0, x1, y1]: Window, need: Totals, carried: Totals): boolean {
+  carried.fill(0);
+  const at = (x: number, y: number) => rgbOrBeyond(pixels, x, y);
   for (let y = y0; y <= y1; y++) {
-    const before = channel(pixels.rgbAt(x0 - 1, y));
-    const first = channel(pixels.rgbAt(x0, y));
-    const last = channel(pixels.rgbAt(x1, y));
-    const after = channel(pixels.rgbAt(x1 + 1, y));
-    total += Math.max(Math.abs(before - last), Math.abs(after - first));
+    addLine(carried, at(x0 - 1, y), at(x0, y), at(x1, y), at(x1 + 1, y));
+    if (reaches(carried, need)) return true;
   }
   for (let x = x0; x <= x1; x++) {
-    const before = channel(pixels.rgbAt(x, y0 - 1));
-    const first = channel(pixels.rgbAt(x, y0));
-    const last = channel(pixels.rgbAt(x, y1));
-    const after = channel(pixels.rgbAt(x, y1 + 1));
-    total += Math.max(Math.abs(before - last), Math.abs(after - first));
+    addLine(carried, at(x, y0 - 1), at(x, y0), at(x, y1), at(x, y1 + 1));
+    if (reaches(carried, need)) return true;
   }
-  return total;
+  return false;
 }
 
-/** `throughput` for a window whose margin reaches beyond the image, on a side under 3 pixels. */
-function throughputBeyond(
-  channel: Channel,
-  pixels: Pixels,
-  x0: number,
-  y0: number,
-  x1: number,
-  y1: number,
-): number {
-  const at = (x: number, y: number) => valueAt(channel, pixels, x, y);
-  const inside = (x: number, y: number) => channel(pixels.rgbAt(x, y));
-  let total = 0;
-  for (let y = y0; y <= y1; y++) {
-    total += Math.max(step(at(x0 - 1, y), inside(x1, y)), step(at(x1 + 1, y), inside(x0, y)));
-  }
-  for (let x = x0; x <= x1; x++) {
-    total += Math.max(step(at(x, y0 - 1), inside(x, y1)), step(at(x, y1 + 1), inside(x, y0)));
-  }
-  return total;
-}
-
-/** The window over which a pixel's colour must be conserved, as [x0, y0, x1, y1]. */
-type Window = readonly [number, number, number, number];
-
-/**
- * Whether a channel's total over the window changed by more than rounding and a move of under a
- * pixel in either image can explain. Most noise changes it by less than rounding alone allows, so
- * only then is the border measured.
- */
-function unexplained(
-  change: number,
-  channel: Channel,
-  image: Pixels,
-  other: Pixels,
-  [x0, y0, x1, y1]: Window,
-): boolean {
-  // Each pixel of the window may have rounded the other way.
-  const rounding = ROUNDING_LEVELS * (x1 - x0 + 1) * (y1 - y0 + 1);
-  if (Math.abs(change) <= rounding) return false;
-  const carried = Math.max(
-    throughput(channel, image, x0, y0, x1, y1),
-    throughput(channel, other, x0, y0, x1, y1),
-  );
-  return Math.abs(change) > carried + rounding;
-}
+// Reused for every pixel, to spare an allocation each.
+const needed: Totals = [0, 0, 0];
+const carried: Totals = [0, 0, 0];
 
 /**
  * Whether the colour in the window around (x, y) is conserved between the images, as a move of
- * under a pixel conserves it.
+ * under a pixel conserves it: each channel's total may change by no more than rounding and what a
+ * move in either image can carry across the window's border. Most noise changes it by less than
+ * rounding alone allows, so only then is the border measured, and the other image's only for the
+ * channels the first image's border can't explain.
  */
 function conserved(image: Pixels, other: Pixels, x: number, y: number): boolean {
   const [x0, x1] = span(x, image.width);
   const [y0, y1] = span(y, image.height);
-  const window: Window = [x0, y0, x1, y1];
 
   let r = 0;
   let g = 0;
@@ -185,11 +158,19 @@ function conserved(image: Pixels, other: Pixels, x: number, y: number): boolean 
       b += blue(after) - blue(before);
     }
   }
-  return !(
-    unexplained(r, red, image, other, window) ||
-    unexplained(g, green, image, other, window) ||
-    unexplained(b, blue, image, other, window)
-  );
+  // Each pixel of the window may have rounded the other way. What's left is what a move would
+  // have to carry across the border.
+  const rounding = ROUNDING_LEVELS * (x1 - x0 + 1) * (y1 - y0 + 1);
+  needed[0] = Math.abs(r) - rounding;
+  needed[1] = Math.abs(g) - rounding;
+  needed[2] = Math.abs(b) - rounding;
+  if (needed[0] <= 0 && needed[1] <= 0 && needed[2] <= 0) return true;
+
+  const window: Window = [x0, y0, x1, y1];
+  if (carries(image, window, needed, carried)) return true;
+  // The sum ran to the end, so it is exact: channels it explains need nothing more.
+  for (let c = 0; c < 3; c++) if (carried[c]! >= needed[c]!) needed[c] = 0;
+  return carries(other, window, needed, carried);
 }
 
 /** Whether pixel (x, y) differs only because content moved by less than a pixel. */
