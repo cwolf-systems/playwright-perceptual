@@ -4,14 +4,6 @@ import type { Pixels, RgbaImage } from './types.js';
 const CHANNELS = 4;
 const OPAQUE = 255;
 
-/** Offsets of the eight neighbours of a pixel, as [dx, dy]. */
-export const NEIGHBOURS: readonly (readonly [number, number])[] = [-1, 0, 1]
-  .flatMap((dy) => [-1, 0, 1].map((dx) => [dx, dy] as const))
-  .filter(([dx, dy]) => dx !== 0 || dy !== 0);
-
-export const contains = (pixels: Pixels, x: number, y: number): boolean =>
-  x >= 0 && y >= 0 && x < pixels.width && y < pixels.height;
-
 export const onEdge = (pixels: Pixels, x: number, y: number): boolean =>
   x === 0 || y === 0 || x === pixels.width - 1 || y === pixels.height - 1;
 
