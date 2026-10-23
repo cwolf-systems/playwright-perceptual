@@ -34,6 +34,9 @@ const NEAR = 3;
 /** Half the side of the large window: 32 for 65×65. */
 const FAR = 32;
 
+/** Pixels apart that the large window's centre is placed, so that neighbouring pixels share it. */
+const GRID = 8;
+
 /**
  * Channel levels a pixel may lie outside its neighbourhood's range, besides half that range: the
  * slack 0.1.0 allowed for rounding in the resampling.
@@ -385,6 +388,44 @@ function resamples(source: Float64Array, target: Float64Array, windows: number):
   return false;
 }
 
+/** The large window last summed for an image: against which other image, where, and its sums. */
+interface FarWindow {
+  other: Pixels;
+  x: number;
+  y: number;
+  reachable: boolean;
+  readonly sums: Float64Array;
+}
+
+const farWindows = new WeakMap<Pixels, FarWindow>();
+
+/**
+ * Sums the large window holding (x, y) into the first window's place, and tells whether resampling
+ * either image could reach the other's sums. Its centre lies on a grid of GRID pixels, moved
+ * inward until the window and its moves by a pixel fit, so neighbouring pixels share it and it is
+ * summed once for them.
+ */
+function farWindow(image: Pixels, other: Pixels, x: number, y: number): boolean {
+  const cx = Math.min(Math.max(x - (x % GRID) + GRID / 2, FAR + 1), image.width - FAR - 2);
+  const cy = Math.min(Math.max(y - (y % GRID) + GRID / 2, FAR + 1), image.height - FAR - 2);
+  let last = farWindows.get(image);
+  if (last?.other === other && last.x === cx && last.y === cy) {
+    imageSums.set(last.sums.subarray(0, WINDOW));
+    otherSums.set(last.sums.subarray(WINDOW));
+    return last.reachable;
+  }
+  sum(0, image, other, cx - FAR, cy - FAR, cx + FAR, cy + FAR);
+  last ??= { other, x: cx, y: cy, reachable: false, sums: new Float64Array(2 * WINDOW) };
+  last.other = other;
+  last.x = cx;
+  last.y = cy;
+  last.reachable = reachable(imageSums, otherSums) || reachable(otherSums, imageSums);
+  last.sums.set(imageSums.subarray(0, WINDOW));
+  last.sums.set(otherSums.subarray(0, WINDOW), WINDOW);
+  farWindows.set(image, last);
+  return last.reachable;
+}
+
 /** Whether pixel (x, y) differs only because content moved by less than a pixel. */
 export function isShifted(image: Pixels, other: Pixels, x: number, y: number): boolean {
   if (
@@ -398,11 +439,7 @@ export function isShifted(image: Pixels, other: Pixels, x: number, y: number): b
   // than any move could carry across its border, and the small window need not be read.
   let windows = 0;
   if (width >= 2 * FAR + 3 && height >= 2 * FAR + 3) {
-    // The large window holding the pixel, moved inward until it and its moves by a pixel fit.
-    const cx = Math.min(Math.max(x, FAR + 1), width - FAR - 2);
-    const cy = Math.min(Math.max(y, FAR + 1), height - FAR - 2);
-    sum(0, image, other, cx - FAR, cy - FAR, cx + FAR, cy + FAR);
-    if (!reachable(imageSums, otherSums) && !reachable(otherSums, imageSums)) return false;
+    if (!farWindow(image, other, x, y)) return false;
     windows = 1;
   }
   sum(

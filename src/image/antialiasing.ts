@@ -30,8 +30,26 @@ function inFlatArea(pixels: Pixels, x: number, y: number): boolean {
   return false;
 }
 
+/** Whether some neighbour of (x, y) kept its colour, give or take rounding. */
+function anyKept(image: Pixels, other: Pixels, x: number, y: number): boolean {
+  for (const [dx, dy] of NEIGHBOURS) {
+    const nx = x + dx;
+    const ny = y + dy;
+    if (
+      contains(image, nx, ny) &&
+      withinLevels(image.rgbAt(nx, ny), other.rgbAt(nx, ny), ROUNDING_LEVELS)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /** Whether pixel (x, y) of `image` looks like anti-aliasing, judged against `other`. */
 export function isAntialiased(image: Pixels, other: Pixels, x: number, y: number): boolean {
+  // The flat neighbour must keep its colour, so where none did, as across a change of a whole
+  // area, there is nothing to look for.
+  if (!anyKept(image, other, x, y)) return false;
   const own = luma(image.rgbAt(x, y));
   let same = edgeAllowance(image, x, y);
   let darkest = 0;
