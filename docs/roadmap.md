@@ -42,8 +42,9 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    drift of two over an area counts. A renderer whose exposure differs by one or two levels
    between loads of the same scene used to pass through shift tolerance and now fails, as in one
    of 28 scenes of the renderer's golden set.
-9. Shift tolerance cannot test an image one pixel high or wide, since what lies beyond the image
-   there is unknown: in such slivers any change passes as a shift.
+9. Across an image one pixel high or wide, what lies beyond the image is unknown, so shift
+   tolerance allows no move across it, and content moved by part of a pixel across such a sliver
+   counts as changed. The same holds on the outermost pixels of any image.
 
 Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pixel by pixel.
 

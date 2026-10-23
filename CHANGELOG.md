@@ -14,7 +14,7 @@
   other's at the box and one pixel over, give or take a level per pixel; and the pixel's own
   colour must lie within the colours next to it, both ways round, give or take three levels, as
   before. Near the image's border the box moves inward, so the border and small element
-  screenshots are judged too, down to two pixels high or wide.
+  screenshots are judged too, down to one pixel high or wide.
 - **Renders whose colour drifts by two levels or more over an area now fail.** In a renderer's
   golden set of 56 pairs of identical input, 10 failed with 0.1.0 and 12 now: one scene's first
   capture is one to two levels darker over nearly half the frame (44,548 pixels counted against
@@ -62,9 +62,10 @@
 
 ### Limits
 
-- In an image one pixel high or wide, shift tolerance cannot test that side, since what lies
-  beyond the image is unknown, and any change passes as a shift. Use `ignoreShifts: false` for
-  such slivers. Images two pixels across are judged.
+- In an image one pixel high or wide, what lies beyond the image across that side is unknown, so
+  shift tolerance allows no move across it: a sub-pixel move of content across such a sliver
+  counts as a change. In 0.1.0 and earlier drafts of this release, such slivers took any change
+  within three levels of the colours nearby for a shift.
 - Over texture whose colour changes by a level or more per pixel, a drift of one to three levels
   is mostly taken for a move: the judge's textured drift over a whole 1346×819 frame has 3.6% of
   its changed pixels counted, enough to fail it with up to 2% of the image allowed. Of a faint
@@ -75,16 +76,16 @@
 Measured by the redesign round's judge (median of five, Apple M4, Node 22) against 0.1.0 on the
 same machine; `npm run bench` gives the same picture in [docs/benchmarks/speed.md](docs/benchmarks/speed.md).
 
-- Fully changed images compare in about two thirds of 0.1.0's time: 3200×2000 in 2.6 s, from
-  4.1 s; 1920×1080 in 0.90 s, from 1.37 s. CIELAB and ΔE are cached in fixed tables, and the
+- Fully changed images compare in about two thirds of 0.1.0's time or less: 3200×2000 in 2.6 s,
+  from 4.3 s; 1920×1080 in 0.92 s, from 1.42 s. CIELAB and ΔE are cached in fixed tables, and the
   shift test reads 20 values per channel at most, whatever the size of its box.
-- A drift of one to three levels over a whole textured 1346×819 frame takes 332 ms, from 551 ms;
-  a real whole-frame change of that size 340 ms, from 406 ms. Each box is computed once, with
+- A drift of one to three levels over a whole textured 1346×819 frame takes 343 ms, from 561 ms;
+  a real whole-frame change of that size 350 ms, from 408 ms. Each box is computed once, with
   running sums over tiles of the image, rather than read pixel by pixel at every changed pixel.
-- Grainy images are four to twenty times faster (22 ms from 411 ms for synthetic grain, 56 ms
+- Grainy images are four to twenty times faster (22 ms from 414 ms for synthetic grain, 60 ms
   from 239 ms for a real one), since rounding is checked before the detectors.
-- With 1% of a 1280×720 image changed, comparison takes 10.5 ms, from 8.7 ms: the tiles around
-  the first changed pixels are filtered whole.
+- With 1% or 10% of the image changed, comparison is a little faster than 0.1.0 too: 10.4 ms
+  from 10.9 ms at 1280×720 with 1% changed, 291 ms from 404 ms at 3200×2000 with 10%.
 
 ### Other
 

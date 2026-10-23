@@ -47,7 +47,8 @@ the box covers it: 25 levels for a 5×5 box.
   move conserves colour over any box, so this stays sound off centre. Where a side is only one
   pixel longer than the box, a box sits at each end, each judging the move whose neighbour fits,
   so images two pixels high or wide are judged. The box of one pixel stays on the pixel: on the
-  outermost pixels a move from beyond the border explains nothing.
+  outermost pixels a move from beyond the border explains nothing. Across an image one pixel high
+  or wide no move is allowed, for the same reason, and moves along it are judged.
 
 The colour caches changed at the same time: CIELAB by colour and ΔE by pair are kept in fixed
 tables indexed by a hash, rather than maps that grew to a million entries each on frames of
@@ -64,7 +65,8 @@ sliver limit is the smallest side from which a three-level tint is counted in fu
 The first runs had the reverse direction's sign wrong (the expected image's box total was tested
 as if it were the actual's) and are left out. The box-size, rounding and anti-aliasing sweeps
 below were run while the pixel test still accepted either direction; the last rows re-measure the
-rule as kept.
+rule as kept. Until the last row, an image one pixel high or wide passed any change, so no limit
+below 2 px could show.
 
 | Variant                                                     | Lost   | Gained | Residual    | Drift | Sliver |
 | ----------------------------------------------------------- | ------ | ------ | ----------- | ----- | ------ |
@@ -87,6 +89,7 @@ rule as kept.
 | Kept, and three levels for the 5×5 box too (27)             | 0 / 0  | 2/1    | 72.4 / 74.4 | 2.1%  | 3      |
 | Kept, but both images' 5×5 boxes must explain it            | 2 / 2  | 2/1    | 88.0 / 86.6 | 19.0% | 2      |
 | Kept, but both images' 5×5 boxes, with 10 levels more slack | 1 / 0  | 2/1    | 67.9 / 72.3 | 7.3%  | 4      |
+| Kept, and sides of one pixel judged (final)                 | 0 / 0  | 1/1    | 76.5 / 77.2 | 3.6%  | 1      |
 
 What each taught:
 
@@ -133,22 +136,22 @@ The kept rule, as the judge scores it (full run; speed is the median of five, Ap
   the real capture (73.2%).
 - **Textured drift:** 3.6% counted (26,312 of 740,228 pixels; PR #1 none). Enough to fail it at any
   allowance up to 2%, but most of it still passes as shifts.
-- **Slivers:** a three-level tint is counted in full from a side of 2 px (PR #1: 3 px); 1 px
-  sides still pass.
+- **Slivers:** a three-level tint is counted in full at every size, down to a side of 1 px (PR #1:
+  from 3 px).
 - **Detector code:** 195 lines under `src/image/` (PR #1: 204), 27 of types, 69 of comments.
 
 | Whole-frame case, ms                   | 0.1.0  | PR #1  | Box filter | vs 0.1.0 |
 | -------------------------------------- | ------ | ------ | ---------- | -------- |
-| bench 1280×720, all changed            | 659.8  | 509.7  | 422.1      | 0.64×    |
-| bench 1920×1080, all changed           | 1365.1 | 1045.7 | 902.6      | 0.66×    |
-| bench 3200×2000, all changed           | 4117.9 | 3133.7 | 2590.1     | 0.63×    |
-| textured drift of 1–3 levels, 1346×819 | 550.5  | 684.9  | 331.5      | 0.60×    |
-| film grain of ±1 level, 1346×819       | 410.6  | 49.4   | 22.2       | 0.05×    |
-| real whole-frame change, 1346×819      | 406.3  | 982.9  | 339.5      | 0.84×    |
-| real film grain, 1346×819              | 238.6  | 48.4   | 55.8       | 0.23×    |
+| bench 1280×720, all changed            | 727.0  | 570.2  | 435.2      | 0.60×    |
+| bench 1920×1080, all changed           | 1419.9 | 1122.3 | 924.0      | 0.65×    |
+| bench 3200×2000, all changed           | 4261.6 | 3244.5 | 2648.5     | 0.62×    |
+| textured drift of 1–3 levels, 1346×819 | 560.7  | 699.3  | 342.9      | 0.61×    |
+| film grain of ±1 level, 1346×819       | 414.1  | 49.2   | 22.3       | 0.05×    |
+| real whole-frame change, 1346×819      | 408.0  | 995.7  | 349.5      | 0.86×    |
+| real film grain, 1346×819              | 238.6  | 48.1   | 60.4       | 0.25×    |
 
-With 1% or 10% of the image changed, it is within 17 ms of PR #1 either way and faster than
-0.1.0, except 1280×720 with 1% changed: 10.5 ms against 8.7 (0.1.0) and 7.2 (PR #1).
+With 1% or 10% of the image changed, it is faster than 0.1.0 in every case and within 14 ms of
+PR #1 either way; the largest gap is 3200×2000 with 10% changed, 290.8 ms against 277.3.
 
 ## What is better, and what is not
 
@@ -158,9 +161,9 @@ Better:
   Its slack follows from rounding, except the pixel test's three levels, which 0.1.0 and PR #1
   already used; the box's size, 5, is the smallest that loses no verdict.
 - Every test costs the same whatever the box's size, and the speed gap on textured changes is
-  gone: the textured drift takes 0.60× and the real whole-frame change 0.84× of 0.1.0's time,
-  from 1.24× and 2.42× with PR #1.
-- More of a faint uniform change is counted, slivers two pixels across are judged, and the
+  gone: the textured drift takes 0.61× and the real whole-frame change 0.86× of 0.1.0's time,
+  from 1.25× and 2.44× with PR #1.
+- More of a faint uniform change is counted, slivers down to one pixel across are judged, and the
   textured drift fails.
 
 Not better, or worse:
@@ -174,6 +177,9 @@ Not better, or worse:
   page through the GPU against software at 2×, 116 → 187 of 256 allowed; the 2D map the same way,
   895 → 954 at 1× and 5,581 → 5,741 at 2×. In the real golden captures, a label one pixel over,
   150 → 165, and the frame a level or two darker, 41,872 → 44,548.
-- Small changes on small screenshots cost a little more: tiles are filtered whole, 140 rows by up
-  to 524 columns, for the first changed pixel in them.
-- A side of one pixel is still not judged.
+- Small changes cost a little more than with PR #1, though less than with 0.1.0: tiles are
+  filtered whole, 140 rows by up to 524 columns, for the first changed pixel in them. With 1% of
+  a 1280×720 image changed, 10.4 ms against 7.5.
+- A sub-pixel move across an image one pixel high or wide counts as a change, as it does on the
+  outermost pixels of any image: what it would bring in is unknown. The first draft passed any
+  change in such slivers, a red pixel in a 10×1 readback included; a browser test caught it.

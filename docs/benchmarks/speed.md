@@ -49,5 +49,5 @@ Node 22.22, Apple M4, milliseconds.
   764 ms with 10%, and 3,374 against 4,421 ms with everything changed. It returns at once for
   identical files, since it compares the encoded bytes first.
 - Against 0.1.0, as measured by the redesign round's judge on the same machine, fully changed
-  images take about two thirds of the time, and a drift of one to three levels over a whole
-  textured frame 0.60×; the [design log](../design/box-filter.md) has the table.
+  images take about two thirds of the time or less, and a drift of one to three levels over a
+  whole textured frame 0.61×; the [design log](../design/box-filter.md) has the table.

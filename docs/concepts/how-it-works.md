@@ -34,7 +34,8 @@ Two images of the same size are compared pixel by pixel.
    the pixel alone, both ways round and give or take three levels: there it says each image's
    colour lies within the colours next to it in the other. Near the image's border the 5×5 box
    moves inward so that the box moved is in the image too; a box of one pixel stays on the pixel,
-   so on the outermost pixels a move from beyond the border explains nothing. A pixel that passes
+   so on the outermost pixels a move from beyond the border explains nothing, and across an image
+   one pixel wide no move does. A pixel that passes
    both is reported as shifted. A real change brings in a colour that was not nearby, such as a
    line that went away or a new colour on an edge, or changes the colour of a whole box at once,
    such as a translucent overlay made a little stronger or weaker over textured ground.
@@ -68,9 +69,9 @@ lightness, chroma and hue, and for blues, where earlier formulas were least accu
 - A drift of one level everywhere passes as rounding while shift tolerance is on, even where it
   passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over a flat or gently
   shaded area counts.
-- In an image one pixel high or wide, what lies beyond the image along that side is unknown, so
-  shift tolerance cannot test it, and any change passes as a shift. Use `ignoreShifts: false` for
-  such slivers. From two pixels, it is tested.
+- In an image one pixel high or wide, what lies beyond the image across that side is unknown, so
+  a move across it explains nothing and is not allowed for; a move along it is. A sub-pixel move
+  of content across such a sliver counts as a change.
 - Not every sub-pixel move passes. Thin text, maps and 3D scenes moved 0.3 px still leave changed
   pixels where edges overlap and produce colours neither image has nearby.
 - Fine detail is judged at full resolution. CIEDE2000 was built for uniform patches; the eye blends

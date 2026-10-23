@@ -269,9 +269,9 @@ few: the 2D map through the GPU, from 894 to 954 at 1× and from 5,067 to 5,741 
 In the synthetic set the faint overlay change, 0 counted pixels before, now has 17,450 at ΔE00 1.
 
 The redesign round's judge times these against 0.1.0 on the same machine. A whole-frame real
-change on a downstream renderer's 1346×819 captures (not included) takes 340 ms against 406 ms; a
-drift of one to three levels over a whole textured frame of that size 332 ms against 551 ms; a
-film-grain scene 56 ms against 239 ms. The [design log](../design/box-filter.md) has the table.
+change on a downstream renderer's 1346×819 captures (not included) takes 350 ms against 408 ms; a
+drift of one to three levels over a whole textured frame of that size 343 ms against 561 ms; a
+film-grain scene 60 ms against 239 ms. The [design log](../design/box-filter.md) has the table.
 
 These rules were measured on the held-out set while being developed, so for them it is no longer
 unseen.
