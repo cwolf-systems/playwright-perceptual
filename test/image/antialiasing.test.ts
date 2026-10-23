@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isAntialiased } from '../../src/image/antialiasing.js';
+import { isAntialiased, isAntialiasedEitherWay } from '../../src/image/antialiasing.js';
 import { onEdge, Raster } from '../../src/image/raster.js';
 import type { RgbaImage } from '../../src/image/types.js';
 import { setPixel, solid } from '../helpers.js';
@@ -55,6 +55,30 @@ describe('isAntialiased', () => {
     setPixel(image, 1, 1, [200, 200, 200, 255]);
     const raster = new Raster(image);
     expect(isAntialiased(raster, raster, 1, 1)).toBe(false);
+  });
+});
+
+describe('isAntialiasedEitherWay', () => {
+  it('asks both ways round', () => {
+    const [left, right] = [new Raster(edge(4)), new Raster(edge(5))];
+    for (const x of [3, 4, 5, 6]) {
+      expect(isAntialiasedEitherWay(left, right, x, 4)).toBe(
+        isAntialiased(left, right, x, 4) || isAntialiased(right, left, x, 4),
+      );
+    }
+    expect(isAntialiasedEitherWay(left, right, 4, 4)).toBe(true);
+  });
+
+  it('refuses at once where every neighbour changed colour, which either way needs', () => {
+    // The same edge with every pixel nine levels away.
+    const changed = solid(9, 9, [246, 246, 246, 255]);
+    for (let y = 0; y < 9; y++) {
+      for (let x = 0; x <= 4; x++) {
+        setPixel(changed, x, y, x < 4 ? [9, 9, 9, 255] : [137, 137, 137, 255]);
+      }
+    }
+    expect(isAntialiased(new Raster(edge(4)), new Raster(edge(4)), 4, 4)).toBe(true);
+    expect(isAntialiasedEitherWay(new Raster(edge(4)), new Raster(changed), 4, 4)).toBe(false);
   });
 });
 

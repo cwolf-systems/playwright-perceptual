@@ -3,7 +3,7 @@ import { rgbToLab } from '../color/cielab.js';
 import { ROUNDING_LEVELS, withinLevels } from '../color/rgb.js';
 import { resolveCompareOptions, type ResolvedCompareOptions } from '../defaults.js';
 import { ImageSizeError } from '../errors.js';
-import { isAntialiased } from '../image/antialiasing.js';
+import { isAntialiased, isAntialiasedEitherWay } from '../image/antialiasing.js';
 import { Raster } from '../image/raster.js';
 import { isShifted } from '../image/shift.js';
 import type { ColorDifference, Lab } from '../color/types.js';
@@ -53,6 +53,7 @@ function notes(
 export class PerceptualComparator implements ImageComparator {
   private readonly options: ResolvedCompareOptions;
   private readonly colorDifference: ColorDifference;
+  /** Asked once: whether a pixel looks like anti-aliasing in either image. */
   private readonly antialiasing: NoiseDetector | null;
   private readonly shift: NoiseDetector | null;
   private readonly ignoreRounding: boolean;
@@ -64,7 +65,13 @@ export class PerceptualComparator implements ImageComparator {
     this.colorDifference = parts.colorDifference ?? deltaE2000;
     const antialiasing = parts.antialiasing === undefined ? isAntialiased : parts.antialiasing;
     const shift = parts.shift === undefined ? isShifted : parts.shift;
-    this.antialiasing = this.options.ignoreAntialiasing ? antialiasing : null;
+    this.antialiasing =
+      !this.options.ignoreAntialiasing || antialiasing === null
+        ? null
+        : antialiasing === isAntialiased
+          ? isAntialiasedEitherWay
+          : (image, other, x, y) =>
+              antialiasing(image, other, x, y) || antialiasing(other, image, x, y);
     this.shift = this.options.ignoreShifts ? shift : null;
     // 0.1.0's shift tolerance took every pixel within three levels for a move, rounding included.
     // Rounding is set aside by default only while shift tolerance is on, so turning shift
@@ -140,10 +147,7 @@ export class PerceptualComparator implements ImageComparator {
       }
       const x = index % expected.width;
       const y = (index - x) / expected.width;
-      if (
-        this.antialiasing?.(expected, actual, x, y) ||
-        this.antialiasing?.(actual, expected, x, y)
-      ) {
+      if (this.antialiasing?.(expected, actual, x, y)) {
         antialiased++;
         diff?.antialiased(index);
       } else if (this.shift?.(expected, actual, x, y)) {

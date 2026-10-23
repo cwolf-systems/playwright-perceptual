@@ -71,3 +71,31 @@ export function isAntialiased(image: Pixels, other: Pixels, x: number, y: number
     inFlatArea(other, nx, ny);
   return flatInBoth(darkX, darkY) || flatInBoth(brightX, brightY);
 }
+
+/** Whether any neighbour of (x, y) kept its colour between the images, give or take rounding. */
+function neighbourKept(image: Pixels, other: Pixels, x: number, y: number): boolean {
+  for (let ny = Math.max(0, y - 1); ny <= Math.min(image.height - 1, y + 1); ny++) {
+    for (let nx = Math.max(0, x - 1); nx <= Math.min(image.width - 1, x + 1); nx++) {
+      if (
+        (nx !== x || ny !== y) &&
+        withinLevels(image.rgbAt(nx, ny), other.rgbAt(nx, ny), ROUNDING_LEVELS)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * `isAntialiased` asked both ways round. Either way needs a neighbour that kept its colour, so
+ * where none did, as across most of a real change, the question is settled at once.
+ */
+export const isAntialiasedEitherWay = (
+  image: Pixels,
+  other: Pixels,
+  x: number,
+  y: number,
+): boolean =>
+  neighbourKept(image, other, x, y) &&
+  (isAntialiased(image, other, x, y) || isAntialiased(other, image, x, y));

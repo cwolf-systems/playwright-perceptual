@@ -94,6 +94,7 @@ function span(centre: number, size: number, end: 0 | 1): number {
 const H = new Float64Array(12);
 const V = new Float64Array(12);
 const C = new Float64Array(12);
+const corners = new Int32Array(16);
 
 /** Steps across a move's horizontal part when looking for one that explains a change. */
 const STEPS = 16;
@@ -152,6 +153,19 @@ function explains(
   const after = Math.min(moved.width - 1, x1 + 1);
   const above = Math.max(0, y0 - 1);
   const below = Math.min(moved.height - 1, y1 + 1);
+  // The four pixels of each direction's corner term, read once for all three channels: the one
+  // diagonally beyond the window, the ones beside it on the row and column pushed out, and the
+  // corner pushed out.
+  for (let d = 0; d < 4; d++) {
+    const inX = d < 2 ? before : after;
+    const outX = d < 2 ? x1 : x0;
+    const inY = d % 2 === 0 ? above : below;
+    const outY = d % 2 === 0 ? y1 : y0;
+    corners[4 * d] = moved.rgbAt(inX, inY);
+    corners[4 * d + 1] = moved.rgbAt(outX, inY);
+    corners[4 * d + 2] = moved.rgbAt(inX, outY);
+    corners[4 * d + 3] = moved.rgbAt(outX, outY);
+  }
   let open = 0b1111;
   for (let c = 0; c < 3; c++) {
     const channel = CHANNELS[c]!;
@@ -163,20 +177,14 @@ function explains(
     const upwards = sums.total(c, x0, below, x1, below) - sums.total(c, x0, y0, x1, y0);
     for (let d = 0; d < 4; d++) {
       if ((open & (1 << d)) === 0) continue;
-      const toRight = d < 2;
-      const toBottom = d % 2 === 0;
-      const inX = toRight ? before : after;
-      const outX = toRight ? x1 : x0;
-      const inY = toBottom ? above : below;
-      const outY = toBottom ? y1 : y0;
       const i = 3 * d + c;
-      const h = (H[i] = toRight ? rightwards : leftwards);
-      const v = (V[i] = toBottom ? downwards : upwards);
+      const h = (H[i] = d < 2 ? rightwards : leftwards);
+      const v = (V[i] = d % 2 === 0 ? downwards : upwards);
       const k = (C[i] =
-        channel(moved.rgbAt(inX, inY)) -
-        channel(moved.rgbAt(outX, inY)) -
-        channel(moved.rgbAt(inX, outY)) +
-        channel(moved.rgbAt(outX, outY)));
+        channel(corners[4 * d]!) -
+        channel(corners[4 * d + 1]!) -
+        channel(corners[4 * d + 2]!) +
+        channel(corners[4 * d + 3]!));
       // Between its values at the unit square's corners: 0, h, v and h + v + k.
       const lowest = Math.min(0, h, v, h + v + k);
       const highest = Math.max(0, h, v, h + v + k);

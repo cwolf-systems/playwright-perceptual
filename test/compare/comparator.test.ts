@@ -127,6 +127,12 @@ describe('PerceptualComparator', () => {
     expect(never.compare(solid(2, 2, GREY), actual).differing).toBe(0);
     const everyEdge = new PerceptualComparator({}, { antialiasing: () => true });
     expect(everyEdge.compare(solid(2, 2, GREY), actual).antialiased).toBe(1);
+    // Asked both ways round: here only the actual image's pixel, black, looks anti-aliased.
+    const blackEdge = new PerceptualComparator(
+      {},
+      { antialiasing: (image, _other, x, y) => image.rgbAt(x, y) === 0 },
+    );
+    expect(blackEdge.compare(solid(2, 2, GREY), actual).antialiased).toBe(1);
     const everyShift = new PerceptualComparator({}, { antialiasing: null, shift: () => true });
     expect(everyShift.compare(solid(2, 2, GREY), actual).shifted).toBe(1);
     const noDetectors = new PerceptualComparator({}, { antialiasing: null, shift: null });
