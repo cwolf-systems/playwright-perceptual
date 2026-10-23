@@ -12,7 +12,7 @@ describe('report', () => {
   it('says when counting stopped early', () => {
     const comparison = { width: 10, height: 10, differing: 3, exceeded: true, notes: [] };
     expect(describeComparison(comparison)).toBe(
-      'More than 2 pixels (over 3.00% of the image) changed; counting stopped there.',
+      'More than 2 pixels (over 2.00% of the image) changed; counting stopped there.',
     );
   });
 

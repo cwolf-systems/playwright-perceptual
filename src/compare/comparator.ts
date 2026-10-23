@@ -60,14 +60,13 @@ export class PerceptualComparator implements ImageComparator {
   private readonly colorDifference: ColorDifference;
   private readonly antialiasing: NoiseDetector | null;
   private readonly shift: NoiseDetector | null;
-  private readonly ignoreRounding: boolean;
   private readonly labColours = new Int32Array(1 << CACHE_BITS).fill(-1);
   private readonly labs = new Array<Lab | null>(1 << CACHE_BITS).fill(null);
   private readonly deltaPairs = new Float64Array(1 << CACHE_BITS).fill(-1);
   private readonly deltas = new Float64Array(1 << CACHE_BITS);
 
   constructor(options: CompareOptions = {}, parts: ComparatorParts = {}) {
-    this.options = resolveCompareOptions(options);
+    this.options = resolveCompareOptions(options, { shiftDetector: parts.shift !== null });
     this.colorDifference = parts.colorDifference ?? deltaE2000;
     // Anti-aliasing is asked both ways round. The default asks once for both, sharing the check
     // that a neighbour kept its colour; a detector passed in is asked each way.
@@ -79,10 +78,6 @@ export class PerceptualComparator implements ImageComparator {
     const shift = parts.shift === undefined ? isShifted : parts.shift;
     this.antialiasing = this.options.ignoreAntialiasing ? antialiasing : null;
     this.shift = this.options.ignoreShifts ? shift : null;
-    // 0.1.0's shift tolerance took every pixel within three levels for a move, rounding included.
-    // Rounding is set aside by default only while shift tolerance is on, so turning shift
-    // tolerance off still counts every pixel past the threshold, as it did then.
-    this.ignoreRounding = options.ignoreRounding ?? this.shift !== null;
   }
 
   compare(expected: RgbaImage, actual: RgbaImage, limit = Infinity): PerceptualComparison {
@@ -149,7 +144,7 @@ export class PerceptualComparator implements ImageComparator {
         continue;
       }
       // Rounding alone can pass ΔE00 1 in dark and greyish colours.
-      if (this.ignoreRounding && withinLevels(a, b, ROUNDING_LEVELS)) {
+      if (this.options.ignoreRounding && withinLevels(a, b, ROUNDING_LEVELS)) {
         rounded++;
         diff?.rounded(index);
         continue;

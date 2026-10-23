@@ -15,15 +15,28 @@ export interface ResolvedCompareOptions {
   readonly maxDeltaE: number;
   readonly ignoreAntialiasing: boolean;
   readonly ignoreShifts: boolean;
+  readonly ignoreRounding: boolean;
 }
 
-export function resolveCompareOptions(options: CompareOptions = {}): ResolvedCompareOptions {
+/**
+ * Fills in the comparison options' defaults. `shiftDetector` says whether a shift detector is in
+ * use at all: a comparator built with the shift detector set to `null` has none.
+ */
+export function resolveCompareOptions(
+  options: CompareOptions = {},
+  { shiftDetector = true } = {},
+): ResolvedCompareOptions {
   const maxDeltaE = options.maxDeltaE ?? DEFAULT_MAX_DELTA_E;
   if (!(maxDeltaE >= 0)) throw new InvalidOptionError('maxDeltaE', maxDeltaE, 'a number ≥ 0');
+  const ignoreShifts = options.ignoreShifts ?? DEFAULT_IGNORE_SHIFTS;
   return {
     maxDeltaE,
     ignoreAntialiasing: options.ignoreAntialiasing ?? DEFAULT_IGNORE_ANTIALIASING,
-    ignoreShifts: options.ignoreShifts ?? DEFAULT_IGNORE_SHIFTS,
+    ignoreShifts,
+    // 0.1.0's shift tolerance took every pixel within three levels for a move, rounding included.
+    // Rounding is set aside by default only while shift tolerance is on, so turning shift
+    // tolerance off still counts every pixel past the threshold, as it did then.
+    ignoreRounding: options.ignoreRounding ?? (ignoreShifts && shiftDetector),
   };
 }
 
