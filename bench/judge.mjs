@@ -203,8 +203,13 @@ async function benchmarkPairs() {
 
 const TEXTURED_DRIFT = 'synthetic/judge/textured drift of 1–3 levels';
 const TEXTURE_MOVED = 'synthetic/judge/fine texture moved 0.3, 0.2 px';
+const GROUND_BESIDE_EDGE = 'synthetic/judge/textured ground beside an edge, three levels darker';
+const EDGE_SIDES_CHANGED = 'synthetic/judge/edge pixel whose sides changed colour too';
 
-/** bench/synthetic.mjs's pairs, and the judge's own textured drift and its control. */
+/**
+ * bench/synthetic.mjs's pairs, the judge's own textured drift and its control, and two changes
+ * beside an edge.
+ */
 const syntheticSet = () => [
   ...SYNTHETIC_PAIRS.map((p) => ({
     id: `synthetic/${p.finding}/${p.name}`,
@@ -213,6 +218,8 @@ const syntheticSet = () => [
   })),
   { id: TEXTURED_DRIFT, set: 'synthetic', load: texturedDrift },
   { id: TEXTURE_MOVED, set: 'synthetic', load: textureMoved },
+  { id: GROUND_BESIDE_EDGE, set: 'synthetic', load: groundBesideEdge },
+  { id: EDGE_SIDES_CHANGED, set: 'synthetic', load: edgeSidesChanged },
 ];
 
 /** A real pair, labelled by the hashes of its files. */
@@ -640,6 +647,47 @@ function textureMoved() {
     return { data, width, height };
   };
   return { expected: render(0, 0), actual: render(0.3, 0.2) };
+}
+
+/** A `width`×`height` image of grey `level(x, y)`. */
+function greys(width, height, level) {
+  const data = new Uint8Array(width * height * 4);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const v = level(x, y);
+      data.set([v, v, v, 255], (y * width + x) * 4);
+    }
+  }
+  return { data, width, height };
+}
+
+/**
+ * Faintly textured grey ground, four columns wide, beside an edge to light grey, and the same
+ * ground three levels darker. The edge did not move, so this is a change of colour, and it must be
+ * counted. Beside the edge, though, any window holds the edge, and a move of the edge by under a
+ * pixel can carry as much colour across the window's border as the change took away.
+ * A unit test of the shift detector in the register-first candidate, made a whole pair: its two
+ * levels at grey 60 stay under ΔE00 1, so here the ground is at grey 100 and three levels darker,
+ * and only four columns wide, so that every changed pixel lies beside the edge.
+ */
+function groundBesideEdge() {
+  const ground = (offset) =>
+    greys(8, 11, (x, y) => (x >= 4 ? 200 : 100 + ((x * 3 + y * 5) % 7) + offset));
+  return { expected: ground(0), actual: ground(-3) };
+}
+
+/**
+ * An edge from dark grey to light, its middle column a mixture, and the same edge with a
+ * different mixture and both columns beside it eight levels lighter. Rasterisers mix an edge pixel
+ * differently, but the colours either side of it keep theirs; here they changed too, so this is
+ * no rasterisation difference and must be counted. Another unit test of the register-first
+ * candidate, made a whole pair: only the columns beside the edge change, not the whole of each side,
+ * so that every changed pixel lies on the edge or next to it.
+ */
+function edgeSidesChanged() {
+  const edge = (left, mixed, right) =>
+    greys(9, 9, (x) => [40, 40, 40, left, mixed, right, 220, 220, 220][x]);
+  return { expected: edge(40, 160, 220), actual: edge(48, 120, 228) };
 }
 
 function adjusted(image, change) {
