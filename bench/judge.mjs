@@ -26,7 +26,16 @@
 //
 // Then the win conditions, in order: (1) no pair whose expected verdict PR #1 gets right goes
 // wrong; (2) issue #2's residual and the sliver limit improve on PR #1; (3) whole-frame speed no
-// slower than 0.1.0; (4) less detector code than PR #1. `--compare` ranks result files by them.
+// slower than 0.1.0; (4) less detector code than PR #1. `--compare` ranks result files by them,
+// then by less code, then by the margin below.
+//
+// It also reports, though not as a win condition, the margin on pairs that should match: for each
+// one that passes with 0.1% allowed, its counted pixels as a share of that allowance. A build that
+// passes them with room to spare is less likely to fail a capture slightly noisier than these. The
+// worst share and the median are reported, and the worst over pairs allowed 10 pixels or more: a
+// small image allowed a pixel or two puts every build at 50% or 100% with one counted pixel, so
+// the worst share over all pairs rarely tells builds apart, and it is that last figure that breaks
+// ties.
 //
 // The judge reads only a comparison's counted pixels. The default adapter reads `differing`; if a
 // candidate renames it, add an adapter below and pass `--adapter <name>`. Candidates never carry
@@ -422,6 +431,42 @@ function accuracy(candidatePairs, pr1Pairs, labels, notices) {
     };
   }
   return { summary, changes, notRun: notRun.length, pairs: rows };
+}
+
+/** Pairs allowed fewer pixels than this are left out of the margin that breaks ties. */
+const MARGIN_MIN_ALLOWED = 10;
+
+/**
+ * Counted pixels as a share of the allowance, over the pairs that should match and pass with it.
+ * A pair allowed no pixels passes only with none counted, a share of 0. Shares are rounded to
+ * 0.1%, so a tie means the same margin. Result files from before the margin carry the pairs it is
+ * worked out from.
+ */
+function margin(pairs) {
+  const passing = pairs
+    .filter((p) => p.match && p.counted <= allowed(p.pixels))
+    .map((p) => {
+      const allowance = allowed(p.pixels);
+      const share = allowance === 0 ? 0 : Math.round((p.counted / allowance) * 1000) / 1000;
+      return { id: p.id, counted: p.counted, allowed: allowance, share };
+    })
+    .sort((a, b) => b.share - a.share || b.allowed - a.allowed);
+  const large = passing.filter((p) => p.allowed >= MARGIN_MIN_ALLOWED);
+  const shares = passing.map((p) => p.share).sort((a, b) => a - b);
+  const middle = shares.length >> 1;
+  const median =
+    shares.length === 0
+      ? null
+      : shares.length % 2
+        ? shares[middle]
+        : (shares[middle - 1] + shares[middle]) / 2;
+  return {
+    pairs: passing.length,
+    worst: passing[0] ?? null,
+    median,
+    worstLarge: large[0] ?? null,
+    closest: passing.slice(0, 5),
+  };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -902,6 +947,24 @@ function markdown(r) {
     ),
   );
 
+  out.push('\n## Margin on pairs that should match\n');
+  const m = r.margin;
+  out.push(
+    `Counted pixels as a share of the 0.1% allowance, over the ${m.pairs} pairs that should match and pass with it. Not a win condition; the worst share at ${MARGIN_MIN_ALLOWED} pixels allowed or more breaks ties.\n`,
+  );
+  const shareOf = (p) =>
+    p ? `${pct(p.share)} (${p.id}, ${num(p.counted)} of ${num(p.allowed)})` : 'n/a';
+  out.push(
+    table(
+      ['Measure', 'Share'],
+      [
+        ['Worst', shareOf(m.worst)],
+        [`Worst, ${MARGIN_MIN_ALLOWED} pixels allowed or more`, shareOf(m.worstLarge)],
+        ['Median', m.median === null ? 'n/a' : pct(m.median)],
+      ],
+    ),
+  );
+
   out.push('\n## Win conditions\n');
   const c = r.conditions;
   out.push(
@@ -926,9 +989,16 @@ function markdown(r) {
   return out.join('\n');
 }
 
-/** Ranks result files by the win conditions in order, then by less code. */
+/**
+ * Ranks result files by the win conditions in order, then by less code, then by the larger margin:
+ * the smaller worst share at MARGIN_MIN_ALLOWED pixels allowed or more, then the smaller worst
+ * share and median over all.
+ */
 function compare(files) {
   const results = files.map((file) => JSON.parse(readFileSync(file, 'utf8')));
+  // Result files from before the margin was reported are given it from their pairs.
+  for (const r of results) r.margin ??= margin(r.accuracy.pairs);
+  const share = (p) => p?.share ?? Number.POSITIVE_INFINITY;
   const labelSets = new Set(results.map((r) => r.judge.labels));
   if (labelSets.size > 1)
     console.log('Notice: these results were judged against different labels.\n');
@@ -942,7 +1012,11 @@ function compare(files) {
         met(a.c[2].pass) - met(b.c[2].pass) ||
         met(a.c[3].pass) - met(b.c[3].pass) ||
         met(a.c[4].pass) - met(b.c[4].pass) ||
-        a.c[4].code - b.c[4].code,
+        a.c[4].code - b.c[4].code ||
+        share(a.r.margin.worstLarge) - share(b.r.margin.worstLarge) ||
+        share(a.r.margin.worst) - share(b.r.margin.worst) ||
+        (a.r.margin.median ?? Number.POSITIVE_INFINITY) -
+          (b.r.margin.median ?? Number.POSITIVE_INFINITY),
     );
   const residuals = (r) =>
     Object.entries(r.residual)
@@ -962,6 +1036,7 @@ function compare(files) {
         '2. Sliver limit',
         '3. Worst whole-frame vs 0.1.0',
         '4. src/image code (types)',
+        `Margin: worst at ${MARGIN_MIN_ALLOWED}+ px allowed / worst / median`,
         'Met',
       ],
       ranked.map(({ r, c }, n) => [
@@ -974,6 +1049,9 @@ function compare(files) {
         `${side(r.slivers.limit)} px`,
         c[3].worstRatio === null ? 'n/a' : `${c[3].worstRatio.toFixed(2)}×`,
         `${r.size.candidate.image.code} (${r.size.candidate.image.types})`,
+        [r.margin.worstLarge?.share, r.margin.worst?.share, r.margin.median]
+          .map((x) => pct(x ?? Number.NaN))
+          .join(' / '),
         [1, 2, 3, 4].map((k) => yes(c[k].pass)).join(', '),
       ]),
     ),
@@ -1044,6 +1122,7 @@ async function judge(args) {
     machine: { cpu: cpus()[0]?.model ?? 'unknown', node: process.version, platform: platform() },
     notices,
     accuracy: acc,
+    margin: margin(acc.pairs),
     residual: res,
     slivers: sl,
     speed,

@@ -70,4 +70,5 @@ in order, and is tested against all 34 of their published pairs.
   synthetic pairs that reproduce findings reported from other projects (`bench/synthetic.mjs`,
   which the unit tests also use). Results are in `docs/benchmarks/`. The pairs are built in
   `bench/corpus.mjs`. `bench/judge.mjs` judges a build against expected verdicts frozen in
-  `bench/judge-labels.json`, and against earlier releases, on accuracy, speed and size.
+  `bench/judge-labels.json`, and against earlier releases, on accuracy, speed and size, and
+  reports the margin by which pairs that should match pass.
