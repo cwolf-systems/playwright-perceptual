@@ -13,31 +13,44 @@ import type { Pixels } from './types.js';
 //
 // So, one rule: box-filter both images, and one image's box total at a pixel must lie within the
 // range of the other's box totals there and one pixel over, in one of the four directions, give
-// or take rounding. It is tested over a 5×5 box, which a real change survives, either image being
-// the one that moved; and over the pixel alone, where it says the pixel's colour lies within the
-// colours next to it in the other image, both ways round, so a colour that appears or goes away
-// is not a move.
+// or take rounding. It is tested over three boxes, either image being the one that moved:
+//
+// - 65×65: over texture, a drift of a level or two is what a move up the local slope would do to
+//   a small box, but over a box this large the texture rises and falls, a move carries as much
+//   colour in as out, and the drift remains.
+// - 5×5: a real change smaller than the large box, such as a faint stroke, survives this one.
+// - The pixel alone, where the rule says the pixel's colour lies within the colours next to it in
+//   the other image, both ways round, so a colour that appears or goes away is not a move.
 
-/** The sides of the boxes tested, the most decisive first. */
-const BOXES = [5, 1];
+/**
+ * The boxes tested, the most decisive first: each one's side, and the levels per pixel of the box
+ * by which a total may lie outside the range, for rounding.
+ *
+ * - Rounding in either image enters a box's total by up to half a level per pixel, so a level per
+ *   pixel covers it, and the 5×5 box needs all of it for renderings through the GPU against
+ *   software. Over the large box rounding goes both ways and its worst case is not reached; half a
+ *   level per pixel still fails those renderings, where one is lighter across an area, and three
+ *   quarters leaves room above that.
+ * - Over the pixel alone, three levels: 0.1.0's slack. With one or two, real renders of the same
+ *   scene fail.
+ */
+const BOXES = [
+  { side: 65, slack: 0.75 },
+  { side: 5, slack: ROUNDING_LEVELS },
+  { side: 1, slack: 3 },
+] as const;
 
 const CHANNELS = 3;
 
 /** Rows and columns filtered at once: an image is filtered only in tiles where a pixel is judged. */
-const TILE = { rows: 128, columns: 512 } as const;
+const TILE = { rows: 256, columns: 512 } as const;
 
 /** Pixels read beyond a tile, for the boxes that judge the pixels at its edge. */
-const MARGIN = BOXES[0]! + 1;
+const MARGIN = BOXES[0].side + 1;
 
 /** Directions a box may move along a side: both, or none along a side of one pixel. */
 const SIGNS = [-1, 1];
 const STILL = [0];
-
-/**
- * Levels a pixel's colour may lie outside the colours next to it: rounding in the resampling. One
- * level per pixel, as over the box, fails real renders of the same scene; three does not.
- */
-const PIXEL_SLACK = 3;
 
 /**
  * Where a box of `n` pixels starts along a side of `size` to judge the pixel at `p` against a move
@@ -58,7 +71,7 @@ interface Boxes {
   readonly ny: number;
   /** Boxes in a row. */
   readonly columns: number;
-  readonly totals: Uint16Array;
+  readonly totals: Uint32Array;
 }
 
 /** A tile of an image, box-filtered at each size of box. */
@@ -83,7 +96,7 @@ function filter(pixels: Pixels, column: number, row: number): Tile {
   const across = Math.min(width, (column + 1) * TILE.columns + MARGIN) - left;
   const rows = Math.min(height, (row + 1) * TILE.rows + MARGIN) - top;
   const stride = across * CHANNELS;
-  const levels = new Uint16Array(rows * stride);
+  const levels = new Uint32Array(rows * stride);
   for (let y = 0, i = 0; y < rows; y++) {
     for (let x = 0; x < across; x++, i += CHANNELS) {
       const rgb = pixels.rgbAt(left + x, top + y);
@@ -93,14 +106,14 @@ function filter(pixels: Pixels, column: number, row: number): Tile {
     }
   }
   // Separable running sums: totals down each column over the box's rows, then across.
-  const boxes = BOXES.map((n) => {
+  const boxes = BOXES.map(({ side: n }) => {
     // At most n, leaving room to move the box by a pixel where the side has room.
     const nx = Math.max(1, Math.min(n, width - 1));
     const ny = Math.max(1, Math.min(n, height - 1));
     const columns = across - nx + 1;
     if (nx === 1 && ny === 1) return { nx, ny, columns, totals: levels };
-    const totals = new Uint16Array(rows * columns * CHANNELS);
-    const down = new Uint16Array(stride);
+    const totals = new Uint32Array(rows * columns * CHANNELS);
+    const down = new Uint32Array(stride);
     const sums = new Int32Array(stride);
     for (let y = 0; y < rows; y++) {
       const first = (y - ny + 1) * columns * CHANNELS;
@@ -138,7 +151,7 @@ function tile(pixels: Pixels, x: number, y: number): Tile {
 function moved(from: Tile, to: Tile, b: number, x: number, y: number): boolean {
   const { nx, ny } = from.boxes[b]!;
   const { width, height } = from.pixels;
-  const slack = BOXES[b] === 1 ? PIXEL_SLACK : ROUNDING_LEVELS * nx * ny;
+  const slack = BOXES[b]!.slack * nx * ny;
   channels: for (let c = 0; c < CHANNELS; c++) {
     for (const sx of width > 1 ? SIGNS : STILL) {
       const x0 = place(x, nx, width, sx);
@@ -164,8 +177,8 @@ function moved(from: Tile, to: Tile, b: number, x: number, y: number): boolean {
 export function isShifted(image: Pixels, other: Pixels, x: number, y: number): boolean {
   const before = tile(image, x, y);
   const after = tile(other, x, y);
-  return BOXES.every((n, b) =>
-    n === 1
+  return BOXES.every(({ side }, b) =>
+    side === 1
       ? moved(before, after, b, x, y) && moved(after, before, b, x, y)
       : moved(before, after, b, x, y) || moved(after, before, b, x, y),
   );

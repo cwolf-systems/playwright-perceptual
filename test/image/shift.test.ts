@@ -83,7 +83,17 @@ describe('isShifted, on colour a move would have to conserve', () => {
   });
 
   it('accepts a change of one level over an area, which rounding alone explains', () => {
-    expect(shifted(textured(0), textured(-1), 5, 5)).toBe(true);
+    const patch = textured(0);
+    for (let y = 3; y < 8; y++) {
+      for (let x = 3; x < 8; x++) setPixel(patch, x, y, grey(99 + ((x + y) % 2)));
+    }
+    expect(shifted(textured(0), patch, 5, 5)).toBe(true);
+  });
+
+  it('leaves a level across the whole of the large box to the rounding class', () => {
+    // Rounding goes both ways over the large box: a level everywhere, the same way, is a drift.
+    // The comparator still sets such pixels aside as rounding unless told not to.
+    expect(shifted(textured(0), textured(-1), 5, 5)).toBe(false);
   });
 
   it('accepts a soft edge moved by part of a pixel, which carries colour across the window', () => {
