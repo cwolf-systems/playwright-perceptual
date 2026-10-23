@@ -23,11 +23,15 @@ import { Histogram } from './histogram.js';
 const BIN_WIDTH = 0.01;
 const BIN_COUNT = 12_800;
 
-// Screenshots repeat colours, and colour pairs, heavily: CIELAB is computed once per colour and
-// ΔE once per pair. The caps bound memory on noisy images such as photographs.
+// Screenshots repeat colours, and colour pairs, heavily: CIELAB is computed once per colour, and
+// ΔE kept for recent pairs. The cap bounds memory on noisy images such as photographs.
 const LAB_CACHE_LIMIT = 1 << 20;
-const DELTA_CACHE_LIMIT = 1 << 20;
-const PAIR_KEY_SHIFT = 2 ** 24;
+
+// Pairs are kept in a fixed table, each at a slot its two colours hash to; a pair that lands on a
+// taken slot replaces the one there. Typed arrays look up far faster than a map of large keys.
+const PAIR_SLOT_BITS = 18;
+const PAIR_SLOTS = 1 << PAIR_SLOT_BITS;
+const EMPTY = -1;
 
 const fixed = (value: number): string => value.toFixed(2);
 
@@ -58,7 +62,9 @@ export class PerceptualComparator implements ImageComparator {
   private readonly shift: NoiseDetector | null;
   private readonly ignoreRounding: boolean;
   private readonly labs = new Map<number, Lab>();
-  private readonly deltas = new Map<number, number>();
+  private readonly pairExpected = new Int32Array(PAIR_SLOTS).fill(EMPTY);
+  private readonly pairActual = new Int32Array(PAIR_SLOTS);
+  private readonly pairDelta = new Float64Array(PAIR_SLOTS);
 
   constructor(options: CompareOptions = {}, parts: ComparatorParts = {}) {
     this.options = resolveCompareOptions(options);
@@ -97,11 +103,15 @@ export class PerceptualComparator implements ImageComparator {
   }
 
   private delta(expected: number, actual: number): number {
-    const key = expected * PAIR_KEY_SHIFT + actual;
-    const cached = this.deltas.get(key);
-    if (cached !== undefined) return cached;
+    const slot =
+      (Math.imul(expected, 0x9e3779b1) ^ Math.imul(actual, 0x85ebca6b)) >>> (32 - PAIR_SLOT_BITS);
+    if (this.pairExpected[slot] === expected && this.pairActual[slot] === actual) {
+      return this.pairDelta[slot]!;
+    }
     const delta = this.colorDifference(this.lab(expected), this.lab(actual));
-    if (this.deltas.size < DELTA_CACHE_LIMIT) this.deltas.set(key, delta);
+    this.pairExpected[slot] = expected;
+    this.pairActual[slot] = actual;
+    this.pairDelta[slot] = delta;
     return delta;
   }
 
