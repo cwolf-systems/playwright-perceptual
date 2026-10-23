@@ -1,7 +1,7 @@
 {
  "judge": {
-  "labels": "62225992109e0375",
-  "commit": "dfbfeccc89f767ec5e01bfacb799e0f5aab4d468"
+  "labels": "c89bd65571c1177d",
+  "commit": "bc4924b06986919269a5acb7e2c718841ec8af75"
  },
  "candidate": {
   "name": "0.1.0",
@@ -47,18 +47,18 @@
     }
    },
    "synthetic": {
-    "pairs": 9,
+    "pairs": 11,
     "none": {
-     "wrong": 6,
-     "pr1Wrong": 5,
-     "failing": 4,
-     "pr1Failing": 5
+     "wrong": 7,
+     "pr1Wrong": 6,
+     "failing": 5,
+     "pr1Failing": 6
     },
     "allowance": {
-     "wrong": 2,
-     "pr1Wrong": 1,
-     "failing": 0,
-     "pr1Failing": 1
+     "wrong": 3,
+     "pr1Wrong": 2,
+     "failing": 1,
+     "pr1Failing": 2
     }
    },
    "real golden": {
@@ -3346,6 +3346,38 @@
     }
    },
    {
+    "id": "synthetic/judge/textured ground beside an edge, three levels darker",
+    "set": "synthetic",
+    "match": false,
+    "pixels": 88,
+    "counted": 0,
+    "pr1Counted": 0,
+    "pass": {
+     "none": true,
+     "allowance": true
+    },
+    "pr1Pass": {
+     "none": true,
+     "allowance": true
+    }
+   },
+   {
+    "id": "synthetic/judge/edge pixel whose sides changed colour too",
+    "set": "synthetic",
+    "match": false,
+    "pixels": 81,
+    "counted": 9,
+    "pr1Counted": 9,
+    "pass": {
+     "none": false,
+     "allowance": false
+    },
+    "pr1Pass": {
+     "none": false,
+     "allowance": false
+    }
+   },
+   {
     "id": "golden/1/0v1",
     "set": "real golden",
     "match": false,
@@ -4272,6 +4304,54 @@
      "none": true,
      "allowance": true
     }
+   }
+  ]
+ },
+ "margin": {
+  "pairs": 125,
+  "worst": {
+   "id": "playwright/should-match/webkit-rendering-artifacts/webkit-pixel",
+   "counted": 1,
+   "allowed": 1,
+   "share": 1
+  },
+  "median": 0,
+  "worstLarge": {
+   "id": "synthetic/3/geofence, snapped vertices",
+   "counted": 27,
+   "allowed": 64,
+   "share": 0.422
+  },
+  "closest": [
+   {
+    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-pixel",
+    "counted": 1,
+    "allowed": 1,
+    "share": 1
+   },
+   {
+    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-corner-pixel",
+    "counted": 1,
+    "allowed": 2,
+    "share": 0.5
+   },
+   {
+    "id": "synthetic/3/geofence, snapped vertices",
+    "counted": 27,
+    "allowed": 64,
+    "share": 0.422
+   },
+   {
+    "id": "rendered/software vs GPU/chromium/svg",
+    "counted": 26,
+    "allowed": 64,
+    "share": 0.406
+   },
+   {
+    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-corner-2x",
+    "counted": 4,
+    "allowed": 10,
+    "share": 0.4
    }
   ]
  },
