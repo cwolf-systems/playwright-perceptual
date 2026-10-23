@@ -47,7 +47,10 @@ const BOXES = [
   { side: 1, slack: 3, widen: 1 },
 ] as const;
 
+type Box = (typeof BOXES)[number];
+
 const CHANNELS = 3;
+const LEVELS = [red, green, blue];
 
 /** Rows and columns filtered at once: an image is filtered only in tiles where a pixel is judged. */
 const TILE = { rows: 256, columns: 512 } as const;
@@ -72,71 +75,48 @@ function place(p: number, n: number, size: number, sign: number): number {
   return n === 1 && start !== p ? -1 : start;
 }
 
-/** Each channel's totals over boxes of one size, for a tile of an image. */
-interface Boxes {
-  readonly nx: number;
-  readonly ny: number;
-  /** Boxes in a row. */
-  readonly columns: number;
-  readonly totals: Uint32Array;
-}
-
-/** A tile of an image, box-filtered at each size of box. */
+/** A tile of an image, with each channel's summed-area table: its totals from the top left. */
 interface Tile {
   readonly pixels: Pixels;
   readonly left: number;
   readonly top: number;
-  readonly boxes: readonly Boxes[];
+  /** Entries in a row of the table: one column more than the tile, by channel. */
+  readonly stride: number;
+  readonly sums: Uint32Array;
 }
 
-/** Channel `c`'s total over the `b`th size of box whose top left pixel is (x, y). */
-function total({ left, top, boxes }: Tile, b: number, c: number, x: number, y: number): number {
-  const { columns, totals } = boxes[b]!;
-  return totals[((y - top) * columns + x - left) * CHANNELS + c]!;
+/** Channel `c`'s total over the box of `nx` × `ny` pixels whose top left pixel is (x, y). */
+function total(tile: Tile, nx: number, ny: number, c: number, x: number, y: number): number {
+  const { stride, sums } = tile;
+  const above = (y - tile.top) * stride + (x - tile.left) * CHANNELS + c;
+  const below = above + ny * stride;
+  const across = nx * CHANNELS;
+  return sums[below + across]! - sums[below]! - sums[above + across]! + sums[above]!;
 }
 
-/** Box-filters the tile of `pixels` in the given column and row of tiles. */
+/** Reads the tile of `pixels` in the given column and row of tiles into its summed-area table. */
 function filter(pixels: Pixels, column: number, row: number): Tile {
   const { width, height } = pixels;
   const left = Math.max(0, column * TILE.columns - MARGIN);
   const top = Math.max(0, row * TILE.rows - MARGIN);
   const across = Math.min(width, (column + 1) * TILE.columns + MARGIN) - left;
   const rows = Math.min(height, (row + 1) * TILE.rows + MARGIN) - top;
-  const stride = across * CHANNELS;
-  const levels = new Uint32Array(rows * stride);
-  for (let y = 0, i = 0; y < rows; y++) {
-    for (let x = 0; x < across; x++, i += CHANNELS) {
+  // A first row and column of zeros, so every box's total is four entries.
+  const stride = (across + 1) * CHANNELS;
+  const sums = new Uint32Array((rows + 1) * stride);
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < across; x++) {
       const rgb = pixels.rgbAt(left + x, top + y);
-      levels[i] = red(rgb);
-      levels[i + 1] = green(rgb);
-      levels[i + 2] = blue(rgb);
-    }
-  }
-  // Separable running sums: totals down each column over the box's rows, then across.
-  const boxes = BOXES.map(({ side: n }) => {
-    // At most n, leaving room to move the box by a pixel where the side has room.
-    const nx = Math.max(1, Math.min(n, width - 1));
-    const ny = Math.max(1, Math.min(n, height - 1));
-    const columns = across - nx + 1;
-    if (nx === 1 && ny === 1) return { nx, ny, columns, totals: levels };
-    const totals = new Uint32Array(rows * columns * CHANNELS);
-    const down = new Uint32Array(stride);
-    const sums = new Int32Array(stride);
-    for (let y = 0; y < rows; y++) {
-      const first = (y - ny + 1) * columns * CHANNELS;
-      for (let i = 0; i < stride; i++) {
-        down[i]! += levels[y * stride + i]! - (y < ny ? 0 : levels[(y - ny) * stride + i]!);
-        sums[i] = down[i]! + (i < CHANNELS ? 0 : sums[i - CHANNELS]!);
-        // The box ending at this pixel starts nx pixels back; its total, once it is all read.
-        const before = i - nx * CHANNELS;
-        if (first >= 0 && before >= -CHANNELS) {
-          totals[first + before + CHANNELS] = sums[i]! - (before < 0 ? 0 : sums[before]!);
-        }
+      const i = (y + 1) * stride + (x + 1) * CHANNELS;
+      // Each channel's level, plus the totals to the left and above, less their overlap.
+      for (let c = 0; c < CHANNELS; c++) {
+        const level = LEVELS[c]!(rgb);
+        const before = sums[i + c - CHANNELS]! - sums[i + c - stride - CHANNELS]!;
+        sums[i + c] = level + before + sums[i + c - stride]!;
       }
     }
-    return { nx, ny, columns, totals };
-  });
-  return { pixels, left, top, boxes };
+  }
+  return { pixels, left, top, stride, sums };
 }
 
 // The tiles filtered in the last row of tiles of each image. Pixels are judged row by row, so a
@@ -152,27 +132,29 @@ function tile(pixels: Pixels, x: number, y: number): Tile {
 }
 
 /**
- * Whether, in every channel, `to`'s total over the `b`th size of box around (x, y) lies within
- * what a move of under a pixel in `from` leaves, give or take rounding.
+ * Whether, in every channel, `to`'s total over `box` around (x, y) lies within what a move of
+ * under a pixel in `from` leaves, give or take rounding.
  */
-function moved(from: Tile, to: Tile, b: number, x: number, y: number): boolean {
-  const { nx, ny } = from.boxes[b]!;
+function moved(from: Tile, to: Tile, box: Box, x: number, y: number): boolean {
   const { width, height } = from.pixels;
-  const { slack, widen } = BOXES[b]!;
+  // At most the box's side, leaving room to move the box by a pixel where the side has room.
+  const nx = Math.max(1, Math.min(box.side, width - 1));
+  const ny = Math.max(1, Math.min(box.side, height - 1));
+  const sum = (tile: Tile, c: number, x0: number, y0: number) => total(tile, nx, ny, c, x0, y0);
   channels: for (let c = 0; c < CHANNELS; c++) {
     for (const sx of width > 1 ? SIGNS : STILL) {
       const x0 = place(x, nx, width, sx);
       for (const sy of height > 1 ? SIGNS : STILL) {
         const y0 = place(y, ny, height, sy);
         if (x0 < 0 || y0 < 0) continue;
-        const here = total(from, b, c, x0, y0);
-        const across = total(from, b, c, x0 + sx, y0);
-        const down = total(from, b, c, x0, y0 + sy);
-        const both = total(from, b, c, x0 + sx, y0 + sy);
-        const target = total(to, b, c, x0, y0);
+        const here = sum(from, c, x0, y0);
+        const across = sum(from, c, x0 + sx, y0);
+        const down = sum(from, c, x0, y0 + sy);
+        const both = sum(from, c, x0 + sx, y0 + sy);
+        const target = sum(to, c, x0, y0);
         const lo = Math.min(here, across, down, both);
         const hi = Math.max(here, across, down, both);
-        const allowed = slack * nx * ny + widen * (hi - lo);
+        const allowed = box.slack * nx * ny + box.widen * (hi - lo);
         if (target >= lo - allowed && target <= hi + allowed) continue channels;
       }
     }
@@ -185,9 +167,9 @@ function moved(from: Tile, to: Tile, b: number, x: number, y: number): boolean {
 export function isShifted(image: Pixels, other: Pixels, x: number, y: number): boolean {
   const before = tile(image, x, y);
   const after = tile(other, x, y);
-  return BOXES.every(({ side }, b) =>
-    side === 1
-      ? moved(before, after, b, x, y) && moved(after, before, b, x, y)
-      : moved(before, after, b, x, y) || moved(after, before, b, x, y),
+  return BOXES.every((box) =>
+    box.side === 1
+      ? moved(before, after, box, x, y) && moved(after, before, box, x, y)
+      : moved(before, after, box, x, y) || moved(after, before, box, x, y),
   );
 }
