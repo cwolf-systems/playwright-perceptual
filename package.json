@@ -15,7 +15,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -32,7 +33,7 @@
     "test": "vitest run --project unit",
     "test:coverage": "vitest run --project unit --coverage",
     "test:browser": "playwright test",
-    "test:runner": "vitest run --project runner",
+    "test:runner": "npm run build && vitest run --project runner",
     "test:count": "node tools/test-count.mjs",
     "bench": "npm run build && node bench/speed.mjs",
     "bench:accuracy": "npm run build && node bench/accuracy.mjs"

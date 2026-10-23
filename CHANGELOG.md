@@ -116,6 +116,12 @@ same machine; the tables are in [docs/benchmarks/speed.md](docs/benchmarks/speed
   8.4 ms, and at 1920×1080 21.2 ms, from 18.8 ms. The first changed pixel in a tile of 256 by 512
   pixels reads the whole tile and 66 pixels beyond it. At 3200×2000, 52.9 ms, from 75.5 ms.
 
+### Fixed
+
+- The package can be imported from CommonJS projects, such as Playwright projects without
+  `"type": "module"` (Node 20.19 or later). Its `exports` had no condition for `require`, so they
+  failed with `No "exports" main defined`.
+
 ### Other
 
 - The accuracy benchmark has a synthetic set reproducing four findings from a renderer's tests,
