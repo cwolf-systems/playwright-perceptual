@@ -24,13 +24,21 @@
   Finding 2's label test now asserts a pass with no allowance, as B's branch does.
 - Note: the session scratchpad was wiped once; the 0.1.0 build for speed must be rebuilt.
 
-## Next
+- 49e4a24: slacks 5×5 1.25, 65×65 0.625. 0 lost, wrong 29 / 10, opacity 96.1 / 87.0 %.
+  Full judge (before the AA change): whole-frame cases 0.60–0.98× 0.1.0.
+- db7b734: A's either-way anti-aliasing (whole frame ~410 → ~345 ms in probes); 215 lines.
+- 59743a9: one summed-area table per tile serves every box: 202 lines; whole ~370 ms, grain 84.
+  Margin (worst, allowance ≥ 10 px): 75.4 % (recipe 87.1 %). Coordinator: keep this design.
+- Tests added (uncommitted): 65×65 drift, 16-bit overflow (fails with Uint16), random
+  bilinear moves. Random moves: the box rules refuse 0 of 2,000; the pixel test's reverse
+  direction refuses 121 (widen 1.5: 39, 2: 17, 3: 9): not sound by construction.
 
-1. Look for margin on the effects pair within the 5 spare lines.
-2. Unit, lint, typecheck, coverage, browser, runner, test:count gates.
-3. Full judge at the head (and the margin branch if it exists), docs, CHANGELOG, push, CI.
+## Next (coordinator, latest)
 
-## Open questions
+1. C's two shift tests (textured ground beside an edge; edge pixel whose sides changed):
+   run; if failing, try one consistent move across channels; port both as regression tests.
+2. Lighter anti-aliasing (integer brightness, direct loops, no either-way) vs mine.
+3. Sensitivity of 5×5 slack, 65×65 slack, widen at ±10 / ±20 %; distance to a lost verdict.
+4. Soundness test: export the box part (conserved) and test it; note the pixel test's limit.
+5. Docs, gates, push, full judge with speed, CI 9 jobs.
 
-- Whether the ablation analyst's recipe changes the slack or the pixel test.
-- The anti-aliasing early exit from A costs about 15 lines; whole frame is already 0.90×.

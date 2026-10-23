@@ -13,41 +13,48 @@ import type { Pixels } from './types.js';
 //
 // So, one rule: box-filter both images, and one image's box total at a pixel must lie within the
 // range of the other's box totals there and one pixel over, in one of the four directions, give
-// or take rounding. It is tested over three boxes, either image being the one that moved:
+// or take rounding. It is tested over two boxes, either image being the one that moved:
 //
 // - 65×65: over texture, a drift of a level or two is what a move up the local slope would do to
 //   a small box, but over a box this large the texture rises and falls, a move carries as much
 //   colour in as out, and the drift remains.
 // - 5×5: a real change smaller than the large box, such as a faint stroke, survives this one.
-// - The pixel alone, where the rule says the pixel's colour lies within the colours next to it in
-//   the other image, both ways round, so a colour that appears or goes away is not a move. A
-//   rasteriser covers an edge more sharply than bilinear resampling mixes it, so here the range is
-//   widened by the contrast across it.
+//
+// And over the pixel alone, where the rule says the pixel's colour lies within the colours next to
+// it in the other image, both ways round. A rasteriser covers an edge more sharply than bilinear
+// resampling mixes it, so here the range is widened by the contrast across it.
+//
+// Each box is judged by its own move, per channel. An edge inside a box lets its total take a
+// wide range, so a faint change beside an edge that did not move, or an edge pixel whose sides
+// changed too, can pass where no single move explains both boxes.
 
 /**
  * The boxes tested, the most decisive first: each one's side, the levels per pixel of the box by
  * which a total may lie outside the range, for rounding, and the share of the range itself by which
  * it may, for sharpness.
  *
- * - Rounding in either image enters a box's total by up to half a level per pixel, so a level per
- *   pixel covers it. Renderings of the same scene through the GPU and in software differ by a
- *   little more where one is lighter across an area, and a 5×5 box needs a quarter of a level
- *   more to pass them with room to spare. Over the large box rounding goes both ways and its
- *   worst case is not reached: half a level per pixel fails those renderings, five eighths does
- *   not, and the tighter bound counts more of a faint overlay change than the 5×5 box gives up.
- * - Over the pixel alone, three levels: 0.1.0's slack. With one or two, real renders of the same
- *   scene fail. What a rasteriser moves across a box's border matches bilinear resampling on
- *   average, but a single pixel along an edge only roughly: widened by the whole range, sub-pixel
- *   moves of text, SVG and charts pass, and no faint change counts less. Half the range passes
- *   fewer of them; a flat neighbourhood has no range, so a speck there still counts.
+ * Rounding in either image enters a box's total by up to half a level per pixel, so a level per
+ * pixel covers it. Renderings of the same scene through the GPU and in software differ by a little
+ * more where one is lighter across an area, and a 5×5 box needs a quarter of a level more to pass
+ * them with room to spare. Over the large box rounding goes both ways and its worst case is not
+ * reached: half a level per pixel fails those renderings, five eighths does not, and the tighter
+ * bound counts more of a faint overlay change than the 5×5 box gives up.
  */
 const BOXES = [
   { side: 65, slack: 0.625, widen: 0 },
   { side: 5, slack: ROUNDING_LEVELS + 0.25, widen: 0 },
-  { side: 1, slack: 3, widen: 1 },
 ] as const;
 
-type Box = (typeof BOXES)[number];
+/**
+ * The pixel alone, with three levels of slack: 0.1.0's. With one or two, real renders of the same
+ * scene fail. What a rasteriser moves across a box's border matches bilinear resampling on
+ * average, but a single pixel along an edge only roughly: widened by the whole range, sub-pixel
+ * moves of text, SVG and charts pass, and no faint change counts less. Half the range passes fewer
+ * of them; a flat neighbourhood has no range, so a speck there still counts.
+ */
+const PIXEL = { side: 1, slack: 3, widen: 1 } as const;
+
+type Box = (typeof BOXES)[number] | typeof PIXEL;
 
 const CHANNELS = 3;
 const LEVELS = [red, green, blue];
@@ -163,13 +170,26 @@ function moved(from: Tile, to: Tile, box: Box, x: number, y: number): boolean {
   return true;
 }
 
+/**
+ * Whether the change at pixel (x, y) is what a move of under a pixel leaves in every box, either
+ * image being the one that moved. Sound: a bilinear move of any content passes, give or take
+ * rounding.
+ */
+export function conserved(image: Pixels, other: Pixels, x: number, y: number): boolean {
+  const before = tile(image, x, y);
+  const after = tile(other, x, y);
+  return BOXES.every((box) => moved(before, after, box, x, y) || moved(after, before, box, x, y));
+}
+
 /** Whether pixel (x, y) differs only because content moved by less than a pixel. */
 export function isShifted(image: Pixels, other: Pixels, x: number, y: number): boolean {
   const before = tile(image, x, y);
   const after = tile(other, x, y);
-  return BOXES.every((box) =>
-    box.side === 1
-      ? moved(before, after, box, x, y) && moved(after, before, box, x, y)
-      : moved(before, after, box, x, y) || moved(after, before, box, x, y),
+  // The pixel both ways round, so a colour that appears or goes away is not a move. A colour
+  // that went away from content of high contrast is sometimes a move too, and is then refused.
+  return (
+    conserved(image, other, x, y) &&
+    moved(before, after, PIXEL, x, y) &&
+    moved(after, before, PIXEL, x, y)
   );
 }

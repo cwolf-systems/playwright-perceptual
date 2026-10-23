@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Raster } from '../../src/image/raster.js';
-import { isShifted } from '../../src/image/shift.js';
+import { conserved, isShifted } from '../../src/image/shift.js';
 import type { RgbaImage } from '../../src/image/types.js';
 import { setPixel, solid, type Rgba } from '../helpers.js';
 
@@ -239,5 +239,157 @@ describe('isShifted, as a box filter', () => {
         }
       }
     }
+  });
+});
+
+describe('isShifted, on a drift over texture', () => {
+  const SIZE = 160;
+
+  /** A smooth texture, each grey level `level(x, y)` plus `offset(x, y)`, rounded. */
+  function texture(level: (x: number, y: number) => number): Raster {
+    const image = solid(SIZE, SIZE, WHITE);
+    for (let y = 0; y < SIZE; y++) {
+      for (let x = 0; x < SIZE; x++) setPixel(image, x, y, grey(Math.round(level(x, y))));
+    }
+    return new Raster(image);
+  }
+
+  const smooth = (base: number) => (x: number, y: number) =>
+    base + 25 * Math.sin(x / 17) * Math.cos(y / 23) + 10 * Math.sin((x + y) / 5);
+
+  /** The share of the pixels that differ which pass as shifts. */
+  function shiftedShare(expected: Raster, actual: Raster): number {
+    let changed = 0;
+    let shifts = 0;
+    for (let y = 0; y < SIZE; y++) {
+      for (let x = 0; x < SIZE; x++) {
+        if (expected.rgbAt(x, y) === actual.rgbAt(x, y)) continue;
+        changed++;
+        if (isShifted(expected, actual, x, y)) shifts++;
+      }
+    }
+    return shifts / changed;
+  }
+
+  /** One to three levels lighter, in a fixed pattern. */
+  const drift = (x: number, y: number) => 1 + ((x + 2 * y) % 3);
+
+  it('counts a drift of one to three levels, which a 5×5 box alone would take for a move', () => {
+    // Texture rises a few levels per pixel, so near any pixel a drift is a move up the slope;
+    // over 65×65 it rises and falls, and the drift remains.
+    const level = smooth(60);
+    expect(
+      shiftedShare(
+        texture(level),
+        texture((x, y) => level(x, y) + drift(x, y)),
+      ),
+    ).toBe(0);
+  });
+
+  it('counts the drift where box totals pass 16 bits', () => {
+    // A 65×65 box of levels near 200 totals over 800,000.
+    const level = smooth(200);
+    expect(
+      shiftedShare(
+        texture(level),
+        texture((x, y) => level(x, y) + drift(x, y)),
+      ),
+    ).toBe(0);
+  });
+
+  it('accepts the same texture moved by part of a pixel, bright or dark', () => {
+    for (const base of [60, 200]) {
+      const level = smooth(base);
+      const moved = texture((x, y) => level(x + 0.3, y + 0.2));
+      expect(shiftedShare(texture(level), moved)).toBeGreaterThan(0.99);
+    }
+  });
+});
+
+describe('isShifted, on any move of under a pixel', () => {
+  /** A deterministic generator of numbers from 0 to 1. */
+  function random(seed: number): () => number {
+    let state = seed;
+    return () => (state = (Math.imul(state, 1103515245) + 12345) >>> 0) / 2 ** 32;
+  }
+
+  /** Bilinear moves of random content `judge` refuses, out of `moves`, each at a random pixel. */
+  function refusedMoves(judge: typeof isShifted, moves: number): number {
+    const next = random(7);
+    const side = 11;
+    let refused = 0;
+    for (let n = 0; n < moves; n++) {
+      const levels = Array.from({ length: side * side * 3 }, () => Math.floor(next() * 256));
+      // Beyond the image its edge continues, so a move brings in nothing unknown.
+      const at = (x: number, y: number, c: number) =>
+        levels[
+          (Math.min(side - 1, Math.max(0, y)) * side + Math.min(side - 1, Math.max(0, x))) * 3 + c
+        ]!;
+      const [a, b] = [next() * 2 - 1, next() * 2 - 1];
+      const before = solid(side, side, WHITE);
+      const after = solid(side, side, WHITE);
+      for (let y = 0; y < side; y++) {
+        for (let x = 0; x < side; x++) {
+          const [sx, sy] = [x - a, y - b];
+          const [x0, y0] = [Math.floor(sx), Math.floor(sy)];
+          const [fx, fy] = [sx - x0, sy - y0];
+          const moved = [0, 1, 2].map((c) =>
+            Math.round(
+              (1 - fx) * (1 - fy) * at(x0, y0, c) +
+                fx * (1 - fy) * at(x0 + 1, y0, c) +
+                (1 - fx) * fy * at(x0, y0 + 1, c) +
+                fx * fy * at(x0 + 1, y0 + 1, c),
+            ),
+          );
+          setPixel(before, x, y, [at(x, y, 0), at(x, y, 1), at(x, y, 2), 255]);
+          setPixel(after, x, y, [moved[0]!, moved[1]!, moved[2]!, 255]);
+        }
+      }
+      const [x, y] = [Math.floor(next() * side), Math.floor(next() * side)];
+      if (!judge(new Raster(before), new Raster(after), x, y)) refused++;
+    }
+    return refused;
+  }
+
+  it('conserves every bilinear move of random content, in any direction, at any pixel', () => {
+    expect(refusedMoves(conserved, 2_000)).toBe(0);
+  });
+
+  it('refuses a few of them at the pixel, where a colour of high contrast went away', () => {
+    // Random levels are the highest contrast there is: a pixel's colour can lie well outside its
+    // neighbours' after the move, as a colour that went away does.
+    expect(refusedMoves(isShifted, 2_000)).toBeLessThan(200);
+  });
+});
+
+describe('isShifted, beside an edge that did not move: known limits', () => {
+  /** An 11×11 image whose pixel (x, y) is `rgba(x, y)`. */
+  function image(rgba: (x: number, y: number) => Rgba): RgbaImage {
+    const result = solid(11, 11, WHITE);
+    for (let y = 0; y < 11; y++) for (let x = 0; x < 11; x++) setPixel(result, x, y, rgba(x, y));
+    return result;
+  }
+
+  // Known limits, pinned down: each box is judged by its own move, and an edge inside a box lets
+  // its total take a wide range. Both are real changes that pass as moves.
+
+  it('passes a change of two levels over textured ground within reach of an edge', () => {
+    // An edge runs down column 7 of faintly textured ground. Two levels darker on its left, the
+    // change is no move of the edge: the edge did not move. Where the 5×5 box reaches the edge
+    // it passes; further off, the box counts it.
+    const ground = (offset: number) =>
+      image((x, y) => grey(x >= 7 ? 200 : 60 + ((x * 3 + y * 5) % 7) + offset));
+    for (const x of [4, 5, 6]) expect(shifted(ground(0), ground(-2), x, 5)).toBe(true);
+    for (const x of [0, 1, 2, 3]) expect(shifted(ground(0), ground(-2), x, 5)).toBe(false);
+  });
+
+  it('passes an edge pixel whose sides changed colour too, though the sides count', () => {
+    /** Dark left of column 4, light right of it, and column 4 a mixture. */
+    const edge = (mixed: number, left: number, right: number) =>
+      image((x) => grey(x < 4 ? left : x > 4 ? right : mixed));
+    const [before, after] = [edge(160, 40, 220), edge(120, 48, 228)];
+    expect(shifted(before, after, 4, 4)).toBe(true);
+    expect(shifted(before, after, 2, 4)).toBe(false);
+    expect(shifted(before, after, 7, 4)).toBe(false);
   });
 });
