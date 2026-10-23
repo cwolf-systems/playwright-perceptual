@@ -85,42 +85,55 @@ export class Tile {
     const tables = new Float64Array((x1 - x0 + 2) * (y1 - y0 + 2) * QUANTITIES);
     const rowLength = (x1 - x0 + 2) * QUANTITIES;
     const values = new Float64Array(QUANTITIES);
-    const add = (quantity: number, value: number) => (values[quantity] = values[quantity]! + value);
     const { before, after } = this;
     for (let y = y0; y <= y1; y++) {
       for (let x = x0; x <= x1; x++) {
-        values.fill(0);
-        values[Sum.kept] = 1;
         const here = this.at(x, y);
-        // Central differences, one-sided at the image's border, where the planes stop too, and
-        // none across a side of one pixel.
-        const left = this.at(x - 1, y);
-        const right = this.at(x + 1, y);
-        const up = this.at(x, y - 1);
-        const down = this.at(x, y + 1);
-        const across = Math.min(x + 1, image.width - 1) - Math.max(x - 1, 0) || Infinity;
-        const along = Math.min(y + 1, image.height - 1) - Math.max(y - 1, 0) || Infinity;
+        // Central differences, one-sided at the image's border, and none across a side of one
+        // pixel. The channels are read a pixel beyond the summed box, except at the border.
+        const row = (this.read.x1 - this.read.x0 + 1) * CHANNELS;
+        const left = x > 0 ? here - CHANNELS : here;
+        const right = x < image.width - 1 ? here + CHANNELS : here;
+        const up = y > 0 ? here - row : here;
+        const down = y < image.height - 1 ? here + row : here;
+        const across = (left === here ? 0 : 1) + (right === here ? 0 : 1) || Infinity;
+        const along = (up === here ? 0 : 1) + (down === here ? 0 : 1) || Infinity;
+        let kept = 1;
+        let gxx = 0;
+        let gxy = 0;
+        let gyy = 0;
+        let gxd = 0;
+        let gyd = 0;
+        let dd = 0;
         for (let c = 0; c < CHANNELS; c++) {
           const d = after[here + c]! - before[here + c]!;
           const gx = (before[right + c]! - before[left + c]!) / across;
           const gy = (before[down + c]! - before[up + c]!) / along;
-          if (Math.abs(d) > ROUNDING_LEVELS) values[Sum.kept] = 0;
+          if (Math.abs(d) > ROUNDING_LEVELS) kept = 0;
           values[Sum.red + c] = d;
-          add(Sum.gxx, gx * gx);
-          add(Sum.gxy, gx * gy);
-          add(Sum.gyy, gy * gy);
-          add(Sum.gxd, gx * d);
-          add(Sum.gyd, gy * d);
-          add(Sum.dd, d * d);
+          gxx += gx * gx;
+          gxy += gx * gy;
+          gyy += gy * gy;
+          gxd += gx * d;
+          gyd += gy * d;
+          dd += d * d;
         }
+        values[Sum.kept] = kept;
+        values[Sum.gxx] = gxx;
+        values[Sum.gxy] = gxy;
+        values[Sum.gyy] = gyy;
+        values[Sum.gxd] = gxd;
+        values[Sum.gyd] = gyd;
+        values[Sum.dd] = dd;
         // Each entry sums everything above and to the left of it, itself included.
         const entry = this.entry(x, y);
         const above = entry - rowLength;
-        const previous = entry - QUANTITIES;
-        const corner = above - QUANTITIES;
         for (let q = 0; q < QUANTITIES; q++) {
           tables[entry + q] =
-            values[q]! + tables[above + q]! + tables[previous + q]! - tables[corner + q]!;
+            values[q]! +
+            tables[above + q]! +
+            tables[entry - QUANTITIES + q]! -
+            tables[above - QUANTITIES + q]!;
         }
       }
     }
