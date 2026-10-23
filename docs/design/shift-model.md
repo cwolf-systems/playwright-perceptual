@@ -155,4 +155,23 @@ now the largest cost on a whole-frame change; it stops at once where no neighbou
 
 ## Result
 
-See the end of this log for the judge's numbers on the final design.
+The judge on the final design, against PR #1 (wrong verdicts as _none / 0.1%_ over all labelled
+pairs; times in ms, medians of 5, against 0.1.0):
+
+| Measure                                    | PR #1   | This design |
+| ------------------------------------------ | ------- | ----------- |
+| Verdicts PR #1 gets right that go wrong    |         | 0           |
+| Wrong verdicts                             | 52 / 27 | 34 / 14     |
+| Golden pairs failing (56, identical input) | 12      | 9           |
+| Real opacity change counted                | 73.2%   | 81.7%       |
+| Synthetic opacity change counted           | 66.1%   | 86.4%       |
+| Textured drift of 1–3 levels counted       | 0%      | 100%        |
+| Smallest panel side counted in full        | 3 px    | 1 px        |
+| Real whole-frame change (0.1.0: 449)       | 1,018   | 416         |
+| Textured drift (0.1.0: 580)                | 752     | 446         |
+| 3200×2000, all changed (0.1.0: 4,495)      | 3,705   | 3,185       |
+| Detector code in `src/image/`, lines       | 204     | 444         |
+
+What is worse: more detector code, for the window totals that make it fast; the 2D map through
+the GPU against software counts more pixels at 2× (5,581 → 11,243), a pair both get wrong; and the
+grain of a real capture compares in 94 ms against PR #1's 48, still well under 0.1.0's 257.

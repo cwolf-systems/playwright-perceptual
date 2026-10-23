@@ -61,10 +61,11 @@
 ### Speed
 
 - Whole-frame changes compare faster than in 0.1.0: in `npm run bench`, a fully changed
-  3200×2000 image in about 3.3 s, from 5.1 s; a textured drift over a 1346×819 frame in about
-  0.5 s, from 0.6 s; film grain three to eight times faster, since rounding is checked before the
-  detectors. Window sums come from totals computed a block of a row at a time, with column sums
-  updated as rows enter and leave, and most real changes are refused before any offset is sought.
+  3200×2000 image in about 3.2 s, from 4.5 s; a textured drift over a 1346×819 frame in about
+  0.45 s, from 0.58 s; film grain three to eight times faster, since rounding is checked before
+  the detectors. Window sums come from totals computed a block of a row at a time, with column
+  sums updated as rows enter and leave, and most real changes are refused before any offset is
+  sought.
 
 ### Other
 
