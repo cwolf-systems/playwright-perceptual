@@ -20,18 +20,18 @@ Node 22.22, Apple M4, milliseconds.
 
 | Size      | Changed | PNG decode ×2 | perceptual | perceptual + diff | pixelmatch | looks-same (incl. decode) |
 | --------- | ------- | ------------- | ---------- | ----------------- | ---------- | ------------------------- |
-| 1280×720  | 0%      | 42.6          | 4.0        | 21.4              | 0.8        | 0.0                       |
-| 1280×720  | 1%      | 41.5          | 8.7        | 27.2              | 1.2        | 64.7                      |
-| 1280×720  | 10%     | 48.7          | 50.7       | 67.4              | 1.8        | 114.1                     |
-| 1280×720  | 100%    | 47.6          | 467.5      | 482.3             | 5.5        | 670.6                     |
-| 1920×1080 | 0%      | 109.5         | 7.6        | 48.7              | 2.2        | 0.0                       |
-| 1920×1080 | 1%      | 108.8         | 20.5       | 61.9              | 3.3        | 136.6                     |
-| 1920×1080 | 10%     | 109.0         | 106.4      | 146.7             | 4.1        | 261.5                     |
-| 1920×1080 | 100%    | 109.1         | 1004.9     | 1043.6            | 12.4       | 1473.7                    |
-| 3200×2000 | 0%      | 328.1         | 23.5       | 154.8             | 6.5        | 0.1                       |
-| 3200×2000 | 1%      | 327.2         | 51.6       | 184.3             | 10.1       | 385.3                     |
-| 3200×2000 | 10%     | 328.3         | 320.1      | 449.7             | 12.7       | 764.4                     |
-| 3200×2000 | 100%    | 328.7         | 3044.9     | 3011.9            | 38.3       | 4420.7                    |
+| 1280×720  | 0%      | 43.0          | 4.1        | 22.8              | 0.8        | 0.0                       |
+| 1280×720  | 1%      | 42.2          | 11.7       | 30.7              | 1.3        | 68.2                      |
+| 1280×720  | 10%     | 51.3          | 51.5       | 70.1              | 1.9        | 119.5                     |
+| 1280×720  | 100%    | 48.7          | 443.3      | 448.6             | 5.6        | 688.6                     |
+| 1920×1080 | 0%      | 110.1         | 7.6        | 49.4              | 2.1        | 0.0                       |
+| 1920×1080 | 1%      | 109.5         | 20.4       | 61.9              | 3.3        | 138.0                     |
+| 1920×1080 | 10%     | 112.4         | 96.3       | 136.9             | 4.1        | 268.8                     |
+| 1920×1080 | 100%    | 109.8         | 914.1      | 948.5             | 12.6       | 1511.5                    |
+| 3200×2000 | 0%      | 327.7         | 23.6       | 157.2             | 6.6        | 0.1                       |
+| 3200×2000 | 1%      | 328.8         | 49.8       | 181.3             | 10.3       | 392.1                     |
+| 3200×2000 | 10%     | 328.8         | 303.3      | 432.2             | 12.9       | 786.7                     |
+| 3200×2000 | 100%    | 327.0         | 2621.8     | 2732.5            | 38.7       | 4431.2                    |
 
 ## Reading the results
 
@@ -41,13 +41,30 @@ Node 22.22, Apple M4, milliseconds.
   time than decoding the screenshot it compares.
 - Heavily changed images are slow. Every changed pixel gets the full colour maths, an
   anti-aliasing check and a shift check. A heavily changed image is a failing test, so this cost
-  is paid on failure. The shift check reads at most 20 box totals per channel, from box filters
-  computed once per tile of the image with running sums, so it costs the same over texture as
-  over a solid block of colour.
+  is paid on failure. The shift check reads box totals from a summed-area table built once per
+  tile of the image, four reads per total whatever the box's size, so it costs the same over
+  texture as over a solid block of colour.
 - Against looks-same, compare like with like. Its times include decoding, so set them against
-  decode plus perceptual: at 3200×2000 that is 379 against 385 ms with 1% changed, 648 against
-  764 ms with 10%, and 3,374 against 4,421 ms with everything changed. It returns at once for
+  decode plus perceptual: at 3200×2000 that is 379 against 392 ms with 1% changed, 632 against
+  787 ms with 10%, and 2,949 against 4,431 ms with everything changed. It returns at once for
   identical files, since it compares the encoded bytes first.
-- Against 0.1.0, as measured by the redesign round's judge on the same machine, fully changed
-  images take about two thirds of the time or less, and a drift of one to three levels over a
-  whole textured frame 0.61×; the [design log](../design/box-filter.md) has the table.
+
+## Against 0.1.0
+
+The redesign judge times 0.1.0, PR #1's first draft of 0.2.0 and this release, each in a process
+of its own on the same machine (Apple M4, Node 22), median of five. Whole-frame cases, milliseconds:
+
+| Case                                   | 0.1.0  | First draft | 0.2.0  | vs 0.1.0 |
+| -------------------------------------- | ------ | ----------- | ------ | -------- |
+| bench 1280×720, all changed            | 688.0  | 625.8       | 368.2  | 0.54×    |
+| bench 1920×1080, all changed           | 1414.7 | 1292.6      | 796.0  | 0.56×    |
+| bench 3200×2000, all changed           | 4485.1 | 3438.6      | 2350.1 | 0.52×    |
+| textured drift of 1–3 levels, 1346×819 | 572.1  | 707.5       | 271.1  | 0.47×    |
+| film grain of ±1 level, 1346×819       | 448.0  | 51.0        | 22.3   | 0.05×    |
+| real whole-frame change, 1346×819      | 461.7  | 997.1       | 359.4  | 0.78×    |
+| real film grain, 1346×819              | 257.8  | 52.2        | 85.4   | 0.33×    |
+
+The real captures come from a downstream renderer and are not included. Small changes cost more
+than with 0.1.0 at 1280×720 (14.0 ms against 9.0 with 1% changed), since the first changed pixel
+in a tile reads the whole tile, 256 rows by 512 columns and 66 pixels beyond each side; from
+1920×1080 up, and from 10% changed, they cost the same or less.

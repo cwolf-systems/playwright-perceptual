@@ -8,24 +8,25 @@
   within three levels per channel of the colours around it, and a pixel's own old colour is
   always around it, so any change of up to three levels per channel passed as a shift: a tint
   across a flat panel, a dark theme a shade lighter, a GPU readback drifting by two levels. It is
-  now one box-filter rule. A move of under a pixel only carries colour across a box's border, and
-  changes the box's total by no more than moving the box a whole pixel would. So both images are
-  box-filtered, and at a changed pixel one image's 5×5 box total must lie within the range of the
-  other's at the box and one pixel over, give or take a level per pixel; and the pixel's own
-  colour must lie within the colours next to it, both ways round, give or take three levels, as
-  before. Near the image's border the box moves inward, so the border and small element
-  screenshots are judged too, down to one pixel high or wide.
-- **Renders whose colour drifts by two levels or more over an area now fail.** In a renderer's
-  golden set of 56 pairs of identical input, 10 failed with 0.1.0 and 12 now: one scene's first
-  capture is one to two levels darker over nearly half the frame (44,548 pixels counted against
-  each of the other two captures). Over fine texture, where the colour changes by a level or more
-  per pixel, a drift of a level or two mostly still passes; see Limits.
-- **Pairs that already differed gain counted pixels.** Self-noise in that golden set: a map label
-  one pixel over between loads, 139 → 165 pixels; a second scene's label and box edge, 82 → 94.
-  In this repository's benchmark, among pairs that should match: the 2D map through the GPU
-  against software, 894 → 954 at 1× and 5,067 → 5,741 at 2×; the map and 3D view moved 0.3 px
-  at 2×, by up to 95; CSS effects through the GPU against software, 3 → 9 at 1× and 48 → 187 at
-  2×, where it now also fails at ΔE00 1.5.
+  now one rule about boxes of pixels. A move of under a pixel only carries colour across a box's
+  border, and changes the box's total by no more than moving the box a whole pixel would. So at a
+  changed pixel one image's box total must lie within the range of the other's at the box and one
+  pixel over, give or take rounding, over a 65×65 box and a 5×5 box, and over the pixel alone,
+  both ways round, give or take three levels as before. Where a neighbour kept its colour, the
+  pixel's range is widened by the contrast around it, since a rasteriser draws an edge more
+  sharply than resampling mixes it. Near the image's border the boxes move inward, so the border
+  and small element screenshots are judged too, down to one pixel high or wide.
+- **Renders whose colour drifts by two levels or more over an area now fail, over texture too.** A
+  drift of one to three levels over a whole textured 1346×819 frame, which 0.1.0 passes, is
+  counted in full. In a renderer's golden set of 56 pairs of identical input, 10 failed with no
+  allowance with 0.1.0 and 9 now; one scene's first capture is one to two levels darker over
+  nearly half the frame (37,112 pixels counted against each of the other two captures), which
+  fails as it should.
+- **Some pairs that should match count more pixels.** In this repository's benchmark, the 2D map
+  through the GPU against the software rasteriser at 2×, which failed before, from 5,067 to 9,694;
+  CSS effects through the GPU, from 3 to 8 at 1× and from 48 to 85 at 2×, still within 0.1%. Most
+  sub-pixel moves count fewer: text at 1× from 325–438 to 205–279, and the 3D view at 1× from
+  161–163 to 14–22, which now passes with 0.1% allowed.
 - **Anti-aliasing detection asks that the flat area beside a slope keep its colour**, give or take
   a level. A uniform change of colour no longer passes there as anti-aliasing.
 - If a test starts failing, look at the diff image: red is what counts. If the change is
@@ -56,36 +57,44 @@
   and a `Comparison` may set `exceeded` when it stopped there. A custom comparator needs no
   change: it may ignore `limit`. Code that calls `compare` itself gets full counts unless it
   passes a limit.
-- `isShifted` keeps the box filter of the tiles it has read for each `Pixels` object. A custom
-  detector built on it must not change an image's pixels while it is being judged; the
+- `isShifted` keeps a summed-area table of the tiles it has read for each `Pixels` object. A
+  custom detector built on it must not change an image's pixels while it is being judged; the
   comparator passes new ones for each comparison.
+- The comparator asks the built-in anti-aliasing detector once for both images, sharing the check
+  that a neighbour kept its colour. A detector passed as `antialiasing` is still asked each way
+  round, as before.
 
 ### Limits
 
+- Beside an edge that did not move, a faint change of colour can pass as a shift: a move of the
+  edge by a small part of a pixel carries as much colour across each box's border as the change
+  took away. Ground three levels darker within a few pixels of an edge passes, as it does with
+  0.1.0. Of a real faint overlay change over terrain, 17% of the changed pixels still pass this
+  way, beside contour lines.
+- On random noise most sub-pixel moves count as changes: no neighbour keeps its colour, so the
+  pixel's range is not widened. The box tests alone pass every bilinear move of such content.
 - In an image one pixel high or wide, what lies beyond the image across that side is unknown, so
   shift tolerance allows no move across it: a sub-pixel move of content across such a sliver
-  counts as a change. In 0.1.0 and earlier drafts of this release, such slivers took any change
-  within three levels of the colours nearby for a shift.
-- Over texture whose colour changes by a level or more per pixel, a drift of one to three levels
-  is mostly taken for a move: the judge's textured drift over a whole 1346×819 frame has 3.6% of
-  its changed pixels counted, enough to fail it with up to 2% of the image allowed. Of a faint
-  overlay change over terrain, about a fifth still passes as shifts, beside contour lines.
+  counts as a change. In 0.1.0 such slivers took any change within three levels of the colours
+  nearby for a shift.
 
 ### Speed
 
-Measured by the redesign round's judge (median of five, Apple M4, Node 22) against 0.1.0 on the
-same machine; `npm run bench` gives the same picture in [docs/benchmarks/speed.md](docs/benchmarks/speed.md).
+Measured by the redesign judge against 0.1.0 on the same machine (median of five, Apple M4,
+Node 22); `npm run bench` gives the same picture in
+[docs/benchmarks/speed.md](docs/benchmarks/speed.md).
 
-- Fully changed images compare in about two thirds of 0.1.0's time or less: 3200×2000 in 2.6 s,
-  from 4.3 s; 1920×1080 in 0.92 s, from 1.42 s. CIELAB and ΔE are cached in fixed tables, and the
-  shift test reads 20 values per channel at most, whatever the size of its box.
-- A drift of one to three levels over a whole textured 1346×819 frame takes 343 ms, from 561 ms;
-  a real whole-frame change of that size 350 ms, from 408 ms. Each box is computed once, with
-  running sums over tiles of the image, rather than read pixel by pixel at every changed pixel.
-- Grainy images are four to twenty times faster (22 ms from 414 ms for synthetic grain, 60 ms
-  from 239 ms for a real one), since rounding is checked before the detectors.
-- With 1% or 10% of the image changed, comparison is a little faster than 0.1.0 too: 10.4 ms
-  from 10.9 ms at 1280×720 with 1% changed, 291 ms from 404 ms at 3200×2000 with 10%.
+- Fully changed images compare in about half of 0.1.0's time: 3200×2000 in 2.35 s, from 4.49 s;
+  1920×1080 in 0.80 s, from 1.41 s. CIELAB and ΔE are cached in fixed tables, anti-aliasing is
+  asked once for both images and stops where no neighbour kept its colour, and every box total is
+  four reads of a summed-area table.
+- A drift of one to three levels over a whole textured 1346×819 frame takes 271 ms, from 572 ms;
+  a real whole-frame change of that size 359 ms, from 462 ms.
+- Grainy images are three to twenty times faster (22 ms from 448 ms for synthetic grain, 85 ms
+  from 258 ms for a real one), since rounding is checked before the detectors.
+- With 1% of a 1280×720 image changed, comparison takes 14.0 ms, from 9.0 ms: the first changed
+  pixel in a tile of 256 by 512 pixels reads the whole tile. From 1920×1080 up, or with 10%
+  changed, it is as fast as 0.1.0 or faster.
 
 ### Other
 

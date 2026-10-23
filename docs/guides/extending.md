@@ -53,7 +53,8 @@ const comparator = new PerceptualComparator({ maxDeltaE: 2.3 }, { colorDifferenc
 
 The detectors, `antialiasing` and `shift`, each decide whether a changed pixel is rendering noise.
 Pass your own `NoiseDetector`, `(image, other, x, y) => boolean`, or `null` to turn one off; with
-both `null`, every changed pixel counts. While a shift detector is in use, pixels within one level
+both `null`, every changed pixel counts. An anti-aliasing detector is asked each way round, with
+the images swapped; a shift detector once. While a shift detector is in use, pixels within one level
 in every channel are set aside as rounding before either detector is asked; `ignoreRounding`
 overrides that either way. A detector reads both
 images through `Pixels`, whose `rgbAt(x, y)` gives a colour as `0xRRGGBB`. The built-in ones are
@@ -72,8 +73,9 @@ const shift: NoiseDetector = (image, other, x, y) => y >= 40 && isShifted(image,
 const comparator = new PerceptualComparator({}, { shift });
 ```
 
-`isShifted` keeps the box filter of the tiles it has read for each `Pixels` object, so an image
-must not change while it is being judged; the comparator passes new ones for each comparison.
+`isShifted` keeps a summed-area table of the tiles it has read for each `Pixels` object, so an
+image must not change while it is being judged; the comparator passes new ones for each
+comparison.
 
 ## Other storage
 

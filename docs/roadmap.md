@@ -11,26 +11,24 @@ These come from the benchmark, at the default settings with 0.1% of the image al
 1. Sub-pixel movement mostly fails. Text, maps and 3D cameras moved by 0.3 px leave hundreds to
    thousands of changed pixels. Shift tolerance passes about 95% of the changed pixels in these
    cases, but rarely all of them, and a few hundred left over still fails the test.
-2. The 2D map through Chromium's GPU and through its software rasteriser fails: 1.5% of pixels at
-   1× scale, 2.2% at 2×. The differences are hairlines along the seams between raster tiles and
+2. The 2D map through Chromium's GPU and through its software rasteriser fails: 0.8% of pixels at
+   1× scale, 3.8% at 2×. The differences are hairlines along the seams between raster tiles and
    along the edges of thick stroked lines.
 3. Shift tolerance passes a hard edge moved by exactly one pixel. That is the price of looking one
    pixel around; `ignoreShifts: false` turns it off.
-4. Comparison is slow when much of the image changes: about 3.0 s for a fully changed 3200×2000
-   screenshot, against 40 ms for pixelmatch. Passing tests and small changes cost less than
-   decoding the screenshot, so this is mostly paid by failing tests.
+4. Comparison is slow when much of the image changes: about 2.4 s for a fully changed 3200×2000
+   screenshot in the redesign judge, against 40 ms for pixelmatch. Passing tests and small changes
+   cost less than decoding the screenshot, so this is mostly paid by failing tests.
 5. The thresholds are rules of thumb. ΔE00 1 as "just noticeable" comes from the formula's design
    and from viewing uniform patches, not from people looking at screenshots.
-6. Part of a faint uniform change still passes as shifts. The noise detectors no longer explain a
-   translucent overlay made 5 points more transparent over terrain (from a renderer's tests), but
-   along contour lines and other edges a move could change a 5×5 box's total by as much as the
-   change does, so shift tolerance still sets aside about a fifth of its pixels. Over fine texture
-   it is worse: a drift of one to three levels over a whole textured frame is nearly all set aside,
-   since where the colour changes by a level or more per pixel, a drift of a level or two and a
-   move of a pixel look alike in any small box. A larger box, or asking both images to explain the
-   box, counts more of it, and fails real renders of the same scene; see
-   [the design log](design/box-filter.md). Registration, below, would tell the two apart by
-   finding the move first.
+6. A faint change of colour beside an edge that did not move can pass as a shift. A move of the
+   edge by a small part of a pixel carries as much colour across each box's border as the change
+   took away: ground three levels darker within a few pixels of an edge passes, and of a
+   translucent overlay made 5 points more transparent over terrain (from a renderer's tests), 17%
+   of the changed pixels still pass, beside contour lines. Registration, below, would tell the two
+   apart by finding the move first; measured, the smallest piece of it that catches the ground
+   costs 150 to 190 lines and loses verdicts at most settings. See
+   [the design log](design/synthesis-s1.md).
 7. The same scene can land on different pixels between page loads or rasterisers. A label whose
    projected anchor falls either side of a pixel boundary moves by a whole pixel; an aliased
    overlay edge within 1/32 px of a row of pixel centres covers the row in a rasteriser that

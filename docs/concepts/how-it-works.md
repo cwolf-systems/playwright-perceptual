@@ -27,18 +27,26 @@ Two images of the same size are compared pixel by pixel.
    pixels, each channel's total changes only by what the move carries across the box's border.
    For a move of (tx, ty), each up to a pixel, resampled bilinearly, that change is bilinear in tx
    and ty, so it lies between its values for whole-pixel moves: the box's total moved one pixel
-   across, down, both, or not at all. Both images are box-filtered with running sums, and at a
-   changed pixel one image's box total must lie within the range of the other's totals at the box
-   and one pixel over, in one of the four directions, give or take a level per pixel of the box
-   for rounding. The test runs over a 5×5 box, either image being the one that moved, and over
-   the pixel alone, both ways round and give or take three levels: there it says each image's
-   colour lies within the colours next to it in the other. Near the image's border the 5×5 box
-   moves inward so that the box moved is in the image too; a box of one pixel stays on the pixel,
-   so on the outermost pixels a move from beyond the border explains nothing, and across an image
-   one pixel wide no move does. A pixel that passes
-   both is reported as shifted. A real change brings in a colour that was not nearby, such as a
-   line that went away or a new colour on an edge, or changes the colour of a whole box at once,
-   such as a translucent overlay made a little stronger or weaker over textured ground.
+   across, down, both, or not at all. So at a changed pixel one image's box total must lie within
+   the range of the other's totals at the box and one pixel over, in one of the four directions,
+   give or take rounding. Three tests ask it:
+   - a 65×65 box, either image being the one that moved. Over texture a drift of a level or two
+     looks like a small move in any small box, but over a box this large the texture rises and
+     falls, a move carries as much colour in as out, and the drift remains;
+   - a 5×5 box, either image being the one that moved, which a smaller real change survives;
+   - the pixel alone, both ways round, give or take three levels: each image's colour lies within
+     the colours next to it in the other. A rasteriser draws an edge more sharply than bilinear
+     resampling mixes it, so where a neighbour kept its colour the range is widened by the
+     contrast across it.
+
+   Box totals come from a summed-area table per channel, built once for each tile of the image
+   where a pixel is judged, so a box of any size costs four reads. Near the image's border a box
+   moves inward so that the box moved is in the image too; the pixel's own test stays on the
+   pixel, so on the outermost pixels a move from beyond the border explains nothing, and across
+   an image one pixel wide no move does. A pixel that passes all three is reported as shifted. A
+   real change brings in a colour that was not nearby, such as a line that went away, changes the
+   colour beside an edge as well as the edge, or changes the colour of a whole box at once, such
+   as a translucent overlay made a little stronger or weaker, or a drift over textured ground.
 
 The result is the number of changed pixels and the distribution of ΔE00 over the whole image:
 mean, median, p95, p99 and maximum. The count says how much changed; the distribution says how
@@ -61,11 +69,14 @@ lightness, chroma and hue, and for blues, where earlier formulas were least accu
   that lands on the next pixel in another page load, or an aliased edge that runs within 1/32 px
   of a row of pixel centres and covers that row in one rasteriser but not another, leaves a few
   pixels counted.
-- Along edges and over texture, shift tolerance can still take part of a uniform change for a
-  move, where a move of the content could change a 5×5 box's total by as much as the change does:
-  about a fifth of the pixels of a faint overlay change, and nearly all of a drift of one to three
-  levels over fine texture, in the cases measured. Over texture whose colour changes by a level or
-  more per pixel, a drift of a level or two and a move of a pixel look alike in any small box.
+- Beside an edge that did not move, shift tolerance can take a faint change of colour for a
+  move: a move of the edge by a small part of a pixel carries as much colour across each box's
+  border as the change took away. Ground three levels darker within a few pixels of an edge
+  passes; further from the edge it counts. 0.1.0 passes it too. Of a real faint overlay change
+  over terrain, 17% of the changed pixels still pass this way, beside contour lines.
+- On random noise most sub-pixel moves count as changes: no neighbour keeps its colour, so the
+  pixel test is not widened, and noise moved by part of a pixel produces colours outside its
+  neighbours'. The box tests alone pass every such move.
 - A drift of one level everywhere passes as rounding while shift tolerance is on, even where it
   passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over a flat or gently
   shaded area counts.
