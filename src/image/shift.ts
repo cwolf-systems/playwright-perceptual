@@ -1,4 +1,4 @@
-import { blue, green, red, ROUNDING_LEVELS } from '../color/rgb.js';
+import { blue, green, red, ROUNDING_LEVELS, withinLevels } from '../color/rgb.js';
 import { type ChannelSums, sumsOf } from './sums.js';
 import type { Pixels } from './types.js';
 
@@ -232,9 +232,11 @@ export function conserved(image: Pixels, other: Pixels, x: number, y: number): b
 
 /** Whether pixel (x, y) differs only because content moved by less than a pixel. */
 export function isShifted(image: Pixels, other: Pixels, x: number, y: number): boolean {
-  return (
-    inNeighbourhood(image.rgbAt(x, y), other, x, y) &&
-    inNeighbourhood(other.rgbAt(x, y), image, x, y) &&
-    conserved(image, other, x, y)
-  );
+  const before = image.rgbAt(x, y);
+  const after = other.rgbAt(x, y);
+  // Each colour is in its own neighbourhood, so two within the slack are each within the other's.
+  const near =
+    withinLevels(before, after, SLACK) ||
+    (inNeighbourhood(before, other, x, y) && inNeighbourhood(after, image, x, y));
+  return near && conserved(image, other, x, y);
 }
