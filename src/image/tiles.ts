@@ -39,6 +39,9 @@ type Quantity = (typeof Sum)[keyof typeof Sum];
 
 const QUANTITIES = 10;
 
+/** The quantities before `gxx`, of colour rather than of motion. */
+const COLOUR = Sum.gxx;
+
 /** A rectangle of pixels from (x0, y0) to (x1, y1), inclusive. */
 export interface Box {
   readonly x0: number;
@@ -72,72 +75,104 @@ export class Tile {
   private readonly read: Box;
   /** The box summed: the tile and as far as a window around its pixels reaches. */
   private readonly summed: Box;
-  private readonly tables: Float64Array;
+  /** Tables of what kept its colour and of each channel's change. */
+  private readonly colour: Float64Array;
+  /**
+   * Tables for registration, built when first asked for: a whole-frame change of colour often
+   * never needs them.
+   */
+  private motion: Float64Array | null = null;
+  /** The image's size, for the gradient at its border. */
+  private readonly width: number;
+  private readonly height: number;
 
   constructor(image: Pixels, other: Pixels, cell: Box) {
     this.cell = cell;
+    this.width = image.width;
+    this.height = image.height;
     this.summed = grown(image, cell, WINDOW_RADIUS);
     this.read = grown(image, cell, WINDOW_RADIUS + 1);
     this.before = this.channels(image);
     this.after = this.channels(other);
-
-    const { x0, y0, x1, y1 } = this.summed;
-    const tables = new Float64Array((x1 - x0 + 2) * (y1 - y0 + 2) * QUANTITIES);
-    const rowLength = (x1 - x0 + 2) * QUANTITIES;
-    const values = new Float64Array(QUANTITIES);
     const { before, after } = this;
+    this.colour = this.table(COLOUR, (values, here) => {
+      values[Sum.kept] = 1;
+      for (let c = 0; c < CHANNELS; c++) {
+        const d = after[here + c]! - before[here + c]!;
+        if (Math.abs(d) > ROUNDING_LEVELS) values[Sum.kept] = 0;
+        values[Sum.red + c] = d;
+      }
+    });
+  }
+
+  private motionTables(): Float64Array {
+    const { before, after, width, height } = this;
+    const row = (this.read.x1 - this.read.x0 + 1) * CHANNELS;
+    return this.table(QUANTITIES - COLOUR, (values, here, x, y) => {
+      // Central differences, one-sided at the image's border, and none across a side of one
+      // pixel. The channels are read a pixel beyond the summed box, except at the border.
+      const left = x > 0 ? here - CHANNELS : here;
+      const right = x < width - 1 ? here + CHANNELS : here;
+      const up = y > 0 ? here - row : here;
+      const down = y < height - 1 ? here + row : here;
+      const across = (left === here ? 0 : 1) + (right === here ? 0 : 1) || Infinity;
+      const along = (up === here ? 0 : 1) + (down === here ? 0 : 1) || Infinity;
+      let gxx = 0;
+      let gxy = 0;
+      let gyy = 0;
+      let gxd = 0;
+      let gyd = 0;
+      let dd = 0;
+      for (let c = 0; c < CHANNELS; c++) {
+        const d = after[here + c]! - before[here + c]!;
+        const gx = (before[right + c]! - before[left + c]!) / across;
+        const gy = (before[down + c]! - before[up + c]!) / along;
+        gxx += gx * gx;
+        gxy += gx * gy;
+        gyy += gy * gy;
+        gxd += gx * d;
+        gyd += gy * d;
+        dd += d * d;
+      }
+      values[Sum.gxx - COLOUR] = gxx;
+      values[Sum.gxy - COLOUR] = gxy;
+      values[Sum.gyy - COLOUR] = gyy;
+      values[Sum.gxd - COLOUR] = gxd;
+      values[Sum.gyd - COLOUR] = gyd;
+      values[Sum.dd - COLOUR] = dd;
+    });
+  }
+
+  /**
+   * Summed-area tables of `count` quantities over the summed box, each pixel's values set by
+   * `values` from where it starts in the channels. Each entry sums everything above and to the
+   * left of it, itself included; one row and column before the box are zero.
+   */
+  private table(
+    count: number,
+    values: (out: Float64Array, here: number, x: number, y: number) => void,
+  ): Float64Array {
+    const { x0, y0, x1, y1 } = this.summed;
+    const row = (x1 - x0 + 2) * count;
+    const table = new Float64Array(row * (y1 - y0 + 2));
+    const out = new Float64Array(count);
+    const read = this.read;
     for (let y = y0; y <= y1; y++) {
+      // Where the row starts in the channels: the summed box lies within the pixels read.
+      const start = ((y - read.y0) * (read.x1 - read.x0 + 1) - read.x0) * CHANNELS;
       for (let x = x0; x <= x1; x++) {
-        const here = this.at(x, y);
-        // Central differences, one-sided at the image's border, and none across a side of one
-        // pixel. The channels are read a pixel beyond the summed box, except at the border.
-        const row = (this.read.x1 - this.read.x0 + 1) * CHANNELS;
-        const left = x > 0 ? here - CHANNELS : here;
-        const right = x < image.width - 1 ? here + CHANNELS : here;
-        const up = y > 0 ? here - row : here;
-        const down = y < image.height - 1 ? here + row : here;
-        const across = (left === here ? 0 : 1) + (right === here ? 0 : 1) || Infinity;
-        const along = (up === here ? 0 : 1) + (down === here ? 0 : 1) || Infinity;
-        let kept = 1;
-        let gxx = 0;
-        let gxy = 0;
-        let gyy = 0;
-        let gxd = 0;
-        let gyd = 0;
-        let dd = 0;
-        for (let c = 0; c < CHANNELS; c++) {
-          const d = after[here + c]! - before[here + c]!;
-          const gx = (before[right + c]! - before[left + c]!) / across;
-          const gy = (before[down + c]! - before[up + c]!) / along;
-          if (Math.abs(d) > ROUNDING_LEVELS) kept = 0;
-          values[Sum.red + c] = d;
-          gxx += gx * gx;
-          gxy += gx * gy;
-          gyy += gy * gy;
-          gxd += gx * d;
-          gyd += gy * d;
-          dd += d * d;
-        }
-        values[Sum.kept] = kept;
-        values[Sum.gxx] = gxx;
-        values[Sum.gxy] = gxy;
-        values[Sum.gyy] = gyy;
-        values[Sum.gxd] = gxd;
-        values[Sum.gyd] = gyd;
-        values[Sum.dd] = dd;
-        // Each entry sums everything above and to the left of it, itself included.
-        const entry = this.entry(x, y);
-        const above = entry - rowLength;
-        for (let q = 0; q < QUANTITIES; q++) {
-          tables[entry + q] =
-            values[q]! +
-            tables[above + q]! +
-            tables[entry - QUANTITIES + q]! -
-            tables[above - QUANTITIES + q]!;
+        values(out, start + x * CHANNELS, x, y);
+        const entry = (y - y0 + 1) * row + (x - x0 + 1) * count;
+        for (let q = 0; q < count; q++) {
+          table[entry + q] =
+            out[q]! +
+            table[entry - row + q]! +
+            table[entry - count + q]! -
+            table[entry - row - count + q]!;
         }
       }
     }
-    this.tables = tables;
+    return table;
   }
 
   /** Where (x, y) starts in the channels, with x and y clamped to the pixels read. */
@@ -162,21 +197,16 @@ export class Tile {
     return plane;
   }
 
-  /** Where the table entry for (x, y) starts; one row and column before the box are zero. */
-  private entry(x: number, y: number): number {
-    const { x0, y0, x1 } = this.summed;
-    return ((y - y0 + 1) * (x1 - x0 + 2) + (x - x0 + 1)) * QUANTITIES;
-  }
-
   /** The sum of a quantity over a box, which must lie within the tile's window reach. */
   sum(quantity: Quantity, { x0, y0, x1, y1 }: Box): number {
-    const t = this.tables;
-    return (
-      t[this.entry(x1, y1) + quantity]! -
-      t[this.entry(x0 - 1, y1) + quantity]! -
-      t[this.entry(x1, y0 - 1) + quantity]! +
-      t[this.entry(x0 - 1, y0 - 1) + quantity]!
-    );
+    const motion = quantity >= COLOUR;
+    const table = motion ? (this.motion ??= this.motionTables()) : this.colour;
+    const count = motion ? QUANTITIES - COLOUR : COLOUR;
+    const q = motion ? quantity - COLOUR : quantity;
+    const box = this.summed;
+    const at = (x: number, y: number) =>
+      table[((y - box.y0 + 1) * (box.x1 - box.x0 + 2) + (x - box.x0 + 1)) * count + q]!;
+    return at(x1, y1) - at(x0 - 1, y1) - at(x1, y0 - 1) + at(x0 - 1, y0 - 1);
   }
 }
 

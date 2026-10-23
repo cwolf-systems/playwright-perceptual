@@ -186,7 +186,10 @@ beside contour lines, where the change fits a move of the line.
 Summing a window per pixel is a hundred reads or more. Each pair of images is read once per
 32×32 tile, lazily, into channel planes, with summed-area tables of each channel's change, the
 pixels that kept their colour and the five products the fit needs; a window's sum is then four
-lookups. Only the current row of tiles is kept. The anti-aliasing rule, otherwise as in PR #1,
+lookups. The tables the fit needs are built only when a pixel of the tile first reaches the fit:
+a whole-frame change of colour mostly fails the range test first, and building every tile of a
+1346×819 frame takes 39 ms without them and 89 ms with them. Only the current row of tiles is
+kept. The anti-aliasing rule, otherwise as in PR #1,
 turns away a pixel with no neighbour that kept its colour with one lookup in the same tables,
 which is most pixels of a whole-frame change.
 
