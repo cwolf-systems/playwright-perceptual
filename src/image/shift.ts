@@ -22,11 +22,11 @@ import type { Pixels } from './types.js';
 //
 // And over the pixel alone, where the rule says the pixel's colour lies within the colours next to
 // it in the other image, both ways round. A rasteriser covers an edge more sharply than bilinear
-// resampling mixes it, so here the range is widened by the contrast across it.
+// resampling mixes it, so beside a neighbour that kept its colour the range is widened by the
+// contrast across it.
 //
-// Each box is judged by its own move, per channel. An edge inside a box lets its total take a
-// wide range, so a faint change beside an edge that did not move, or an edge pixel whose sides
-// changed too, can pass where no single move explains both boxes.
+// Each box is judged by its own move, per channel. An edge inside a box lets its total take a wide
+// range, so a faint change of colour beside an edge that did not move passes as a move.
 
 /**
  * The boxes tested, the most decisive first: each one's side, the levels per pixel of the box by
@@ -35,22 +35,25 @@ import type { Pixels } from './types.js';
  *
  * Rounding in either image enters a box's total by up to half a level per pixel, so a level per
  * pixel covers it. Renderings of the same scene through the GPU and in software differ by a little
- * more where one is lighter across an area, and a 5×5 box needs a quarter of a level more to pass
- * them with room to spare. Over the large box rounding goes both ways and its worst case is not
- * reached: half a level per pixel fails those renderings, five eighths does not, and the tighter
- * bound counts more of a faint overlay change than the 5×5 box gives up.
+ * more where one is lighter across an area. The 5×5 box allows a quarter of a level more: every
+ * value from one level to one and a half loses no verdict on the benchmark, and below a quarter
+ * more, those renderings count more pixels. Over the large box rounding goes both ways and its
+ * worst case is not reached: 0.5625 of a level per pixel fails those renderings, 0.6 does not.
+ * Three quarters keeps a fifth of the value between it and that edge, at the cost of a few points
+ * of a faint overlay change, which a tighter bound would count.
  */
 const BOXES = [
-  { side: 65, slack: 0.625, widen: 0 },
+  { side: 65, slack: 0.75, widen: 0 },
   { side: 5, slack: ROUNDING_LEVELS + 0.25, widen: 0 },
 ] as const;
 
 /**
  * The pixel alone, with three levels of slack: 0.1.0's. With one or two, real renders of the same
  * scene fail. What a rasteriser moves across a box's border matches bilinear resampling on
- * average, but a single pixel along an edge only roughly: widened by the whole range, sub-pixel
- * moves of text, SVG and charts pass, and no faint change counts less. Half the range passes fewer
- * of them; a flat neighbourhood has no range, so a speck there still counts.
+ * average, but a single pixel along an edge only roughly: a thin line moved by half a pixel, for
+ * one, gathers into a pixel darker than any beside it. Widened by the whole range, such moves of
+ * text, SVG and charts pass; from 0.8 to 1.2 of the range, no verdict changes for the worse. A flat
+ * neighbourhood has no range, so a speck there still counts.
  */
 const PIXEL = { side: 1, slack: 3, widen: 1 } as const;
 
@@ -161,7 +164,15 @@ function moved(from: Tile, to: Tile, box: Box, x: number, y: number): boolean {
         const target = sum(to, c, x0, y0);
         const lo = Math.min(here, across, down, both);
         const hi = Math.max(here, across, down, both);
-        const allowed = box.slack * nx * ny + box.widen * (hi - lo);
+        // Widened only beside a neighbour that kept its colour, give or take rounding: an edge
+        // drawn more sharply leaves the colour beside it, while an edge whose sides changed colour
+        // too is a change. From no level to three, no verdict is lost; one counts the fewest
+        // pixels on pairs that should match.
+        const kept = (x1: number, y1: number) =>
+          Math.abs(sum(from, c, x1, y1) - sum(to, c, x1, y1)) <= ROUNDING_LEVELS * nx * ny;
+        const sharp =
+          box.widen > 0 && (kept(x0 + sx, y0) || kept(x0, y0 + sy) || kept(x0 + sx, y0 + sy));
+        const allowed = box.slack * nx * ny + (sharp ? box.widen * (hi - lo) : 0);
         if (target >= lo - allowed && target <= hi + allowed) continue channels;
       }
     }

@@ -355,41 +355,51 @@ describe('isShifted, on any move of under a pixel', () => {
     expect(refusedMoves(conserved, 2_000)).toBe(0);
   });
 
-  it('refuses a few of them at the pixel, where a colour of high contrast went away', () => {
-    // Random levels are the highest contrast there is: a pixel's colour can lie well outside its
-    // neighbours' after the move, as a colour that went away does.
-    expect(refusedMoves(isShifted, 2_000)).toBeLessThan(200);
+  it('refuses most of them at the pixel, where no neighbour kept its colour', () => {
+    // Random levels are the highest contrast there is, and after the move no neighbour keeps its
+    // colour, so the pixel test is not widened: a pixel's colour can then lie well outside its
+    // neighbours', as a colour that went away does. Rendered content keeps flat colour beside an
+    // edge; noise does not.
+    const refused = refusedMoves(isShifted, 2_000);
+    expect(refused).toBeGreaterThan(1_000);
+    expect(refused).toBeLessThan(2_000);
   });
 });
 
-describe('isShifted, beside an edge that did not move: known limits', () => {
-  /** An 11×11 image whose pixel (x, y) is `rgba(x, y)`. */
-  function image(rgba: (x: number, y: number) => Rgba): RgbaImage {
-    const result = solid(11, 11, WHITE);
-    for (let y = 0; y < 11; y++) for (let x = 0; x < 11; x++) setPixel(result, x, y, rgba(x, y));
-    return result;
+describe('isShifted, beside an edge', () => {
+  /** A `width`×`height` grey image whose pixel (x, y) is `level(x, y)`. */
+  function greys(width: number, height: number, level: (x: number, y: number) => number): Raster {
+    const result = solid(width, height, WHITE);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) setPixel(result, x, y, grey(level(x, y)));
+    }
+    return new Raster(result);
   }
 
-  // Known limits, pinned down: each box is judged by its own move, and an edge inside a box lets
-  // its total take a wide range. Both are real changes that pass as moves.
+  /** An edge from dark to light, with the columns beside its middle given. */
+  const edge = (left: number, mixed: number, right: number) =>
+    greys(9, 9, (x) => [40, 40, 40, left, mixed, right, 220, 220, 220][x]!);
 
-  it('passes a change of two levels over textured ground within reach of an edge', () => {
-    // An edge runs down column 7 of faintly textured ground. Two levels darker on its left, the
-    // change is no move of the edge: the edge did not move. Where the 5×5 box reaches the edge
-    // it passes; further off, the box counts it.
-    const ground = (offset: number) =>
-      image((x, y) => grey(x >= 7 ? 200 : 60 + ((x * 3 + y * 5) % 7) + offset));
-    for (const x of [4, 5, 6]) expect(shifted(ground(0), ground(-2), x, 5)).toBe(true);
-    for (const x of [0, 1, 2, 3]) expect(shifted(ground(0), ground(-2), x, 5)).toBe(false);
+  it('accepts an edge pixel mixed differently, the colours beside it unchanged', () => {
+    expect(isShifted(edge(40, 160, 220), edge(40, 120, 220), 4, 4)).toBe(true);
   });
 
-  it('passes an edge pixel whose sides changed colour too, though the sides count', () => {
-    /** Dark left of column 4, light right of it, and column 4 a mixture. */
-    const edge = (mixed: number, left: number, right: number) =>
-      image((x) => grey(x < 4 ? left : x > 4 ? right : mixed));
-    const [before, after] = [edge(160, 40, 220), edge(120, 48, 228)];
-    expect(shifted(before, after, 4, 4)).toBe(true);
-    expect(shifted(before, after, 2, 4)).toBe(false);
-    expect(shifted(before, after, 7, 4)).toBe(false);
+  it('rejects the columns beside an edge when they changed colour too', () => {
+    // Eight levels lighter either side of the mixture: no rasteriser leaves that, and the light
+    // side now lies beyond every colour near it. The pixel test is widened only beside a colour
+    // that was kept, and here none beside it was.
+    const [before, after] = [edge(40, 160, 220), edge(48, 120, 228)];
+    for (let y = 0; y < 9; y++) expect(isShifted(before, after, 5, y)).toBe(false);
+  });
+
+  it('passes a faint change over textured ground beside an edge that did not move: a limit', () => {
+    // Three levels darker over ground four columns wide, every pixel within reach of the edge. A
+    // move of the edge by a small part of a pixel carries as much colour across each box's border
+    // as the change took away, and the colour beside the edge is too faint to tell. 0.1.0 and
+    // 0.2.0's earlier detectors pass it too.
+    const ground = (offset: number) =>
+      greys(8, 11, (x, y) => (x >= 4 ? 200 : 100 + ((x * 3 + y * 5) % 7) + offset));
+    const [before, after] = [ground(0), ground(-3)];
+    for (let x = 0; x < 4; x++) expect(isShifted(before, after, x, 5)).toBe(true);
   });
 });
