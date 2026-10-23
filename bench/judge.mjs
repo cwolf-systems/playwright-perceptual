@@ -142,16 +142,21 @@ function decode(bytes) {
 /** Paths to real captures: the local file, then the environment. Missing entries are null. */
 function captureConfig(notices) {
   const file = process.env.PP_JUDGE_CONFIG ?? join(ROOT, 'bench', 'judge.local.json');
-  let config = {};
-  if (existsSync(file)) config = JSON.parse(readFileSync(file, 'utf8'));
-  else notices.push('No capture config (PP_JUDGE_CONFIG): real captures and 0.1.0 are skipped.');
+  const hasConfig = existsSync(file);
+  const config = hasConfig ? JSON.parse(readFileSync(file, 'utf8')) : {};
   const golden = process.env.PP_JUDGE_GOLDEN ?? config.golden ?? null;
   const v010 = process.env.PP_JUDGE_V010 ?? config.v010 ?? null;
+  // Without a config file, one notice says so; one per missing pair would only repeat it.
+  if (!hasConfig) {
+    notices.push(
+      `No capture config (PP_JUDGE_CONFIG): real captures${v010 ? '' : ' and 0.1.0'} are skipped.`,
+    );
+  }
   const pairs = {};
   for (const role of ['opacity', 'bilinear', 'grain', 'wholeFrame']) {
     const paths = config.pairs?.[role];
     pairs[role] = paths && paths.every((p) => existsSync(p)) ? paths : null;
-    if (!pairs[role]) notices.push(`Real capture pair "${role}" not found: skipped.`);
+    if (!pairs[role] && hasConfig) notices.push(`Real capture pair "${role}" not found: skipped.`);
   }
   if (golden && !existsSync(golden)) notices.push('Golden captures not found: skipped.');
   if (v010 && !existsSync(join(v010, 'dist', 'index.js'))) {
@@ -1119,6 +1124,22 @@ function compare(files) {
   );
 }
 
+/**
+ * A result file's text: indented JSON, but with each accuracy pair on a line of its own, so that a
+ * committed baseline stays short and its diffs show one line per pair that changed.
+ */
+function resultJson(result) {
+  const placeholder = 'pairs, one per line';
+  const text = JSON.stringify(
+    { ...result, accuracy: { ...result.accuracy, pairs: placeholder } },
+    null,
+    1,
+  );
+  const pairs = result.accuracy.pairs.map((p) => `   ${JSON.stringify(p)}`).join(',\n');
+  const list = pairs ? `[\n${pairs}\n  ]` : '[]';
+  return `${text.replace(`"pairs": "${placeholder}"`, () => `"pairs": ${list}`)}\n`;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Main
 
@@ -1193,7 +1214,7 @@ async function judge(args) {
 
   const out = args.out ?? join(candidateDir, 'bench', 'results', `judge-${name}.json`);
   mkdirSync(dirname(out), { recursive: true });
-  writeFileSync(out, `${JSON.stringify(result, null, 1)}\n`);
+  writeFileSync(out, resultJson(result));
   console.log(markdown(result));
   console.log(`\nResult: ${out}`);
 }
