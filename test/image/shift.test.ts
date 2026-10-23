@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Raster } from '../../src/image/raster.js';
 import { isShifted } from '../../src/image/shift.js';
 import type { RgbaImage } from '../../src/image/types.js';
-import { setPixel, solid, type Rgba } from '../helpers.js';
+import { pixelAt, setPixel, solid, type Rgba } from '../helpers.js';
 
 const WHITE: Rgba = [255, 255, 255, 255];
 const GREY: Rgba = [100, 100, 100, 255];
@@ -131,6 +131,30 @@ describe('isShifted, on any pixels', () => {
     }
     expect(verdicts.filter(([a, b]) => a !== b)).toEqual([]);
     expect(verdicts.filter(([a]) => a).length).toBeGreaterThan(1_000);
+  });
+
+  it('does so with the large window too, read in order, skipping rows, and out of order', () => {
+    const expected = texture(100, 90, 0);
+    // Moved on the left, two levels lighter on the right, where only the large window can tell.
+    const actual = texture(100, 90, 0.4);
+    for (let y = 0; y < 90; y++) {
+      for (let x = 50; x < 100; x++) {
+        const [r, g, b] = pixelAt(expected, x, y) as [number, number, number];
+        setPixel(actual, x, y, [r + 2, g + 2, b + 2, 255]);
+      }
+    }
+    const rasters = [new Raster(expected), new Raster(actual)] as const;
+    const pixels = [plain(expected), plain(actual)] as const;
+    const rows = [...Array.from({ length: 90 }, (_, y) => y), 5, 3, 80, 12, 30, 89, 0];
+    const verdicts: [boolean, boolean, number][] = [];
+    rows.forEach((y, n) => {
+      for (let x = n % 7; x < 100; x += 7) {
+        verdicts.push([isShifted(...rasters, x, y), isShifted(...pixels, x, y), x]);
+      }
+    });
+    expect(verdicts.filter(([a, b]) => a !== b)).toEqual([]);
+    expect(verdicts.filter(([a, , x]) => a && x < 40).length).toBeGreaterThan(300);
+    expect(verdicts.filter(([a, , x]) => a && x >= 60)).toEqual([]);
   });
 });
 

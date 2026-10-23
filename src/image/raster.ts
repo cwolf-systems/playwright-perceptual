@@ -4,6 +4,10 @@ import type { Pixels, RgbaImage } from './types.js';
 const CHANNELS = 4;
 const OPAQUE = 255;
 
+/** Pixels converted at a time: 2^12. */
+const BAND_BITS = 12;
+const BAND_MASK = (1 << BAND_BITS) - 1;
+
 /** Offsets of the eight neighbours of a pixel, as [dx, dy]. */
 export const NEIGHBOURS: readonly (readonly [number, number])[] = [
   [-1, -1],
@@ -42,13 +46,32 @@ export class Raster implements Pixels {
       byteOffset % CHANNELS === 0 ? new Uint32Array(buffer, byteOffset, this.pixels) : null;
   }
 
+  /**
+   * Colours as 0xRRGGBB, blended over white, converted a band of pixels at a time when first read:
+   * the noise detectors read each changed pixel's neighbours many times over.
+   */
+  private readonly bands: (Int32Array | undefined)[] = [];
+
   /** The colour at a pixel index as 0xRRGGBB. */
   rgb(index: number): number {
+    const band = this.bands[index >> BAND_BITS] ?? this.convert(index >> BAND_BITS);
+    return band[index & BAND_MASK]!;
+  }
+
+  private convert(band: number): Int32Array {
+    const first = band << BAND_BITS;
+    const colours = new Int32Array(Math.min(1 << BAND_BITS, this.pixels - first));
     const d = this.image.data;
-    const i = index * CHANNELS;
-    const alpha = d[i + 3]!;
-    if (alpha === OPAQUE) return pack(d[i]!, d[i + 1]!, d[i + 2]!);
-    return pack(overWhite(d[i]!, alpha), overWhite(d[i + 1]!, alpha), overWhite(d[i + 2]!, alpha));
+    for (let n = 0; n < colours.length; n++) {
+      const i = (first + n) * CHANNELS;
+      const alpha = d[i + 3]!;
+      colours[n] =
+        alpha === OPAQUE
+          ? pack(d[i]!, d[i + 1]!, d[i + 2]!)
+          : pack(overWhite(d[i]!, alpha), overWhite(d[i + 1]!, alpha), overWhite(d[i + 2]!, alpha));
+    }
+    this.bands[band] = colours;
+    return colours;
   }
 
   rgbAt(x: number, y: number): number {
