@@ -1,8 +1,9 @@
 import { deltaE2000 } from '../color/ciede2000.js';
 import { rgbToLab } from '../color/cielab.js';
+import { ROUNDING_LEVELS, withinLevels } from '../color/rgb.js';
 import { resolveCompareOptions, type ResolvedCompareOptions } from '../defaults.js';
 import { ImageSizeError } from '../errors.js';
-import { isAntialiased } from '../image/antialiasing.js';
+import { isAntialiasedEitherWay } from '../image/antialiasing.js';
 import { Raster } from '../image/raster.js';
 import { isShifted } from '../image/shift.js';
 import type { ColorDifference, Lab } from '../color/types.js';
@@ -22,23 +23,32 @@ import { Histogram } from './histogram.js';
 const BIN_WIDTH = 0.01;
 const BIN_COUNT = 12_800;
 
-// Screenshots repeat colours, and colour pairs, heavily: CIELAB is computed once per colour and
-// ΔE once per pair. The caps bound memory on noisy images such as photographs.
-const LAB_CACHE_LIMIT = 1 << 20;
-const DELTA_CACHE_LIMIT = 1 << 20;
+// Screenshots repeat colours, and colour pairs, heavily, so CIELAB is cached by colour and ΔE by
+// pair. Each cache is a fixed table indexed by a hash of its key: a lookup allocates nothing, and
+// a collision only means computing again, so noisy images such as photographs cost no more memory.
+const CACHE_BITS = 16;
+const HASH = 0x9e3779b1;
+const PAIR_HASH = 0x85ebca6b;
 const PAIR_KEY_SHIFT = 2 ** 24;
+const slot = (key: number): number => Math.imul(key, HASH) >>> (32 - CACHE_BITS);
 
 const fixed = (value: number): string => value.toFixed(2);
 
 function notes(
   maxDeltaE: number,
   deltaE: DeltaEStats,
+  rounded: number,
   antialiased: number,
   shifted: number,
+  exceeded: boolean,
 ): string[] {
+  const over = exceeded ? 'Over the pixels read before counting stopped' : 'Over all pixels';
   const lines = [
-    `Changed means ΔE00 above ${maxDeltaE}. Over all pixels: median ${fixed(deltaE.median)}, p95 ${fixed(deltaE.p95)}, p99 ${fixed(deltaE.p99)}, max ${fixed(deltaE.max)}.`,
+    `Changed means ΔE00 above ${maxDeltaE}. ${over}: median ${fixed(deltaE.median)}, p95 ${fixed(deltaE.p95)}, p99 ${fixed(deltaE.p99)}, max ${fixed(deltaE.max)}.`,
   ];
+  if (rounded > 0) {
+    lines.push(`${rounded} pixels within one level in every channel were not counted.`);
+  }
   if (antialiased > 0) lines.push(`${antialiased} anti-aliased pixels were not counted.`);
   if (shifted > 0) lines.push(`${shifted} pixels shifted by less than a pixel were not counted.`);
   return lines;
@@ -50,48 +60,59 @@ export class PerceptualComparator implements ImageComparator {
   private readonly colorDifference: ColorDifference;
   private readonly antialiasing: NoiseDetector | null;
   private readonly shift: NoiseDetector | null;
-  private readonly labs = new Map<number, Lab>();
-  private readonly deltas = new Map<number, number>();
+  private readonly labColours = new Int32Array(1 << CACHE_BITS).fill(-1);
+  private readonly labs = new Array<Lab | null>(1 << CACHE_BITS).fill(null);
+  private readonly deltaPairs = new Float64Array(1 << CACHE_BITS).fill(-1);
+  private readonly deltas = new Float64Array(1 << CACHE_BITS);
 
   constructor(options: CompareOptions = {}, parts: ComparatorParts = {}) {
-    this.options = resolveCompareOptions(options);
+    this.options = resolveCompareOptions(options, { shiftDetector: parts.shift !== null });
     this.colorDifference = parts.colorDifference ?? deltaE2000;
-    const antialiasing = parts.antialiasing === undefined ? isAntialiased : parts.antialiasing;
+    // Anti-aliasing is asked both ways round. The default asks once for both, sharing the check
+    // that a neighbour kept its colour; a detector passed in is asked each way.
+    const custom = parts.antialiasing;
+    const antialiasing: NoiseDetector | null =
+      custom === undefined
+        ? isAntialiasedEitherWay
+        : custom && ((a, b, x, y) => custom(a, b, x, y) || custom(b, a, x, y));
     const shift = parts.shift === undefined ? isShifted : parts.shift;
     this.antialiasing = this.options.ignoreAntialiasing ? antialiasing : null;
     this.shift = this.options.ignoreShifts ? shift : null;
   }
 
-  compare(expected: RgbaImage, actual: RgbaImage): PerceptualComparison {
-    return this.run(expected, actual, null);
+  compare(expected: RgbaImage, actual: RgbaImage, limit = Infinity): PerceptualComparison {
+    return this.run(expected, actual, null, limit);
   }
 
   diff(expected: RgbaImage, actual: RgbaImage): PerceptualComparison & DiffedComparison {
     const diff = new DiffImage(expected.width, expected.height);
-    return { ...this.run(expected, actual, diff), diff: diff.image };
+    return { ...this.run(expected, actual, diff, Infinity), diff: diff.image };
   }
 
   private lab(rgb: number): Lab {
-    const cached = this.labs.get(rgb);
-    if (cached) return cached;
-    const lab = rgbToLab(rgb);
-    if (this.labs.size < LAB_CACHE_LIMIT) this.labs.set(rgb, lab);
-    return lab;
+    const i = slot(rgb);
+    if (this.labColours[i] !== rgb) {
+      this.labColours[i] = rgb;
+      this.labs[i] = rgbToLab(rgb);
+    }
+    return this.labs[i]!;
   }
 
   private delta(expected: number, actual: number): number {
-    const key = expected * PAIR_KEY_SHIFT + actual;
-    const cached = this.deltas.get(key);
-    if (cached !== undefined) return cached;
-    const delta = this.colorDifference(this.lab(expected), this.lab(actual));
-    if (this.deltas.size < DELTA_CACHE_LIMIT) this.deltas.set(key, delta);
-    return delta;
+    const i = slot(expected ^ Math.imul(actual, PAIR_HASH));
+    const pair = expected * PAIR_KEY_SHIFT + actual;
+    if (this.deltaPairs[i] !== pair) {
+      this.deltaPairs[i] = pair;
+      this.deltas[i] = this.colorDifference(this.lab(expected), this.lab(actual));
+    }
+    return this.deltas[i]!;
   }
 
   private run(
     expectedImage: RgbaImage,
     actualImage: RgbaImage,
     diff: DiffImage | null,
+    limit: number,
   ): PerceptualComparison {
     if (expectedImage.width !== actualImage.width || expectedImage.height !== actualImage.height) {
       throw new ImageSizeError(expectedImage, actualImage);
@@ -103,6 +124,7 @@ export class PerceptualComparator implements ImageComparator {
     const actualWords = actual.words;
     let identical = 0;
     let differing = 0;
+    let rounded = 0;
     let antialiased = 0;
     let shifted = 0;
 
@@ -121,12 +143,15 @@ export class PerceptualComparator implements ImageComparator {
         diff?.unchanged(index, a);
         continue;
       }
+      // Rounding alone can pass ΔE00 1 in dark and greyish colours.
+      if (this.options.ignoreRounding && withinLevels(a, b, ROUNDING_LEVELS)) {
+        rounded++;
+        diff?.rounded(index);
+        continue;
+      }
       const x = index % expected.width;
       const y = (index - x) / expected.width;
-      if (
-        this.antialiasing?.(expected, actual, x, y) ||
-        this.antialiasing?.(actual, expected, x, y)
-      ) {
+      if (this.antialiasing?.(expected, actual, x, y)) {
         antialiased++;
         diff?.antialiased(index);
       } else if (this.shift?.(expected, actual, x, y)) {
@@ -135,6 +160,8 @@ export class PerceptualComparator implements ImageComparator {
       } else {
         differing++;
         diff?.changed(index);
+        // Past the limit the verdict is known, and only a diff image would need the rest.
+        if (differing > limit) break;
       }
     }
     histogram.add(0, identical);
@@ -150,10 +177,19 @@ export class PerceptualComparator implements ImageComparator {
       width: expected.width,
       height: expected.height,
       differing,
+      rounded,
       antialiased,
       shifted,
       deltaE,
-      notes: notes(this.options.maxDeltaE, deltaE, antialiased, shifted),
+      exceeded: differing > limit,
+      notes: notes(
+        this.options.maxDeltaE,
+        deltaE,
+        rounded,
+        antialiased,
+        shifted,
+        differing > limit,
+      ),
     };
   }
 }

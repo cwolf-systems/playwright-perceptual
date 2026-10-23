@@ -8,6 +8,12 @@ export interface CompareOptions {
   readonly ignoreAntialiasing?: boolean;
   /** Skip pixels that differ only because content moved by less than a pixel. */
   readonly ignoreShifts?: boolean;
+  /**
+   * Skip pixels within one level of each other in every channel: rounding, not a change. Such a
+   * pixel can reach ΔE00 2.45 in near-black greys. Defaults to on while shift tolerance is on,
+   * which in 0.1.0 skipped these pixels as shifts, and off when it is off.
+   */
+  readonly ignoreRounding?: boolean;
 }
 
 /** What any comparator reports. */
@@ -16,6 +22,11 @@ export interface Comparison {
   readonly height: number;
   /** Pixels that count as changed. */
   readonly differing: number;
+  /**
+   * Whether counting stopped once `differing` passed the limit asked of `compare`: more pixels may
+   * have changed. Absent or false when every pixel was compared.
+   */
+  readonly exceeded?: boolean;
   /** Lines for a failure message, after the count of changed pixels. */
   readonly notes: readonly string[];
 }
@@ -27,7 +38,11 @@ export interface DiffedComparison extends Comparison {
 
 /** Compares two images of the same size. */
 export interface ImageComparator {
-  compare(expected: RgbaImage, actual: RgbaImage): Comparison;
+  /**
+   * With `limit`, the comparator may stop counting once more than `limit` pixels have changed, as
+   * a verdict against that many allowed needs no more, and report the comparison as `exceeded`.
+   */
+  compare(expected: RgbaImage, actual: RgbaImage, limit?: number): Comparison;
   /** Like `compare`, and also paints where the images differ. */
   diff(expected: RgbaImage, actual: RgbaImage): DiffedComparison;
 }
@@ -43,8 +58,14 @@ export interface DeltaEStats {
 
 /** What the perceptual comparator reports. */
 export interface PerceptualComparison extends Comparison {
-  /** Pixels past `maxDeltaE`, excluding anti-aliasing and shifts. */
+  /** Pixels past `maxDeltaE`, excluding rounding, anti-aliasing and shifts. */
   readonly differing: number;
+  /**
+   * Pixels past `maxDeltaE` skipped as rounding: no channel differs by more than one level. Always
+   * set by this package's comparator; optional so that comparisons built by hand before 0.2.0, such
+   * as test doubles of a custom comparator, still type-check.
+   */
+  readonly rounded?: number;
   /** Pixels past `maxDeltaE` skipped as anti-aliasing. */
   readonly antialiased: number;
   /** Pixels past `maxDeltaE` skipped as sub-pixel shifts. */

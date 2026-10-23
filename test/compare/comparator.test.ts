@@ -64,13 +64,70 @@ describe('PerceptualComparator', () => {
     expect(result.shifted).toBe(0);
   });
 
+  it('sets aside a pixel no channel of which moved by more than one level, unless told not to', () => {
+    // A greyish cyan one level up in green and down in blue: past ΔE00 1, within rounding.
+    const dark: Rgba = [69, 123, 136, 255];
+    const actual = solid(3, 3, dark);
+    setPixel(actual, 1, 1, [69, 124, 135, 255]);
+    const ignored = compareImages(solid(3, 3, dark), actual);
+    expect(ignored.deltaE.max).toBeGreaterThan(1);
+    expect(ignored).toMatchObject({ rounded: 1, differing: 0, shifted: 0 });
+    expect(compareImages(solid(3, 3, dark), actual, { ignoreRounding: false }).rounded).toBe(0);
+    const none = { ignoreAntialiasing: false, ignoreShifts: false };
+    expect(
+      compareImages(solid(3, 3, dark), actual, { ...none, ignoreRounding: true }),
+    ).toMatchObject({ rounded: 1, differing: 0 });
+    setPixel(actual, 1, 1, [69, 125, 135, 255]);
+    expect(
+      compareImages(solid(3, 3, dark), actual, { ...none, ignoreRounding: true }).differing,
+    ).toBe(1);
+  });
+
+  it('counts rounding by default once shift tolerance is off, as 0.1.0 did', () => {
+    const dark: Rgba = [69, 123, 136, 255];
+    const actual = solid(3, 3, dark);
+    setPixel(actual, 1, 1, [69, 124, 135, 255]);
+    const none = { ignoreAntialiasing: false, ignoreShifts: false };
+    expect(compareImages(solid(3, 3, dark), actual, none)).toMatchObject({
+      rounded: 0,
+      differing: 1,
+    });
+    const noShift = new PerceptualComparator({}, { shift: null });
+    expect(noShift.compare(solid(3, 3, dark), actual)).toMatchObject({ rounded: 0, differing: 1 });
+    // With shift tolerance on, rounding still covers a lowered threshold: 0.1.0 took these
+    // pixels for shifts.
+    const strictThreshold = compareImages(solid(3, 3, dark), actual, { maxDeltaE: 0.5 });
+    expect(strictThreshold).toMatchObject({ rounded: 1, differing: 0 });
+  });
+
+  it('counts ground beside an edge changed by 6 to 32 levels, as 0.1.0 does', () => {
+    // A dark shape at grey 40 on ground at 200; the first one or two columns of ground beside it
+    // change. Lighter, a single column is a colour no move brings there; two columns either way
+    // keep a colour across a width no edge pixel spans.
+    const ground = (columns: number, d: number) => {
+      const image = solid(40, 10, [200, 200, 200, 255]);
+      for (let y = 0; y < 10; y++) {
+        for (let x = 0; x < 20 + columns; x++) {
+          const v = x < 20 ? 40 : 200 + d;
+          setPixel(image, x, y, [v, v, v, 255]);
+        }
+      }
+      return image;
+    };
+    for (const d of [6, 8, 12, 16, 24, 32]) {
+      expect(compareImages(ground(1, 0), ground(1, d)).differing).toBe(10);
+      expect(compareImages(ground(2, 0), ground(2, d)).differing).toBe(20);
+      expect(compareImages(ground(2, 0), ground(2, -d)).differing).toBe(20);
+    }
+  });
+
   it('judges transparent pixels as they appear over white', () => {
     expect(
       compareImages(solid(2, 2, [0, 0, 0, 0]), solid(2, 2, [255, 255, 255, 255])).differing,
     ).toBe(0);
   });
 
-  it('paints changes red, anti-aliasing yellow, shifts blue and the rest faded', () => {
+  it('paints changes red, anti-aliasing yellow, shifts blue, rounding pale blue, the rest faded', () => {
     const actual = edge(5);
     setPixel(actual, 8, 0, [255, 0, 0, 255]);
     const { diff } = new PerceptualComparator().diff(edge(4), actual);
@@ -79,6 +136,9 @@ describe('PerceptualComparator', () => {
     expect(pixelAt(diff, 8, 8)[0]).toBeGreaterThan(240);
     const shifts = new PerceptualComparator({ ignoreAntialiasing: false });
     expect(pixelAt(shifts.diff(edge(4), edge(5)).diff, 4, 4)).toEqual([0, 160, 255, 255]);
+    const rounded = solid(1, 1, [69, 124, 135, 255]);
+    const roundingDiff = new PerceptualComparator().diff(solid(1, 1, [69, 123, 136, 255]), rounded);
+    expect(pixelAt(roundingDiff.diff, 0, 0)).toEqual([150, 200, 240, 255]);
   });
 
   it('takes its colour difference and noise detectors as parts', () => {
@@ -88,6 +148,20 @@ describe('PerceptualComparator', () => {
     expect(never.compare(solid(2, 2, GREY), actual).differing).toBe(0);
     const everyEdge = new PerceptualComparator({}, { antialiasing: () => true });
     expect(everyEdge.compare(solid(2, 2, GREY), actual).antialiased).toBe(1);
+    // A detector passed in is asked each way round, the images swapped.
+    const asked: [unknown, unknown][] = [];
+    const recording = new PerceptualComparator(
+      {},
+      {
+        antialiasing: (image, other) => {
+          asked.push([image, other]);
+          return false;
+        },
+      },
+    );
+    recording.compare(solid(2, 2, GREY), actual);
+    expect(asked).toHaveLength(2);
+    expect(asked[1]).toEqual([asked[0]![1], asked[0]![0]]);
     const everyShift = new PerceptualComparator({}, { antialiasing: null, shift: () => true });
     expect(everyShift.compare(solid(2, 2, GREY), actual).shifted).toBe(1);
     const noDetectors = new PerceptualComparator({}, { antialiasing: null, shift: null });
@@ -106,6 +180,19 @@ describe('PerceptualComparator', () => {
     expect(compareImages(edge(4), edge(5), { ignoreAntialiasing: false }).notes).toContain(
       '18 pixels shifted by less than a pixel were not counted.',
     );
+    const rounded = solid(2, 1, [69, 124, 135, 255]);
+    expect(compareImages(solid(2, 1, [69, 123, 136, 255]), rounded).notes).toContain(
+      '2 pixels within one level in every channel were not counted.',
+    );
+  });
+
+  it('stops counting once past a limit, and says the statistics cover what it read', () => {
+    const changed = solid(4, 4, [200, 40, 40, 255]);
+    const stopped = new PerceptualComparator().compare(solid(4, 4, GREY), changed, 2);
+    expect(stopped).toMatchObject({ differing: 3, exceeded: true });
+    expect(stopped.notes[0]).toMatch(/^Changed means ΔE00 above 1\. Over the pixels read before/);
+    const full = new PerceptualComparator().compare(solid(4, 4, GREY), changed, 16);
+    expect(full).toMatchObject({ differing: 16, exceeded: false });
   });
 
   it('refuses images of different sizes, and options out of range', () => {

@@ -8,7 +8,14 @@ describe('options', () => {
       maxDeltaE: 1,
       ignoreAntialiasing: true,
       ignoreShifts: true,
+      ignoreRounding: true,
     });
+    // Rounding is set aside only while shift tolerance is on, unless asked either way.
+    expect(resolveCompareOptions({ ignoreShifts: false }).ignoreRounding).toBe(false);
+    expect(resolveCompareOptions({}, { shiftDetector: false }).ignoreRounding).toBe(false);
+    expect(
+      resolveCompareOptions({ ignoreShifts: false, ignoreRounding: true }).ignoreRounding,
+    ).toBe(true);
     expect(allowedDiffPixels({}, 1_000)).toBe(0);
   });
 

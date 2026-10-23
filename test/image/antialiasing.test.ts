@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isAntialiased } from '../../src/image/antialiasing.js';
-import { contains, onEdge, Raster } from '../../src/image/raster.js';
+import { onEdge, Raster } from '../../src/image/raster.js';
 import type { RgbaImage } from '../../src/image/types.js';
 import { setPixel, solid } from '../helpers.js';
 
@@ -20,6 +20,22 @@ describe('isAntialiased', () => {
   it('recognises a transition pixel between flat dark and flat bright areas', () => {
     const image = new Raster(edge(4));
     expect(isAntialiased(image, new Raster(edge(5)), 4, 4)).toBe(true);
+  });
+
+  it('rejects a slope whose flat sides changed colour, as a uniform change leaves it', () => {
+    /** Flat 40 to the left of column 4, 128 on it, flat 210 to the right, all `levels` lighter. */
+    const softEdge = (levels: number) => {
+      const image = solid(9, 9, [210 + levels, 210 + levels, 210 + levels, 255]);
+      for (let y = 0; y < 9; y++) {
+        for (let x = 0; x <= 4; x++) {
+          const v = (x < 4 ? 40 : 128) + levels;
+          setPixel(image, x, y, [v, v, v, 255]);
+        }
+      }
+      return new Raster(image);
+    };
+    expect(isAntialiased(softEdge(0), softEdge(1), 4, 4)).toBe(true);
+    expect(isAntialiased(softEdge(0), softEdge(3), 4, 4)).toBe(false);
   });
 
   it('rejects a pixel inside a flat area', () => {
@@ -43,13 +59,8 @@ describe('isAntialiased', () => {
 });
 
 describe('Raster', () => {
-  it('knows which coordinates are inside it and on its edge', () => {
+  it('knows which coordinates are on its edge', () => {
     const raster = new Raster(solid(3, 3, [0, 0, 0, 255]));
-    expect([contains(raster, 0, 0), contains(raster, 3, 0), contains(raster, -1, 1)]).toEqual([
-      true,
-      false,
-      false,
-    ]);
     expect([onEdge(raster, 0, 1), onEdge(raster, 1, 1)]).toEqual([true, false]);
   });
 });

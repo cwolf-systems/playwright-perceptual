@@ -8,11 +8,17 @@ const WHITE = 255;
 const CHANGED = [255, 0, 0] as const;
 const ANTIALIASED = [255, 255, 0] as const;
 const SHIFTED = [0, 160, 255] as const;
+// Pale blue: rounding is noise by definition and can cover most of a grainy image, so it stays
+// quiet, and kept off green, which red-green colour blindness confuses with the red of changes.
+const ROUNDED = [150, 200, 240] as const;
 
 /** Unchanged pixels keep this much of their contrast against white, so changes stand out. */
 const FADE = 0.1;
 
-/** Paints a diff image: changes red, anti-aliasing yellow, shifts blue, everything else faded grey. */
+/**
+ * Paints a diff image: changes red, anti-aliasing yellow, shifts blue, rounding pale blue,
+ * everything else faded grey.
+ */
 export class DiffImage {
   readonly image: RgbaImage;
 
@@ -35,6 +41,10 @@ export class DiffImage {
 
   shifted(index: number): void {
     this.paint(index, SHIFTED);
+  }
+
+  rounded(index: number): void {
+    this.paint(index, ROUNDED);
   }
 
   private paint(index: number, [r, g, b]: readonly [number, number, number]): void {
