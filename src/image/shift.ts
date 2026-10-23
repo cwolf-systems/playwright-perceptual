@@ -30,10 +30,11 @@ import type { Pixels } from './types.js';
  * it may, for sharpness.
  *
  * - Rounding in either image enters a box's total by up to half a level per pixel, so a level per
- *   pixel covers it, and the 5×5 box needs all of it for renderings through the GPU against
- *   software. Over the large box rounding goes both ways and its worst case is not reached; half a
- *   level per pixel still fails those renderings, where one is lighter across an area, and three
- *   quarters leaves room above that.
+ *   pixel covers it. Renderings of the same scene through the GPU and in software differ by a
+ *   little more where one is lighter across an area, and a 5×5 box needs a quarter of a level
+ *   more to pass them with room to spare. Over the large box rounding goes both ways and its
+ *   worst case is not reached: half a level per pixel fails those renderings, five eighths does
+ *   not, and the tighter bound counts more of a faint overlay change than the 5×5 box gives up.
  * - Over the pixel alone, three levels: 0.1.0's slack. With one or two, real renders of the same
  *   scene fail. What a rasteriser moves across a box's border matches bilinear resampling on
  *   average, but a single pixel along an edge only roughly: widened by the whole range, sub-pixel
@@ -41,8 +42,8 @@ import type { Pixels } from './types.js';
  *   fewer of them; a flat neighbourhood has no range, so a speck there still counts.
  */
 const BOXES = [
-  { side: 65, slack: 0.75, widen: 0 },
-  { side: 5, slack: ROUNDING_LEVELS, widen: 0 },
+  { side: 65, slack: 0.625, widen: 0 },
+  { side: 5, slack: ROUNDING_LEVELS + 0.25, widen: 0 },
   { side: 1, slack: 3, widen: 1 },
 ] as const;
 

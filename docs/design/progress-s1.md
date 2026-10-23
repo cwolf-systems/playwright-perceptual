@@ -16,17 +16,17 @@
 - Tried and dropped: lazy per-box filtering (−4 ms on small changes, +14 ms whole frame);
   box orders 1-5-65 and 5-1-65 (drift 590 ms against 350).
 
-## In progress (uncommitted)
-
-- Pixel test replaced by B's widened range (3 levels + half the 3×3 range, both ways), boxes
-  65 and 5 only (ablation variant d-widerange). Judge: 0 lost, 19 / 16 gained; opacity 94.2 /
-  86.1 %; drift 100 %; median-nonzero margin 20 % (was 64 %). Code 214 lines: over 204.
-  One unit test (finding 2, label moved a whole pixel) asserts the old failure; the judge labels
-  that pair as should-match, and B updated the same test.
+- 0edea24: pixel test widened by the quadrant's range (B's idea as a term of the box rule;
+  B's separate 3×3 range function was 214 lines in all, 19 / 16 gained). Widen 0.5 → 16 / 16
+  gained; widen 1 → 22 / 17 gained, 0 lost, residuals unchanged (94.2 / 86.1 %, drift 100 %).
+  Code 199. Margin: worst passing 80.9 % (a pair PR #1 failed), worst among PR #1-correct
+  pairs 73.0 % (2× GPU vs software effects), median of non-zero 13.3 % (D: 63.5 %).
+  Finding 2's label test now asserts a pass with no allowance, as B's branch does.
+- Note: the session scratchpad was wiped once; the 0.1.0 build for speed must be rebuilt.
 
 ## Next
 
-1. Bring the widened range under 204 lines without golfing (drop the 1×1 box special cases).
+1. Look for margin on the effects pair within the 5 spare lines.
 2. Unit, lint, typecheck, coverage, browser, runner, test:count gates.
 3. Full judge at the head (and the margin branch if it exists), docs, CHANGELOG, push, CI.
 

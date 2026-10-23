@@ -69,11 +69,11 @@ describe('finding 2: a label that lands on another pixel between loads of the sa
     expect(result.deltaE.max).toBeGreaterThan(40);
   });
 
-  it('fails with no allowance and passes with 0.1%, when its box covers one more row', () => {
+  it('passes with no allowance when its box covers one more row', () => {
     const { expected, actual } = labelEdge();
     const result = compareImages(expected, actual);
-    expect(result.differing).toBeGreaterThan(0);
-    expect(result.differing).toBeLessThanOrEqual(allowance(expected));
+    expect(result.differing).toBe(0);
+    expect(result.shifted).toBeGreaterThan(0);
   });
 });
 
