@@ -103,10 +103,8 @@ export function createToMatchPerceptually(defaults: MatcherDefaults): ToMatchPer
       const expected = decodePng(baseline, store.location);
       const actual = decodePng(await capture(timeoutMs), 'screenshot');
       const sameSize = expected.width === actual.width && expected.height === actual.height;
-      const same =
-        sameSize &&
-        comparator.compare(expected, actual).differing <=
-          allowedDiffPixels(options, expected.width * expected.height);
+      const allowed = allowedDiffPixels(options, expected.width * expected.height);
+      const same = sameSize && comparator.compare(expected, actual, allowed).differing <= allowed;
       return {
         pass: same,
         name: NAME,

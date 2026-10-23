@@ -151,6 +151,15 @@ describe('PerceptualComparator', () => {
     );
   });
 
+  it('stops counting once past a limit, and says the statistics cover what it read', () => {
+    const changed = solid(4, 4, [200, 40, 40, 255]);
+    const stopped = new PerceptualComparator().compare(solid(4, 4, GREY), changed, 2);
+    expect(stopped).toMatchObject({ differing: 3, exceeded: true });
+    expect(stopped.notes[0]).toMatch(/^Changed means ΔE00 above 1\. Over the pixels read before/);
+    const full = new PerceptualComparator().compare(solid(4, 4, GREY), changed, 16);
+    expect(full).toMatchObject({ differing: 16, exceeded: false });
+  });
+
   it('refuses images of different sizes, and options out of range', () => {
     expect(() => compareImages(solid(2, 2, GREY), solid(3, 2, GREY))).toThrow(ImageSizeError);
     expect(() => new PerceptualComparator({ maxDeltaE: -1 })).toThrow(InvalidOptionError);

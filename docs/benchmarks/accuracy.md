@@ -46,7 +46,7 @@ Labelled pairs from four sources.
 The first two make the **design set**: the noise detectors were developed while looking at these
 results. The third is the **held-out set**, which holds no Playwright fixtures, since those exist
 only at their own scale. Shift tolerance's neighbourhood rule and its slack of three levels were
-fixed before it was first rendered, but the conservation rule and the rounding class added since
+fixed before it was first rendered, but the box-filter rule and the rounding class added since
 0.1.0 were measured on it while being developed (see the end of this page). The two GIS scenes
 were added to both sets after the noise detectors were designed. The fourth is the **synthetic
 set**, reported pair by pair; it was written alongside the changes it motivated, so it shows what
@@ -200,13 +200,13 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
 | pixelmatch 0.2 (Playwright default)                    | **0**                               | 0                                | **98**                         | **8**                               | 0                                    | 0                                     | 0                                     |
 | ssim-cie94 (Playwright, experimental)                  | 728                                 | **73**                           | **120**                        | **34**                              | 0                                    | **218**                               | 0                                     |
 | looks-same (ΔE00 2.3)                                  | **0**                               | **differ**                       | **differ**                     | **differ**                          | 0                                    | **differ**                            | 0                                     |
-| perceptual ΔE00 1                                      | 15074                               | **10**                           | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
-| perceptual ΔE00 1.5                                    | 2783                                | **3**                            | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
-| perceptual ΔE00 2                                      | 1227                                | 0                                | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
-| perceptual ΔE00 2.3                                    | 1                                   | 0                                | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
-| perceptual ΔE00 3                                      | **0**                               | 0                                | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
+| perceptual ΔE00 1                                      | 17450                               | **10**                           | **2**                          | **5**                               | 0                                    | **33**                                | 0                                     |
+| perceptual ΔE00 1.5                                    | 3236                                | **3**                            | **2**                          | **5**                               | 0                                    | **33**                                | 0                                     |
+| perceptual ΔE00 2                                      | 1399                                | 0                                | **2**                          | **5**                               | 0                                    | **33**                                | 0                                     |
+| perceptual ΔE00 2.3                                    | 1                                   | 0                                | **2**                          | **5**                               | 0                                    | **33**                                | 0                                     |
+| perceptual ΔE00 3                                      | **0**                               | 0                                | **2**                          | **5**                               | 0                                    | **33**                                | 0                                     |
 | perceptual ΔE00 1.5, shifts counted                    | 4259                                | **301**                          | **116**                        | **32**                              | 0                                    | **213**                               | 0                                     |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 79                                  | **2**                            | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 77                                  | **2**                            | **2**                          | **5**                               | 0                                    | **34**                                | 0                                     |
 | perceptual ΔE00 1.5, structural only (experiment)      | 90                                  | **62**                           | **120**                        | **34**                              | 0                                    | **218**                               | 0                                     |
 
 ## Reading the results
@@ -223,8 +223,8 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
   held-out set.
 - What still fails at the default with 0.1% allowed: a WebKit artefact from Playwright's fixtures;
   two large regressions of a few pixels, which fall under the allowance; most sub-pixel shifts;
-  and the 2D map through the GPU against the software rasteriser, with 895 changed pixels (1.4%)
-  at 1× and 5,581 (2.2%) at 2×. Those lie along the seams between basemap tiles, which the two
+  and the 2D map through the GPU against the software rasteriser, with 954 changed pixels (1.5%)
+  at 1× and 5,741 (2.2%) at 2×. Those lie along the seams between basemap tiles, which the two
   rasterisers blend differently, and along the edges of the thick flight tracks: hairlines nobody
   would notice, though they reach ΔE00 28. Playwright's default passes this pair; ssim-cie94 and
   the structural rule fail it too. The 3D mission view through the GPU passes (2 and 45 pixels).
@@ -249,28 +249,29 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
 Three changes to the noise detection, each judged on these pairs before it was adopted, against
 0.1.0 on the same machine:
 
-- **Shift tolerance requires a move to conserve colour** over the 5×5 window around a pixel,
-  moved inward near the image's border.
+- **Shift tolerance is one box-filter rule.** A move of under a pixel changes a box's total colour
+  by no more than moving the box a whole pixel would, so one image's 5×5 box total at a changed
+  pixel must lie within the range of the other's at the box and one pixel over, give or take a
+  level per pixel, and the pixel's colour within the colours next to it, both ways round, give or
+  take three levels. The [design log](../design/box-filter.md) has the derivation, the variants
+  tried and their numbers.
 - **Rounding is its own class**: while shift tolerance is on, a pixel within one level in every
   channel is not counted.
 - **Anti-aliasing detection requires the flat side of a slope to keep its colour**, give or take a
   level.
 
 In the design and held-out sets, one verdict changed: at ΔE00 1.5 with no pixels allowed,
-Chromium's CSS effects page through the GPU against its software rasteriser at 2× fails with 11
-pixels (it already failed at ΔE00 1, with 48 pixels before and 116 now). Nothing else changed at
-any threshold or allowance. Regressions gain counted pixels, and some pairs that should match gain
-a few: the 2D map through the GPU at 2×, from 5,067 to 5,581; the map and 3D view moved 0.3 px
-at 2×, by up to 72; the CSS effects page through the GPU at 1×, from 3 to 9. In the synthetic set
-the faint overlay change, 0 counted pixels before, now has 15,074 at ΔE00 1.
+Chromium's CSS effects page through the GPU against its software rasteriser at 2× fails (it
+already failed at ΔE00 1, with 48 pixels before and 187 now). Nothing else changed at any
+threshold or allowance. Regressions gain counted pixels, and some pairs that should match gain a
+few: the 2D map through the GPU, from 894 to 954 at 1× and from 5,067 to 5,741 at 2×; the map and
+3D view moved 0.3 px at 2×, by up to 95; the CSS effects page through the GPU at 1×, from 3 to 9.
+In the synthetic set the faint overlay change, 0 counted pixels before, now has 17,450 at ΔE00 1.
 
-Comparison is slower where shift tolerance must test conservation at many pixels, and faster on
-grainy images, where rounding is checked before the detectors. On a downstream renderer's captures
-(1346×819, not included), a whole-frame real change took about twice as long (830–900 ms
-against 422–480 ms), and a film-grain scene 50–59 ms against 240–255 ms. A synthetic worst case, a
-drift of one to three levels over a whole textured frame of that size, took 3.6 times as long
-(2.0 s against 0.56 s). `npm run bench` changes a solid block of colour, which shift tolerance
-rejects at once, so its times are unchanged within run-to-run noise.
+The redesign round's judge times these against 0.1.0 on the same machine. A whole-frame real
+change on a downstream renderer's 1346×819 captures (not included) takes 350 ms against 408 ms; a
+drift of one to three levels over a whole textured frame of that size 343 ms against 561 ms; a
+film-grain scene 60 ms against 239 ms. The [design log](../design/box-filter.md) has the table.
 
 These rules were measured on the held-out set while being developed, so for them it is no longer
 unseen.

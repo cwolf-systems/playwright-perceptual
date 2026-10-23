@@ -23,11 +23,14 @@ import { Histogram } from './histogram.js';
 const BIN_WIDTH = 0.01;
 const BIN_COUNT = 12_800;
 
-// Screenshots repeat colours, and colour pairs, heavily: CIELAB is computed once per colour and
-// ΔE once per pair. The caps bound memory on noisy images such as photographs.
-const LAB_CACHE_LIMIT = 1 << 20;
-const DELTA_CACHE_LIMIT = 1 << 20;
+// Screenshots repeat colours, and colour pairs, heavily, so CIELAB is cached by colour and ΔE by
+// pair. Each cache is a fixed table indexed by a hash of its key: a lookup allocates nothing, and
+// a collision only means computing again, so noisy images such as photographs cost no more memory.
+const CACHE_BITS = 16;
+const HASH = 0x9e3779b1;
+const PAIR_HASH = 0x85ebca6b;
 const PAIR_KEY_SHIFT = 2 ** 24;
+const slot = (key: number): number => Math.imul(key, HASH) >>> (32 - CACHE_BITS);
 
 const fixed = (value: number): string => value.toFixed(2);
 
@@ -37,9 +40,11 @@ function notes(
   rounded: number,
   antialiased: number,
   shifted: number,
+  exceeded: boolean,
 ): string[] {
+  const over = exceeded ? 'Over the pixels read before counting stopped' : 'Over all pixels';
   const lines = [
-    `Changed means ΔE00 above ${maxDeltaE}. Over all pixels: median ${fixed(deltaE.median)}, p95 ${fixed(deltaE.p95)}, p99 ${fixed(deltaE.p99)}, max ${fixed(deltaE.max)}.`,
+    `Changed means ΔE00 above ${maxDeltaE}. ${over}: median ${fixed(deltaE.median)}, p95 ${fixed(deltaE.p95)}, p99 ${fixed(deltaE.p99)}, max ${fixed(deltaE.max)}.`,
   ];
   if (rounded > 0) {
     lines.push(`${rounded} pixels within one level in every channel were not counted.`);
@@ -56,8 +61,10 @@ export class PerceptualComparator implements ImageComparator {
   private readonly antialiasing: NoiseDetector | null;
   private readonly shift: NoiseDetector | null;
   private readonly ignoreRounding: boolean;
-  private readonly labs = new Map<number, Lab>();
-  private readonly deltas = new Map<number, number>();
+  private readonly labColours = new Int32Array(1 << CACHE_BITS).fill(-1);
+  private readonly labs = new Array<Lab | null>(1 << CACHE_BITS).fill(null);
+  private readonly deltaPairs = new Float64Array(1 << CACHE_BITS).fill(-1);
+  private readonly deltas = new Float64Array(1 << CACHE_BITS);
 
   constructor(options: CompareOptions = {}, parts: ComparatorParts = {}) {
     this.options = resolveCompareOptions(options);
@@ -72,36 +79,39 @@ export class PerceptualComparator implements ImageComparator {
     this.ignoreRounding = options.ignoreRounding ?? this.shift !== null;
   }
 
-  compare(expected: RgbaImage, actual: RgbaImage): PerceptualComparison {
-    return this.run(expected, actual, null);
+  compare(expected: RgbaImage, actual: RgbaImage, limit = Infinity): PerceptualComparison {
+    return this.run(expected, actual, null, limit);
   }
 
   diff(expected: RgbaImage, actual: RgbaImage): PerceptualComparison & DiffedComparison {
     const diff = new DiffImage(expected.width, expected.height);
-    return { ...this.run(expected, actual, diff), diff: diff.image };
+    return { ...this.run(expected, actual, diff, Infinity), diff: diff.image };
   }
 
   private lab(rgb: number): Lab {
-    const cached = this.labs.get(rgb);
-    if (cached) return cached;
-    const lab = rgbToLab(rgb);
-    if (this.labs.size < LAB_CACHE_LIMIT) this.labs.set(rgb, lab);
-    return lab;
+    const i = slot(rgb);
+    if (this.labColours[i] !== rgb) {
+      this.labColours[i] = rgb;
+      this.labs[i] = rgbToLab(rgb);
+    }
+    return this.labs[i]!;
   }
 
   private delta(expected: number, actual: number): number {
-    const key = expected * PAIR_KEY_SHIFT + actual;
-    const cached = this.deltas.get(key);
-    if (cached !== undefined) return cached;
-    const delta = this.colorDifference(this.lab(expected), this.lab(actual));
-    if (this.deltas.size < DELTA_CACHE_LIMIT) this.deltas.set(key, delta);
-    return delta;
+    const i = slot(expected ^ Math.imul(actual, PAIR_HASH));
+    const pair = expected * PAIR_KEY_SHIFT + actual;
+    if (this.deltaPairs[i] !== pair) {
+      this.deltaPairs[i] = pair;
+      this.deltas[i] = this.colorDifference(this.lab(expected), this.lab(actual));
+    }
+    return this.deltas[i]!;
   }
 
   private run(
     expectedImage: RgbaImage,
     actualImage: RgbaImage,
     diff: DiffImage | null,
+    limit: number,
   ): PerceptualComparison {
     if (expectedImage.width !== actualImage.width || expectedImage.height !== actualImage.height) {
       throw new ImageSizeError(expectedImage, actualImage);
@@ -152,6 +162,8 @@ export class PerceptualComparator implements ImageComparator {
       } else {
         differing++;
         diff?.changed(index);
+        // Past the limit the verdict is known, and only a diff image would need the rest.
+        if (differing > limit) break;
       }
     }
     histogram.add(0, identical);
@@ -171,7 +183,15 @@ export class PerceptualComparator implements ImageComparator {
       antialiased,
       shifted,
       deltaE,
-      notes: notes(this.options.maxDeltaE, deltaE, rounded, antialiased, shifted),
+      exceeded: differing > limit,
+      notes: notes(
+        this.options.maxDeltaE,
+        deltaE,
+        rounded,
+        antialiased,
+        shifted,
+        differing > limit,
+      ),
     };
   }
 }

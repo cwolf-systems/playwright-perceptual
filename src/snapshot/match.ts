@@ -44,13 +44,18 @@ type Outcome =
   | { readonly situation: 'resized'; readonly baseline: RgbaImage }
   | { readonly situation: 'unstable'; readonly last: Judgement; readonly pair: Pair };
 
-function judgeWith(comparator: ImageComparator, tolerance: Tolerance): Judge {
+/**
+ * Judges a pair against the tolerance. `forVerdict` asks only for the verdict, as while waiting for
+ * a stable screenshot, so counting may stop once past the allowance; a failure message is written
+ * from a full comparison.
+ */
+function judgeWith(comparator: ImageComparator, tolerance: Tolerance, forVerdict = false): Judge {
   return (expected, actual) => {
     if (expected.width !== actual.width || expected.height !== actual.height) {
       return { kind: 'resized' };
     }
-    const comparison = comparator.compare(expected, actual);
     const allowed = allowedDiffPixels(tolerance, expected.width * expected.height);
+    const comparison = comparator.compare(expected, actual, forVerdict ? allowed : undefined);
     return { kind: 'compared', comparison, agrees: comparison.differing <= allowed };
   };
 }
@@ -63,12 +68,10 @@ type Baseline =
 
 function classify(capture: Capture, stored: Baseline, judge: Judge): Outcome {
   switch (capture.kind) {
-    case 'unstable':
-      return {
-        situation: 'unstable',
-        last: capture.last,
-        pair: { expected: capture.previous.image, actual: capture.shot.image },
-      };
+    case 'unstable': {
+      const pair = { expected: capture.previous.image, actual: capture.shot.image };
+      return { situation: 'unstable', last: judge(pair.expected, pair.actual), pair };
+    }
     case 'matched':
       return { situation: 'matching' };
     case 'stable': {
@@ -146,7 +149,11 @@ export async function matchSnapshot(request: MatchRequest): Promise<MatchResult>
         : { kind: 'read', image: decodePng(baselinePng, store.location) };
   const judge = judgeWith(comparator, tolerance);
   log.push(waiting(source.timeoutMs));
-  const capture = await captureStable(source, judge, stored.kind === 'read' ? stored.image : null);
+  const capture = await captureStable(
+    source,
+    judgeWith(comparator, tolerance, true),
+    stored.kind === 'read' ? stored.image : null,
+  );
   log.push(
     `${capture.kind} after ${capture.attempts} screenshot${capture.attempts === 1 ? '' : 's'}`,
   );

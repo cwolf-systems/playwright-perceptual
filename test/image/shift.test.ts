@@ -157,8 +157,77 @@ describe('isShifted, on a faint tint over a flat dark panel, at every size', () 
     expect(shiftedPixels(width, height)).toBe(0);
   });
 
-  it('takes all of a panel under three pixels high for a move: what lies beyond is unknown', () => {
-    expect(shiftedPixels(200, 2)).toBe(400);
-    expect(shiftedPixels(1, 50)).toBe(50);
+  it('takes none of a panel one or two pixels high or wide for a move', () => {
+    expect(shiftedPixels(200, 2)).toBe(0);
+    expect(shiftedPixels(2, 50)).toBe(0);
+    expect(shiftedPixels(2, 2)).toBe(0);
+    expect(shiftedPixels(200, 1)).toBe(0);
+    expect(shiftedPixels(1, 50)).toBe(0);
+    expect(shiftedPixels(1, 1)).toBe(0);
+  });
+
+  it('accepts a soft edge moved along an image one pixel high, though not across it', () => {
+    const row = (values: number[]) => {
+      const image = solid(values.length, 1, WHITE);
+      values.forEach((v, x) => {
+        setPixel(image, x, 0, grey(v));
+      });
+      return image;
+    };
+    const before = row([0, 0, 64, 192, 255, 255, 255, 255]);
+    const after = row([0, 0, 32, 160, 255, 255, 255, 255]);
+    expect(shifted(before, after, 2, 0)).toBe(true);
+    expect(shifted(before, after, 3, 0)).toBe(true);
+  });
+});
+
+describe('isShifted, as a box filter', () => {
+  it('rejects a colour that appears in a corner, where no move from beyond can explain it', () => {
+    const actual = solid(4, 4, GREY);
+    setPixel(actual, 0, 0, [255, 0, 0, 255]);
+    expect(shifted(solid(4, 4, GREY), actual, 0, 0)).toBe(false);
+    setPixel(actual, 0, 0, [101, 100, 100, 255]);
+    expect(shifted(solid(4, 4, GREY), actual, 0, 0)).toBe(true);
+  });
+
+  it('rejects a colour that appears beside an edge, though the edge could carry colour', () => {
+    const before = [0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255];
+    const expected = columns(before);
+    const actual = columns(before);
+    setPixel(actual, 8, 2, [200, 40, 40, 255]);
+    expect(shifted(expected, actual, 8, 2)).toBe(false);
+  });
+
+  it('judges pixels the same way whichever tile of the image they fall in', () => {
+    // Larger than the tiles the image is filtered in, so pixels either side of a tile's edge are
+    // judged from different tiles: a soft edge down a tall image, and one across a wide image.
+    /** A soft edge at column `at`, `height` rows of `width`, its two grey columns given. */
+    const edge = (width: number, height: number, at: number, soft: readonly number[]) => {
+      const values = Array.from({ length: width }, (_, x) =>
+        x < at ? 0 : x - at < soft.length ? soft[x - at]! : 255,
+      );
+      const image = solid(width, height, WHITE);
+      for (let y = 0; y < height; y++) {
+        values.forEach((v, x) => {
+          setPixel(image, x, y, grey(v));
+        });
+      }
+      return new Raster(image);
+    };
+    for (const [width, height, at] of [
+      [8, 300, 3],
+      [600, 8, 511],
+    ] as const) {
+      const before = edge(width, height, at, [64, 192]);
+      const after = edge(width, height, at, [32, 160]);
+      for (let y = 0; y < height; y++) {
+        for (const x of [at, at + 1]) {
+          expect([isShifted(before, after, x, y), isShifted(after, before, x, y)]).toEqual([
+            true,
+            true,
+          ]);
+        }
+      }
+    }
   });
 });
