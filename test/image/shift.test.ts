@@ -186,24 +186,36 @@ describe('isShifted, as a box filter', () => {
     expect(shifted(expected, actual, 8, 2)).toBe(false);
   });
 
-  it('judges every band of rows the same way', () => {
-    // Taller than the bands the image is filtered in, so pixels on either side of a band's edge
-    // are judged from different bands.
-    const edge = (values: number[]) => {
-      const image = solid(values.length, 200, WHITE);
-      values.forEach((v, x) => {
-        for (let y = 0; y < 200; y++) setPixel(image, x, y, grey(v));
-      });
-      return image;
+  it('judges pixels the same way whichever tile of the image they fall in', () => {
+    // Larger than the tiles the image is filtered in, so pixels either side of a tile's edge are
+    // judged from different tiles: a soft edge down a tall image, and one across a wide image.
+    /** A soft edge at column `at`, `height` rows of `width`, its two grey columns given. */
+    const edge = (width: number, height: number, at: number, soft: readonly number[]) => {
+      const values = Array.from({ length: width }, (_, x) =>
+        x < at ? 0 : x - at < soft.length ? soft[x - at]! : 255,
+      );
+      const image = solid(width, height, WHITE);
+      for (let y = 0; y < height; y++) {
+        values.forEach((v, x) => {
+          setPixel(image, x, y, grey(v));
+        });
+      }
+      return new Raster(image);
     };
-    const before = new Raster(edge([0, 0, 0, 64, 192, 255, 255, 255]));
-    const after = new Raster(edge([0, 0, 0, 32, 160, 255, 255, 255]));
-    for (let y = 0; y < 200; y++) {
-      expect([edgeMoved(before, after, y), edgeMoved(after, before, y)]).toEqual([true, true]);
+    for (const [width, height, at] of [
+      [8, 300, 3],
+      [600, 8, 511],
+    ] as const) {
+      const before = edge(width, height, at, [64, 192]);
+      const after = edge(width, height, at, [32, 160]);
+      for (let y = 0; y < height; y++) {
+        for (const x of [at, at + 1]) {
+          expect([isShifted(before, after, x, y), isShifted(after, before, x, y)]).toEqual([
+            true,
+            true,
+          ]);
+        }
+      }
     }
   });
 });
-
-/** Whether both pixels of the soft edge in row y pass as moved. */
-const edgeMoved = (before: Raster, after: Raster, y: number): boolean =>
-  isShifted(before, after, 3, y) && isShifted(before, after, 4, y);

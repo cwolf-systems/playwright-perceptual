@@ -23,10 +23,10 @@ const BOXES = [5, 1];
 
 const CHANNELS = 3;
 
-/** Rows of an image filtered at once: bands are filtered only where a pixel is judged. */
-const BAND = 64;
+/** Rows and columns filtered at once: an image is filtered only in tiles where a pixel is judged. */
+const TILE = { rows: 128, columns: 512 } as const;
 
-/** Rows read beyond a band, for the boxes that judge the pixels at its edge. */
+/** Pixels read beyond a tile, for the boxes that judge the pixels at its edge. */
 const MARGIN = BOXES[0]! + 1;
 
 const SIGNS = [-1, 1];
@@ -36,9 +36,6 @@ const SIGNS = [-1, 1];
  * level per pixel, as over the box, fails real renders of the same scene; three does not.
  */
 const PIXEL_SLACK = 3;
-
-/** A box's side along a side of `size`: at most `n`, leaving room to move it by a pixel. */
-const side = (n: number, size: number): number => Math.min(n, size - 1);
 
 /**
  * Where a box of `n` pixels starts along a side of `size` to judge the pixel at `p` against a move
@@ -52,7 +49,7 @@ function place(p: number, n: number, size: number, sign: number): number {
   return n === 1 && start !== p ? -1 : start;
 }
 
-/** Each channel's totals over boxes of one size, for a band of an image's rows. */
+/** Each channel's totals over boxes of one size, for a tile of an image. */
 interface Boxes {
   readonly nx: number;
   readonly ny: number;
@@ -61,77 +58,81 @@ interface Boxes {
   readonly totals: Uint16Array;
 }
 
-/** A band of an image's rows, box-filtered at each size of box. */
-class Band {
+/** A tile of an image, box-filtered at each size of box. */
+interface Tile {
+  readonly pixels: Pixels;
+  readonly left: number;
   readonly top: number;
   readonly boxes: readonly Boxes[];
-
-  constructor(
-    readonly pixels: Pixels,
-    readonly index: number,
-  ) {
-    const { width, height } = pixels;
-    this.top = Math.max(0, index * BAND - MARGIN);
-    const rows = Math.min(height, (index + 1) * BAND + MARGIN) - this.top;
-    const stride = width * CHANNELS;
-    const levels = new Uint16Array(rows * stride);
-    for (let y = 0, i = 0; y < rows; y++) {
-      for (let x = 0; x < width; x++, i += CHANNELS) {
-        const rgb = pixels.rgbAt(x, this.top + y);
-        levels[i] = red(rgb);
-        levels[i + 1] = green(rgb);
-        levels[i + 2] = blue(rgb);
-      }
-    }
-    // Separable running sums: totals down each column over the box's rows, then across.
-    this.boxes = BOXES.map((n) => {
-      const nx = side(n, width);
-      const ny = side(n, height);
-      const columns = width - nx + 1;
-      if (nx === 1 && ny === 1) return { nx, ny, columns, totals: levels };
-      const totals = new Uint16Array(rows * columns * CHANNELS);
-      const down = new Uint16Array(stride);
-      const across = new Int32Array(stride);
-      for (let y = 0; y < rows; y++) {
-        const row = (y - ny + 1) * columns * CHANNELS;
-        for (let i = 0; i < stride; i++) {
-          down[i]! += levels[y * stride + i]! - (y < ny ? 0 : levels[(y - ny) * stride + i]!);
-          across[i] = down[i]! + (i < CHANNELS ? 0 : across[i - CHANNELS]!);
-          // The box ending at this pixel starts nx pixels back; its total, once it is all read.
-          const before = i - nx * CHANNELS;
-          if (row >= 0 && before >= -CHANNELS) {
-            totals[row + before + CHANNELS] = across[i]! - (before < 0 ? 0 : across[before]!);
-          }
-        }
-      }
-      return { nx, ny, columns, totals };
-    });
-  }
-
-  /** Channel `c`'s total over the `b`th size of box whose top left pixel is (x, y). */
-  at(b: number, c: number, x: number, y: number): number {
-    const { columns, totals } = this.boxes[b]!;
-    return totals[((y - this.top) * columns + x) * CHANNELS + c]!;
-  }
 }
 
-// The last band filtered for each image. Pixels are judged row by row, so a band is filtered once.
-const bands = new WeakMap<Pixels, Band>();
+/** Channel `c`'s total over the `b`th size of box whose top left pixel is (x, y). */
+function total({ left, top, boxes }: Tile, b: number, c: number, x: number, y: number): number {
+  const { columns, totals } = boxes[b]!;
+  return totals[((y - top) * columns + x - left) * CHANNELS + c]!;
+}
 
-function band(pixels: Pixels, y: number): Band {
-  const index = Math.floor(y / BAND);
-  const cached = bands.get(pixels);
-  if (cached?.index === index) return cached;
-  const filtered = new Band(pixels, index);
-  bands.set(pixels, filtered);
-  return filtered;
+/** Box-filters the tile of `pixels` in the given column and row of tiles. */
+function filter(pixels: Pixels, column: number, row: number): Tile {
+  const { width, height } = pixels;
+  const left = Math.max(0, column * TILE.columns - MARGIN);
+  const top = Math.max(0, row * TILE.rows - MARGIN);
+  const across = Math.min(width, (column + 1) * TILE.columns + MARGIN) - left;
+  const rows = Math.min(height, (row + 1) * TILE.rows + MARGIN) - top;
+  const stride = across * CHANNELS;
+  const levels = new Uint16Array(rows * stride);
+  for (let y = 0, i = 0; y < rows; y++) {
+    for (let x = 0; x < across; x++, i += CHANNELS) {
+      const rgb = pixels.rgbAt(left + x, top + y);
+      levels[i] = red(rgb);
+      levels[i + 1] = green(rgb);
+      levels[i + 2] = blue(rgb);
+    }
+  }
+  // Separable running sums: totals down each column over the box's rows, then across.
+  const boxes = BOXES.map((n) => {
+    // At most n, leaving room to move the box by a pixel.
+    const nx = Math.min(n, width - 1);
+    const ny = Math.min(n, height - 1);
+    const columns = across - nx + 1;
+    if (nx === 1 && ny === 1) return { nx, ny, columns, totals: levels };
+    const totals = new Uint16Array(rows * columns * CHANNELS);
+    const down = new Uint16Array(stride);
+    const sums = new Int32Array(stride);
+    for (let y = 0; y < rows; y++) {
+      const first = (y - ny + 1) * columns * CHANNELS;
+      for (let i = 0; i < stride; i++) {
+        down[i]! += levels[y * stride + i]! - (y < ny ? 0 : levels[(y - ny) * stride + i]!);
+        sums[i] = down[i]! + (i < CHANNELS ? 0 : sums[i - CHANNELS]!);
+        // The box ending at this pixel starts nx pixels back; its total, once it is all read.
+        const before = i - nx * CHANNELS;
+        if (first >= 0 && before >= -CHANNELS) {
+          totals[first + before + CHANNELS] = sums[i]! - (before < 0 ? 0 : sums[before]!);
+        }
+      }
+    }
+    return { nx, ny, columns, totals };
+  });
+  return { pixels, left, top, boxes };
+}
+
+// The tiles filtered in the last row of tiles of each image. Pixels are judged row by row, so a
+// tile is filtered once. They are kept by image, which must not change while it is judged.
+const tiles = new WeakMap<Pixels, { row: number; tiles: Tile[] }>();
+
+function tile(pixels: Pixels, x: number, y: number): Tile {
+  const row = Math.floor(y / TILE.rows);
+  const column = Math.floor(x / TILE.columns);
+  let cached = tiles.get(pixels);
+  if (cached?.row !== row) tiles.set(pixels, (cached = { row, tiles: [] }));
+  return (cached.tiles[column] ??= filter(pixels, column, row));
 }
 
 /**
  * Whether, in every channel, `to`'s total over the `b`th size of box around (x, y) lies within
  * what a move of under a pixel in `from` leaves, give or take rounding.
  */
-function moved(from: Band, to: Band, b: number, x: number, y: number): boolean {
+function moved(from: Tile, to: Tile, b: number, x: number, y: number): boolean {
   const { nx, ny } = from.boxes[b]!;
   const { width, height } = from.pixels;
   const slack = BOXES[b] === 1 ? PIXEL_SLACK : ROUNDING_LEVELS * nx * ny;
@@ -141,14 +142,14 @@ function moved(from: Band, to: Band, b: number, x: number, y: number): boolean {
       for (const sy of SIGNS) {
         const y0 = place(y, ny, height, sy);
         if (x0 < 0 || y0 < 0) continue;
-        const here = from.at(b, c, x0, y0);
-        const across = from.at(b, c, x0 + sx, y0);
-        const down = from.at(b, c, x0, y0 + sy);
-        const both = from.at(b, c, x0 + sx, y0 + sy);
-        const total = to.at(b, c, x0, y0);
+        const here = total(from, b, c, x0, y0);
+        const across = total(from, b, c, x0 + sx, y0);
+        const down = total(from, b, c, x0, y0 + sy);
+        const both = total(from, b, c, x0 + sx, y0 + sy);
+        const target = total(to, b, c, x0, y0);
         const lo = Math.min(here, across, down, both) - slack;
         const hi = Math.max(here, across, down, both) + slack;
-        if (total >= lo && total <= hi) continue channels;
+        if (target >= lo && target <= hi) continue channels;
       }
     }
     return false;
@@ -160,8 +161,8 @@ function moved(from: Band, to: Band, b: number, x: number, y: number): boolean {
 export function isShifted(image: Pixels, other: Pixels, x: number, y: number): boolean {
   // A side of one pixel: what a move along it would bring in is unknown.
   if (image.width < 2 || image.height < 2) return true;
-  const before = band(image, y);
-  const after = band(other, y);
+  const before = tile(image, x, y);
+  const after = tile(other, x, y);
   return BOXES.every((n, b) =>
     n === 1
       ? moved(before, after, b, x, y) && moved(after, before, b, x, y)
