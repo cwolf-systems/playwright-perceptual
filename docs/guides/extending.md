@@ -19,7 +19,9 @@ Options given to an assertion override the suite's. `perceptualMatchers` is
 
 Anything that implements `ImageComparator` can replace the built-in comparison, per assertion or
 for a suite. A comparison reports the image size, how many pixels changed, and `notes`: lines that
-follow the count in a failure message.
+follow the count in a failure message. `compare` may be given a `limit`, the pixels allowed, when
+only the verdict is needed, as while the matcher waits for a stable screenshot; a comparator may
+then stop counting once more than `limit` pixels changed and set `exceeded`, or ignore it.
 
 ```ts
 import type { ImageComparator } from '@cwolf-systems/playwright-perceptual';
@@ -51,9 +53,12 @@ const comparator = new PerceptualComparator({ maxDeltaE: 2.3 }, { colorDifferenc
 
 The detectors, `antialiasing` and `shift`, each decide whether a changed pixel is rendering noise.
 Pass your own `NoiseDetector`, `(image, other, x, y) => boolean`, or `null` to turn one off; with
-both `null`, every changed pixel counts. A detector reads both images through `Pixels`, whose
-`rgbAt(x, y)` gives a colour as `0xRRGGBB`. The built-in ones are exported as `isAntialiased` and
-`isShifted`, so a detector can build on them:
+both `null`, every changed pixel counts. An anti-aliasing detector is asked each way round, with
+the images swapped; a shift detector once. While a shift detector is in use, pixels within one level
+in every channel are set aside as rounding before either detector is asked; `ignoreRounding`
+overrides that either way. A detector reads both
+images through `Pixels`, whose `rgbAt(x, y)` gives a colour as `0xRRGGBB`. The built-in ones are
+exported as `isAntialiased` and `isShifted`, so a detector can build on them:
 
 ```ts
 import {
@@ -67,6 +72,10 @@ const shift: NoiseDetector = (image, other, x, y) => y >= 40 && isShifted(image,
 
 const comparator = new PerceptualComparator({}, { shift });
 ```
+
+`isShifted` keeps a summed-area table of the tiles it has read for each `Pixels` object, so an
+image must not change while it is being judged; the comparator passes new ones for each
+comparison.
 
 ## Other storage
 
