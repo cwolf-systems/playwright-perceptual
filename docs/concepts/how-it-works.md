@@ -35,18 +35,15 @@ Two images of the same size are compared pixel by pixel.
      falls, a move carries as much colour in as out, and the drift remains;
    - a 5×5 box, either image being the one that moved, which a smaller real change survives;
    - the pixel alone, both ways round, give or take three levels: each image's colour lies within
-     the colours next to it in the other. A rasteriser draws an edge more sharply than bilinear
-     resampling mixes it, so where a neighbour kept its colour the range is widened by the
-     contrast across it.
+     the colours next to it in the other.
 
    Box totals come from a summed-area table per channel, built once for each tile of the image
    where a pixel is judged, so a box of any size costs four reads. Near the image's border a box
-   moves inward so that the box moved is in the image too; the pixel's own test stays on the
-   pixel, so on the outermost pixels a move from beyond the border explains nothing, and across
-   an image one pixel wide no move does. A pixel that passes all three is reported as shifted. A
-   real change brings in a colour that was not nearby, such as a line that went away, changes the
-   colour beside an edge as well as the edge, or changes the colour of a whole box at once, such
-   as a translucent overlay made a little stronger or weaker, or a drift over textured ground.
+   moves inward so that the box moved is in the image too. A pixel that passes all three is
+   reported as shifted. A real change brings in a colour that was not nearby, such as a line that
+   went away or a ring of new colour round a shape, or changes the colour of a whole box at once,
+   such as a translucent overlay made a little stronger or weaker, or a drift over textured
+   ground.
 
 The result is the number of changed pixels and the distribution of ΔE00 over the whole image:
 mean, median, p95, p99 and maximum. The count says how much changed; the distribution says how
@@ -72,19 +69,23 @@ lightness, chroma and hue, and for blues, where earlier formulas were least accu
 - Beside an edge that did not move, shift tolerance can take a faint change of colour for a
   move: a move of the edge by a small part of a pixel carries as much colour across each box's
   border as the change took away. Ground three levels darker within a few pixels of an edge
-  passes; further from the edge it counts. 0.1.0 passes it too. Of a real faint overlay change
-  over terrain, 17% of the changed pixels still pass this way, beside contour lines.
-- On random noise most sub-pixel moves count as changes: no neighbour keeps its colour, so the
-  pixel test is not widened, and noise moved by part of a pixel produces colours outside its
-  neighbours'. The box tests alone pass every such move.
+  passes; further from the edge it counts. 0.1.0 passes it too. Part of a faint overlay change
+  over terrain passes the same way, beside contour lines.
+- Not every sub-pixel move passes. Thin text, maps and 3D scenes moved 0.3 px still leave changed
+  pixels where edges overlap: a rasteriser draws an edge more sharply than resampling mixes it, so
+  a thin line moved by half a pixel can gather into a pixel darker than any beside it. That looks
+  exactly like a line of new colour, which must count. On random noise most sub-pixel moves count
+  as changes for the same reason.
+- Anti-aliasing detection compares brightness, not hue. Beside a black edge, a column of white
+  that turns pure blue or red sits on a slope between a darker and a brighter neighbour, and is
+  taken for anti-aliasing (0.1.0 does the same). A coloured ring a pixel wide round a dark shape
+  can pass the same way.
 - A drift of one level everywhere passes as rounding while shift tolerance is on, even where it
   passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over a flat or gently
   shaded area counts.
 - In an image one pixel high or wide, what lies beyond the image across that side is unknown, so
   a move across it explains nothing and is not allowed for; a move along it is. A sub-pixel move
   of content across such a sliver counts as a change.
-- Not every sub-pixel move passes. Thin text, maps and 3D scenes moved 0.3 px still leave changed
-  pixels where edges overlap and produce colours neither image has nearby.
 - Fine detail is judged at full resolution. CIEDE2000 was built for uniform patches; the eye blends
   detail too fine to resolve, and per-pixel comparison does not. Hairline differences, such as
   seams between map tiles drawn by two rasterisers, count in full.

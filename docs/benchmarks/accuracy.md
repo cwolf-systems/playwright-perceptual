@@ -86,11 +86,11 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
 | pixelmatch 0.2 (Playwright default)                    | 2                                 | 9                             | 24                            | 12                                   |
 | ssim-cie94 (Playwright, experimental)                  | 4                                 | 0                             | 3                             | 15                                   |
 | looks-same (ΔE00 2.3)                                  | 10                                | 1                             | 0                             | 15                                   |
-| perceptual ΔE00 1                                      | 5                                 | 0                             | 0                             | 12                                   |
-| perceptual ΔE00 1.5                                    | 4                                 | 0                             | 0                             | 12                                   |
-| perceptual ΔE00 2                                      | 4                                 | 1                             | 0                             | 12                                   |
-| perceptual ΔE00 2.3                                    | 4                                 | 1                             | 0                             | 12                                   |
-| perceptual ΔE00 3                                      | 4                                 | 1                             | 0                             | 12                                   |
+| perceptual ΔE00 1                                      | 8                                 | 0                             | 0                             | 12                                   |
+| perceptual ΔE00 1.5                                    | 7                                 | 0                             | 0                             | 12                                   |
+| perceptual ΔE00 2                                      | 7                                 | 1                             | 0                             | 12                                   |
+| perceptual ΔE00 2.3                                    | 7                                 | 1                             | 0                             | 12                                   |
+| perceptual ΔE00 3                                      | 6                                 | 1                             | 0                             | 12                                   |
 | perceptual ΔE00 1.5, shifts counted                    | 12                                | 0                             | 0                             | 15                                   |
 | perceptual ΔE00 1.5, structural for edges (experiment) | 3                                 | 0                             | 3                             | 12                                   |
 | perceptual ΔE00 1.5, structural only (experiment)      | 4                                 | 0                             | 3                             | 15                                   |
@@ -105,13 +105,13 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
 | pixelmatch 0.2 (Playwright default)                    | 0                                 | 11                            | 24                            | 8                                    |
 | ssim-cie94 (Playwright, experimental)                  | 2                                 | 2                             | 3                             | 15                                   |
 | looks-same (ΔE00 2.3)                                  | 10                                | 1                             | 0                             | 15                                   |
-| perceptual ΔE00 1                                      | 2                                 | 2                             | 0                             | 9                                    |
-| perceptual ΔE00 1.5                                    | 2                                 | 2                             | 0                             | 8                                    |
-| perceptual ΔE00 2                                      | 2                                 | 3                             | 0                             | 8                                    |
-| perceptual ΔE00 2.3                                    | 2                                 | 3                             | 0                             | 8                                    |
-| perceptual ΔE00 3                                      | 2                                 | 3                             | 3                             | 8                                    |
+| perceptual ΔE00 1                                      | 2                                 | 2                             | 0                             | 12                                   |
+| perceptual ΔE00 1.5                                    | 2                                 | 2                             | 0                             | 12                                   |
+| perceptual ΔE00 2                                      | 2                                 | 3                             | 0                             | 12                                   |
+| perceptual ΔE00 2.3                                    | 2                                 | 3                             | 0                             | 12                                   |
+| perceptual ΔE00 3                                      | 2                                 | 3                             | 3                             | 9                                    |
 | perceptual ΔE00 1.5, shifts counted                    | 6                                 | 2                             | 0                             | 12                                   |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 1                                 | 2                             | 3                             | 8                                    |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 1                                 | 2                             | 3                             | 12                                   |
 | perceptual ΔE00 1.5, structural only (experiment)      | 2                                 | 2                             | 3                             | 15                                   |
 
 ### Held-out set (86 pairs), no changed pixels allowed
@@ -124,13 +124,13 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
 | pixelmatch 0.2 (Playwright default)                    | 1                                 | 6                             | 24                            | 12                                   |
 | ssim-cie94 (Playwright, experimental)                  | 4                                 | 0                             | 0                             | 15                                   |
 | looks-same (ΔE00 2.3)                                  | 5                                 | 0                             | 0                             | 15                                   |
-| perceptual ΔE00 1                                      | 4                                 | 0                             | 0                             | 13                                   |
-| perceptual ΔE00 1.5                                    | 4                                 | 0                             | 0                             | 13                                   |
-| perceptual ΔE00 2                                      | 3                                 | 0                             | 0                             | 13                                   |
-| perceptual ΔE00 2.3                                    | 3                                 | 0                             | 0                             | 13                                   |
-| perceptual ΔE00 3                                      | 3                                 | 0                             | 0                             | 13                                   |
+| perceptual ΔE00 1                                      | 4                                 | 0                             | 0                             | 14                                   |
+| perceptual ΔE00 1.5                                    | 4                                 | 0                             | 0                             | 14                                   |
+| perceptual ΔE00 2                                      | 3                                 | 0                             | 0                             | 14                                   |
+| perceptual ΔE00 2.3                                    | 3                                 | 0                             | 0                             | 14                                   |
+| perceptual ΔE00 3                                      | 3                                 | 0                             | 0                             | 14                                   |
 | perceptual ΔE00 1.5, shifts counted                    | 5                                 | 0                             | 0                             | 15                                   |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 2                                 | 0                             | 0                             | 14                                   |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 2                                 | 0                             | 0                             | 15                                   |
 | perceptual ΔE00 1.5, structural only (experiment)      | 4                                 | 0                             | 0                             | 15                                   |
 
 ### Held-out set, 0.1% of the image allowed
@@ -162,13 +162,13 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
 | pixelmatch 0.2 (Playwright default)                    | 2                                | 0                            | 1                            | 0                                   |
 | ssim-cie94 (Playwright, experimental)                  | 3                                | 0                            | 0                            | 1                                   |
 | looks-same (ΔE00 2.3)                                  | 3                                | 0                            | 1                            | 1                                   |
-| perceptual ΔE00 1                                      | 1                                | 0                            | 0                            | 0                                   |
-| perceptual ΔE00 1.5                                    | 1                                | 0                            | 0                            | 0                                   |
-| perceptual ΔE00 2                                      | 1                                | 0                            | 0                            | 0                                   |
-| perceptual ΔE00 2.3                                    | 1                                | 0                            | 0                            | 0                                   |
-| perceptual ΔE00 3                                      | 1                                | 0                            | 1                            | 0                                   |
+| perceptual ΔE00 1                                      | 3                                | 0                            | 0                            | 1                                   |
+| perceptual ΔE00 1.5                                    | 3                                | 0                            | 0                            | 1                                   |
+| perceptual ΔE00 2                                      | 3                                | 0                            | 0                            | 0                                   |
+| perceptual ΔE00 2.3                                    | 3                                | 0                            | 0                            | 0                                   |
+| perceptual ΔE00 3                                      | 3                                | 0                            | 1                            | 0                                   |
 | perceptual ΔE00 1.5, shifts counted                    | 3                                | 0                            | 0                            | 1                                   |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 1                                | 0                            | 0                            | 0                                   |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 3                                | 0                            | 0                            | 1                                   |
 | perceptual ΔE00 1.5, structural only (experiment)      | 3                                | 0                            | 0                            | 1                                   |
 
 ### Synthetic set, 0.1% of the image allowed
@@ -200,13 +200,13 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
 | pixelmatch 0.2 (Playwright default)                    | **0**                               | 0                                | **98**                         | **8**                               | 0                                    | 0                                     | 0                                     |
 | ssim-cie94 (Playwright, experimental)                  | 728                                 | **73**                           | **120**                        | **34**                              | 0                                    | **218**                               | 0                                     |
 | looks-same (ΔE00 2.3)                                  | **0**                               | **differ**                       | **differ**                     | **differ**                          | 0                                    | **differ**                            | 0                                     |
-| perceptual ΔE00 1                                      | 21348                               | 0                                | 0                              | 0                                   | 0                                    | **9**                                 | 0                                     |
-| perceptual ΔE00 1.5                                    | 4043                                | 0                                | 0                              | 0                                   | 0                                    | **9**                                 | 0                                     |
-| perceptual ΔE00 2                                      | 1598                                | 0                                | 0                              | 0                                   | 0                                    | **9**                                 | 0                                     |
-| perceptual ΔE00 2.3                                    | 1                                   | 0                                | 0                              | 0                                   | 0                                    | **9**                                 | 0                                     |
-| perceptual ΔE00 3                                      | **0**                               | 0                                | 0                              | 0                                   | 0                                    | **9**                                 | 0                                     |
+| perceptual ΔE00 1                                      | 21348                               | **10**                           | **2**                          | **5**                               | 0                                    | **31**                                | 0                                     |
+| perceptual ΔE00 1.5                                    | 4043                                | **3**                            | **2**                          | **5**                               | 0                                    | **31**                                | 0                                     |
+| perceptual ΔE00 2                                      | 1598                                | 0                                | **2**                          | **5**                               | 0                                    | **31**                                | 0                                     |
+| perceptual ΔE00 2.3                                    | 1                                   | 0                                | **2**                          | **5**                               | 0                                    | **31**                                | 0                                     |
+| perceptual ΔE00 3                                      | **0**                               | 0                                | **2**                          | **5**                               | 0                                    | **31**                                | 0                                     |
 | perceptual ΔE00 1.5, shifts counted                    | 4259                                | **301**                          | **116**                        | **32**                              | 0                                    | **213**                               | 0                                     |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 84                                  | 0                                | 0                              | 0                                   | 0                                    | **9**                                 | 0                                     |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 84                                  | **2**                            | **2**                          | **5**                               | 0                                    | **31**                                | 0                                     |
 | perceptual ΔE00 1.5, structural only (experiment)      | 90                                  | **62**                           | **120**                        | **34**                              | 0                                    | **218**                               | 0                                     |
 
 ## Reading the results
@@ -222,27 +222,26 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
   pairs that should match but fail drop from 6 to 2 on the design set and from 4 to 1 on the
   held-out set.
 - What still fails at the default with 0.1% allowed: a WebKit artefact from Playwright's fixtures;
-  two large regressions of a few pixels, which fall under the allowance; most sub-pixel shifts of
-  the map, chart and 3D view; and the 2D map through the GPU against the software rasteriser,
-  with 482 changed pixels (0.8%) at 1× and 9,694 (3.8%) at 2×. Those lie along the seams between
-  basemap tiles, which the two rasterisers blend differently, and along the edges of the thick
-  flight tracks: hairlines nobody would notice, though they reach ΔE00 28. Playwright's default
-  passes this pair; ssim-cie94 and the structural rule fail it too. The 3D mission view through
-  the GPU passes (0 and 40 pixels).
+  two large regressions of a few pixels, which fall under the allowance; most sub-pixel shifts;
+  and the 2D map through the GPU against the software rasteriser, with 953 changed pixels (1.5%)
+  at 1× and 10,034 (3.9%) at 2×. Those lie along the seams between basemap tiles, which the two
+  rasterisers blend differently, and along the edges of the thick flight tracks: hairlines nobody
+  would notice, though they reach ΔE00 28. Playwright's default passes this pair; ssim-cie94 and
+  the structural rule fail it too. The 3D mission view through the GPU passes (2 and 46 pixels).
 - The structural rule passes more rendering noise but hides faint changes. It misses the faint SVG
   regression, a stroke colour nudged, in all three browsers on both sets: a uniform change keeps
   the structure, so SSIM calls it noise. That is the failure this package exists to prevent, so
   the rule stays an experiment.
-- Sub-pixel shifts are partly solved. Shift tolerance passes text and SVG moved at 2× and the 3D
-  view moved at 1× (14–22 pixels), but the map moved 0.3 px leaves 70–200 changed pixels at 1×
-  and 1,000–4,800 at 2×, text at 1× 200–280, and the 3D view at 2× 500–870.
+- Sub-pixel shifts are mostly unsolved. Shift tolerance passes text and SVG moved at 2× (0–4
+  pixels), but the map, the chart and the 3D camera moved 0.3 px leave 160–560 changed pixels at
+  1× and 600–5,600 at 2×, and text at 1× leaves 325–438.
 - In the synthetic set, the faint overlay change, two or three levels per channel and nothing
   moved, is missed by pixelmatch at every threshold and by looks-same, and caught by this package
   at ΔE00 2 and below at both allowances. At ΔE00 2.3 it is caught by a single pixel with none
-  allowed, and missed with 0.1% allowed. Its control, the same scene panned 0.3 px, passes with
-  none allowed. Of the other five pairs, which should match, all pass with none allowed except the
-  geofence through two rasterisers, which leaves 9 pixels and passes at 0.1% (see the roadmap's
-  known gaps).
+  allowed, and missed with 0.1% allowed. Its control, the same scene panned 0.3 px, passes at
+  0.1%. The other five pairs should match: the terrain and the bilinear pair pass at both
+  allowances; the moved label, the taller label box and the geofence through two rasterisers fail
+  with none allowed and pass at 0.1% (see the roadmap's known gaps).
 
 ## Changes since 0.1.0
 
@@ -251,22 +250,17 @@ Three changes to the noise detection, each judged on these pairs before it was a
 - **Shift tolerance is one box rule at three sizes.** A move of under a pixel changes a box's total
   colour by no more than moving the box a whole pixel would. So at a changed pixel one image's box
   total must lie within the range of the other's at the box and one pixel over, give or take
-  rounding, over a 65×65 box, over a 5×5 box, and over the pixel alone, both ways round. The pixel's
-  range is widened by the contrast around it where a neighbour kept its colour. The
-  [design log](../design/synthesis-s1.md) has the steps, the variants tried and their numbers.
+  rounding, over a 65×65 box, over a 5×5 box, and over the pixel alone, both ways round. The
+  [design log](../design/shift-tolerance.md) has the reasoning and the variants tried.
 - **Rounding is its own class**: while shift tolerance is on, a pixel within one level in every
   channel is not counted.
 - **Anti-aliasing detection requires the flat side of a slope to keep its colour**, give or take a
   level.
 
-Against 0.2.0's first draft of these rules (PR #1's), as the redesign judge counts verdicts, none
-that it gets right goes wrong. With none allowed, 11 pairs now get the right verdict: two WebKit
-artefacts from Playwright's fixtures, the 3D view through the GPU, text moved at 2×, three
-synthetic findings (the panned surface and both label pairs), the judge's textured drift and three
-golden pairs of identical input. With 0.1% allowed, 4 do: the 3D view moved 0.3 px in each browser,
-and the textured drift. Some pairs that should match and already failed count more: the
-2D map through the GPU at 2×, from 5,581 to 9,694. In the synthetic set the faint overlay change,
-0 counted pixels with 0.1.0, now has 21,348 at ΔE00 1. The redesign judge's times are in
+Against 0.1.0, at the default threshold: in the synthetic set the faint overlay change, 0 counted
+pixels with 0.1.0, now has 21,348. Some pairs that should match count more: the 2D map through the
+GPU, from 894 to 953 at 1× and from 5,067 to 10,034 at 2×, which already failed; the CSS effects
+page through the GPU, from 3 to 8 at 1× and from 48 to 85 at 2×, still within 0.1%. Times are in
 [speed.md](speed.md).
 
 These rules were measured on the held-out set while being developed, so for them it is no longer

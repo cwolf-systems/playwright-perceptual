@@ -20,18 +20,18 @@ Node 22.22, Apple M4, milliseconds.
 
 | Size      | Changed | PNG decode ×2 | perceptual | perceptual + diff | pixelmatch | looks-same (incl. decode) |
 | --------- | ------- | ------------- | ---------- | ----------------- | ---------- | ------------------------- |
-| 1280×720  | 0%      | 43.0          | 4.1        | 22.8              | 0.8        | 0.0                       |
-| 1280×720  | 1%      | 42.2          | 11.7       | 30.7              | 1.3        | 68.2                      |
-| 1280×720  | 10%     | 51.3          | 51.5       | 70.1              | 1.9        | 119.5                     |
-| 1280×720  | 100%    | 48.7          | 443.3      | 448.6             | 5.6        | 688.6                     |
-| 1920×1080 | 0%      | 110.1         | 7.6        | 49.4              | 2.1        | 0.0                       |
-| 1920×1080 | 1%      | 109.5         | 20.4       | 61.9              | 3.3        | 138.0                     |
-| 1920×1080 | 10%     | 112.4         | 96.3       | 136.9             | 4.1        | 268.8                     |
-| 1920×1080 | 100%    | 109.8         | 914.1      | 948.5             | 12.6       | 1511.5                    |
-| 3200×2000 | 0%      | 327.7         | 23.6       | 157.2             | 6.6        | 0.1                       |
-| 3200×2000 | 1%      | 328.8         | 49.8       | 181.3             | 10.3       | 392.1                     |
-| 3200×2000 | 10%     | 328.8         | 303.3      | 432.2             | 12.9       | 786.7                     |
-| 3200×2000 | 100%    | 327.0         | 2621.8     | 2732.5            | 38.7       | 4431.2                    |
+| 1280×720  | 0%      | 45.1          | 4.1        | 22.3              | 0.8        | 0.0                       |
+| 1280×720  | 1%      | 42.6          | 12.4       | 31.2              | 1.3        | 66.8                      |
+| 1280×720  | 10%     | 46.7          | 52.4       | 72.4              | 1.9        | 132.3                     |
+| 1280×720  | 100%    | 47.1          | 443.8      | 458.4             | 5.6        | 715.6                     |
+| 1920×1080 | 0%      | 111.2         | 7.8        | 52.4              | 2.2        | 0.0                       |
+| 1920×1080 | 1%      | 111.7         | 21.4       | 68.3              | 3.4        | 142.6                     |
+| 1920×1080 | 10%     | 106.7         | 94.3       | 140.8             | 4.2        | 281.6                     |
+| 1920×1080 | 100%    | 111.1         | 910.3      | 956.8             | 12.9       | 1556.3                    |
+| 3200×2000 | 0%      | 334.4         | 25.1       | 160.1             | 6.5        | 0.1                       |
+| 3200×2000 | 1%      | 320.7         | 47.7       | 175.2             | 10.0       | 399.2                     |
+| 3200×2000 | 10%     | 311.7         | 280.8      | 417.9             | 12.6       | 780.9                     |
+| 3200×2000 | 100%    | 340.2         | 2632.0     | 2773.9            | 38.9       | 4744.3                    |
 
 ## Reading the results
 
@@ -45,26 +45,29 @@ Node 22.22, Apple M4, milliseconds.
   tile of the image, four reads per total whatever the box's size, so it costs the same over
   texture as over a solid block of colour.
 - Against looks-same, compare like with like. Its times include decoding, so set them against
-  decode plus perceptual: at 3200×2000 that is 379 against 392 ms with 1% changed, 632 against
-  787 ms with 10%, and 2,949 against 4,431 ms with everything changed. It returns at once for
+  decode plus perceptual: at 3200×2000 that is 368 against 399 ms with 1% changed, 593 against
+  781 ms with 10%, and 2,972 against 4,744 ms with everything changed. It returns at once for
   identical files, since it compares the encoded bytes first.
 
 ## Against 0.1.0
 
-The redesign judge times 0.1.0, PR #1's first draft of 0.2.0 and this release, each in a process
-of its own on the same machine (Apple M4, Node 22), median of five. Whole-frame cases, milliseconds:
+`npm run bench` run at 0.1.0 and at this release, one after the other on the same machine (Node
+22.22, Apple M4), perceptual comparison only, milliseconds:
 
-| Case                                   | 0.1.0  | First draft | 0.2.0  | vs 0.1.0 |
-| -------------------------------------- | ------ | ----------- | ------ | -------- |
-| bench 1280×720, all changed            | 688.0  | 625.8       | 368.2  | 0.54×    |
-| bench 1920×1080, all changed           | 1414.7 | 1292.6      | 796.0  | 0.56×    |
-| bench 3200×2000, all changed           | 4485.1 | 3438.6      | 2350.1 | 0.52×    |
-| textured drift of 1–3 levels, 1346×819 | 572.1  | 707.5       | 271.1  | 0.47×    |
-| film grain of ±1 level, 1346×819       | 448.0  | 51.0        | 22.3   | 0.05×    |
-| real whole-frame change, 1346×819      | 461.7  | 997.1       | 359.4  | 0.78×    |
-| real film grain, 1346×819              | 257.8  | 52.2        | 85.4   | 0.33×    |
+| Size      | Changed | 0.1.0  | 0.2.0  | 0.2.0 ÷ 0.1.0 |
+| --------- | ------- | ------ | ------ | ------------- |
+| 1280×720  | 1%      | 7.6    | 12.4   | 1.63×         |
+| 1280×720  | 10%     | 51.5   | 52.4   | 1.02×         |
+| 1280×720  | 100%    | 515.0  | 443.8  | 0.86×         |
+| 1920×1080 | 1%      | 18.6   | 21.4   | 1.15×         |
+| 1920×1080 | 10%     | 112.1  | 94.3   | 0.84×         |
+| 1920×1080 | 100%    | 1229.0 | 910.3  | 0.74×         |
+| 3200×2000 | 1%      | 71.1   | 47.7   | 0.67×         |
+| 3200×2000 | 10%     | 552.1  | 280.8  | 0.51×         |
+| 3200×2000 | 100%    | 5572.4 | 2632.0 | 0.47×         |
 
-The real captures come from a downstream renderer and are not included. Small changes cost more
-than with 0.1.0 at 1280×720 (14.0 ms against 9.0 with 1% changed), since the first changed pixel
-in a tile reads the whole tile, 256 rows by 512 columns and 66 pixels beyond each side; from
-1920×1080 up, and from 10% changed, they cost the same or less.
+Fully changed images and large ones compare faster: the shift test reads box totals from a
+summed-area table rather than pixel by pixel, anti-aliasing is asked once for both images, and
+rounding is checked before the detectors. Small changes on small images cost more, since the first
+changed pixel in a tile reads the whole tile, 256 rows by 512 columns and 66 pixels beyond each
+side. With nothing changed the two are the same.

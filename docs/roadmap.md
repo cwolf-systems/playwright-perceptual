@@ -11,24 +11,22 @@ These come from the benchmark, at the default settings with 0.1% of the image al
 1. Sub-pixel movement mostly fails. Text, maps and 3D cameras moved by 0.3 px leave hundreds to
    thousands of changed pixels. Shift tolerance passes about 95% of the changed pixels in these
    cases, but rarely all of them, and a few hundred left over still fails the test.
-2. The 2D map through Chromium's GPU and through its software rasteriser fails: 0.8% of pixels at
-   1× scale, 3.8% at 2×. The differences are hairlines along the seams between raster tiles and
+2. The 2D map through Chromium's GPU and through its software rasteriser fails: 1.5% of pixels at
+   1× scale, 3.9% at 2×. The differences are hairlines along the seams between raster tiles and
    along the edges of thick stroked lines.
 3. Shift tolerance passes a hard edge moved by exactly one pixel. That is the price of looking one
    pixel around; `ignoreShifts: false` turns it off.
-4. Comparison is slow when much of the image changes: about 2.4 s for a fully changed 3200×2000
-   screenshot in the redesign judge, against 40 ms for pixelmatch. Passing tests and small changes
+4. Comparison is slow when much of the image changes: about 2.6 s for a fully changed 3200×2000
+   screenshot in `npm run bench`, against 40 ms for pixelmatch. Passing tests and small changes
    cost less than decoding the screenshot, so this is mostly paid by failing tests.
 5. The thresholds are rules of thumb. ΔE00 1 as "just noticeable" comes from the formula's design
    and from viewing uniform patches, not from people looking at screenshots.
 6. A faint change of colour beside an edge that did not move can pass as a shift. A move of the
    edge by a small part of a pixel carries as much colour across each box's border as the change
-   took away: ground three levels darker within a few pixels of an edge passes, and of a
-   translucent overlay made 5 points more transparent over terrain (from a renderer's tests), 17%
-   of the changed pixels still pass, beside contour lines. Registration, below, would tell the two
-   apart by finding the move first; measured, the smallest piece of it that catches the ground
-   costs 150 to 190 lines and loses verdicts at most settings. See
-   [the design log](design/synthesis-s1.md).
+   took away: ground three levels darker within a few pixels of an edge passes, and so does part
+   of a translucent overlay made 5 points more transparent over terrain, beside contour lines.
+   Registration, below, would tell the two apart by finding the move first; see
+   [the design log](design/shift-tolerance.md).
 7. The same scene can land on different pixels between page loads or rasterisers. A label whose
    projected anchor falls either side of a pixel boundary moves by a whole pixel; an aliased
    overlay edge within 1/32 px of a row of pixel centres covers the row in a rasteriser that
@@ -38,11 +36,16 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    removes them. The synthetic pairs in the benchmark reproduce both.
 8. A drift of one level per channel everywhere passes as rounding while shift tolerance is on; a
    drift of two over an area counts. A renderer whose exposure differs by one or two levels
-   between loads of the same scene used to pass through shift tolerance and now fails, as in one
-   of 28 scenes of the renderer's golden set.
+   between loads of the same scene used to pass through shift tolerance and now fails, as one scene
+   of a downstream renderer's captures did (not included here).
 9. Across an image one pixel high or wide, what lies beyond the image is unknown, so shift
    tolerance allows no move across it, and content moved by part of a pixel across such a sliver
    counts as changed. The same holds on the outermost pixels of any image.
+10. Anti-aliasing detection compares brightness, not hue. Beside a black edge, a column of white
+    that turns pure blue or red sits on a slope between a darker and a brighter neighbour and is
+    taken for anti-aliasing; a coloured ring a pixel wide round a dark shape can pass the same way.
+    Requiring the pixel to lie within its darker and brighter neighbours' colours, channel by
+    channel, would close it.
 
 Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pixel by pixel.
 
