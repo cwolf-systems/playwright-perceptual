@@ -150,36 +150,45 @@ function moved(from: Tile, to: Tile, box: Box, x: number, y: number): boolean {
   // At most the box's side, leaving room to move the box by a pixel where the side has room.
   const nx = Math.max(1, Math.min(box.side, width - 1));
   const ny = Math.max(1, Math.min(box.side, height - 1));
-  const sum = (tile: Tile, c: number, x0: number, y0: number) => total(tile, nx, ny, c, x0, y0);
+  const slack = box.slack * nx * ny;
   channels: for (let c = 0; c < CHANNELS; c++) {
     for (const sx of width > 1 ? SIGNS : STILL) {
       const x0 = place(x, nx, width, sx);
       for (const sy of height > 1 ? SIGNS : STILL) {
         const y0 = place(y, ny, height, sy);
         if (x0 < 0 || y0 < 0) continue;
-        const here = sum(from, c, x0, y0);
-        const across = sum(from, c, x0 + sx, y0);
-        const down = sum(from, c, x0, y0 + sy);
-        const both = sum(from, c, x0 + sx, y0 + sy);
-        const target = sum(to, c, x0, y0);
+        const here = total(from, nx, ny, c, x0, y0);
+        const across = total(from, nx, ny, c, x0 + sx, y0);
+        const down = total(from, nx, ny, c, x0, y0 + sy);
+        const both = total(from, nx, ny, c, x0 + sx, y0 + sy);
+        const target = total(to, nx, ny, c, x0, y0);
         const lo = Math.min(here, across, down, both);
         const hi = Math.max(here, across, down, both);
+        if (target >= lo - slack && target <= hi + slack) continue channels;
         // Widened only beside a neighbour that kept its colour, give or take rounding: an edge
         // drawn more sharply leaves the colour beside it, while an edge whose sides changed colour
         // too is a change. From no level to three, no verdict is lost; one counts the fewest
         // pixels on pairs that should match.
-        const kept = (x1: number, y1: number) =>
-          Math.abs(sum(from, c, x1, y1) - sum(to, c, x1, y1)) <= ROUNDING_LEVELS * nx * ny;
-        const sharp =
-          box.widen > 0 && (kept(x0 + sx, y0) || kept(x0, y0 + sy) || kept(x0 + sx, y0 + sy));
-        const allowed = box.slack * nx * ny + (sharp ? box.widen * (hi - lo) : 0);
-        if (target >= lo - allowed && target <= hi + allowed) continue channels;
+        const allowed = slack + box.widen * (hi - lo);
+        if (
+          target >= lo - allowed &&
+          target <= hi + allowed &&
+          (kept(from, to, nx, ny, c, x0 + sx, y0) ||
+            kept(from, to, nx, ny, c, x0, y0 + sy) ||
+            kept(from, to, nx, ny, c, x0 + sx, y0 + sy))
+        ) {
+          continue channels;
+        }
       }
     }
     return false;
   }
   return true;
 }
+
+/** Whether channel `c`'s total over the box at (x, y) is the same in both, give or take rounding. */
+const kept = (from: Tile, to: Tile, nx: number, ny: number, c: number, x: number, y: number) =>
+  Math.abs(total(from, nx, ny, c, x, y) - total(to, nx, ny, c, x, y)) <= ROUNDING_LEVELS * nx * ny;
 
 /**
  * Whether the change at pixel (x, y) is what a move of under a pixel leaves in every box, either
