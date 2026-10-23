@@ -51,17 +51,20 @@ Node 22.22, Apple M4, milliseconds.
 
 ## Against 0.1.0
 
-`npm run bench` run at 0.1.0 and at this release, one after the other on the same machine (Node
-22.22, Apple M4), perceptual comparison only, milliseconds:
+`npm run bench` run at 0.1.0 (commit f240bb1) and at this release, one after the other on the same
+machine (Node 22.22, Apple M4), perceptual comparison only, milliseconds:
 
 | Size      | Changed | 0.1.0  | 0.2.0  | 0.2.0 ÷ 0.1.0 |
 | --------- | ------- | ------ | ------ | ------------- |
+| 1280×720  | 0%      | 4.5    | 4.0    | 0.89×         |
 | 1280×720  | 1%      | 8.4    | 14.4   | 1.71×         |
 | 1280×720  | 10%     | 58.1   | 61.4   | 1.06×         |
 | 1280×720  | 100%    | 549.2  | 435.0  | 0.79×         |
+| 1920×1080 | 0%      | 8.1    | 7.7    | 0.95×         |
 | 1920×1080 | 1%      | 18.8   | 21.2   | 1.13×         |
 | 1920×1080 | 10%     | 108.7  | 93.6   | 0.86×         |
 | 1920×1080 | 100%    | 1220.5 | 921.5  | 0.76×         |
+| 3200×2000 | 0%      | 23.5   | 23.6   | 1.00×         |
 | 3200×2000 | 1%      | 75.5   | 52.9   | 0.70×         |
 | 3200×2000 | 10%     | 548.1  | 311.8  | 0.57×         |
 | 3200×2000 | 100%    | 5134.9 | 2943.1 | 0.57×         |
@@ -70,4 +73,4 @@ Fully changed images and large ones compare faster: the shift test reads box tot
 summed-area table rather than pixel by pixel, anti-aliasing is asked once for both images, and
 rounding is checked before the detectors. Small changes on small images cost more, since the first
 changed pixel in a tile reads the whole tile, 256 rows by 512 columns and 66 pixels beyond each
-side. With nothing changed the two are the same.
+side. With nothing changed the two take about the same time.

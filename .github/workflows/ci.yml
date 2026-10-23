@@ -137,7 +137,7 @@ jobs:
       # aren't in the repository, and speed on a shared runner says little.
       - run: node bench/judge.mjs --skip-speed --name ci --out "$RUNNER_TEMP/judge.json"
       # Fails if a verdict the 0.2.0 baseline got right is now wrong. Rendered pairs are compared
-      # only on the platform the baseline was made on; check-baseline.mjs says why.
+      # only on a machine like the one the baseline was made on; check-baseline.mjs says why.
       - name: No verdict lost against 0.2.0
         shell: bash
         run: node bench/check-baseline.mjs "$RUNNER_TEMP/judge.json" | tee -a "$GITHUB_STEP_SUMMARY"
@@ -147,3 +147,27 @@ jobs:
           name: judge-result
           path: ${{ runner.temp }}/judge.json
           retention-days: 7
+
+  frozen:
+    name: Frozen labels and baselines
+    # The judge job reads the labels and the baseline from the pull request's own tree, so a change
+    # to them could hide a lost verdict. They change only in a pull request of their own; this job
+    # makes such a change visible as a warning, for the reviewer.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Warn if this pull request changes them
+        shell: bash
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --depth=1 origin "$BASE_REF"
+          changed=$(git diff --name-only FETCH_HEAD HEAD -- bench/judge-labels.json 'bench/results/judge-baseline-*.json' | tr '\n' ' ')
+          if [ -n "$changed" ]; then
+            echo "::warning::This pull request changes frozen labels or baselines: $changed"
+            printf '\n**This pull request changes frozen labels or baselines:** %s\n' "$changed" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Frozen labels and baselines unchanged."
+          fi

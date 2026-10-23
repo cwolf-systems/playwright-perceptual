@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (2026-10-22)
+## 0.2.0 (2026-10-23)
 
 What this release is for: it stops passing real colour changes that 0.1.0 took for noise, a tint
 across a flat panel, a fainter overlay, a drift of a few levels over texture and changes in slivers
@@ -59,7 +59,6 @@ share the limits listed below.
   `toHaveScreenshot`. With Playwright before 1.64, `missing` still writes and fails. `UpdateMode`
   gains `'default'`; `matchSnapshot` callers who passed `'missing'` to get a failing write should
   pass `'default'`.
-
 - **The screenshot matcher stops counting past the allowance while it waits for a stable
   screenshot**, and for `.not`, where only the verdict is used; the failure message still comes
   from a full comparison. `ImageComparator.compare` takes an optional third argument, `limit`,

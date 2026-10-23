@@ -20,6 +20,7 @@ A pull request is merged only when every CI job passes. Run the same checks loca
 npm run lint
 npm run typecheck
 npm run test:coverage
+npm run build
 npm run test:browser
 npm run test:runner
 npm run test:count -- --check
@@ -51,12 +52,18 @@ node bench/check-baseline.mjs bench/results/judge-local.json
 ```
 
 The second command fails if a pair that `bench/results/judge-baseline-0.2.0.json` judged correctly
-is now judged wrongly. CI runs both on every pull request, and enforces the benchmark's synthetic
-pairs and Playwright's fixture pairs only. The rendered pairs are screenshots whose pixels depend
-on the platform, so they are compared only on the one the baseline was made on (macOS): the
-maintainer checks them locally before each release. A Linux baseline, so that CI can check them
-too, is future work. Put the judge's accuracy table in your pull request. If the change could affect speed, add `npm run bench`
-before and after.
+is now judged wrongly, or if a pair in the baseline is missing from your run. CI runs both on
+every pull request and enforces 32 pairs: Playwright's 21 fixture pairs and the 11 synthetic
+pairs. The other 172 are screenshots the judge renders, whose pixels depend on the machine; CI
+reports them as not compared. They are compared only on a machine like the one the baseline was
+made on (macOS, Apple M4), where the maintainer checks them before each release. A Linux
+baseline, so that CI can check them too, is future work.
+
+The judge renders the fixture pages once into `bench/data` and reuses them: add `--render` after
+changing a page in `test/browser/fixtures/` or Playwright's version.
+
+Put the judge's accuracy table in your pull request. If the change could affect speed, add
+`npm run bench` before and after.
 
 A change that loses a correct verdict is not merged, even if it gains others. If you think a
 label is wrong, see [Labels are frozen](#labels-are-frozen).
@@ -80,7 +87,8 @@ b.json`. The reasoning and the variants tried go in a design log in `docs/design
 
 `bench/judge-labels.json` holds the expected verdict for each pair. Changing a label is its own
 pull request: one label change and its reason per entry, reviewed on its own, with the baselines
-regenerated. Never change a label in the same pull request as the code it would let pass.
+regenerated. Never change a label in the same pull request as the code it would let pass. CI
+warns on any pull request that changes the labels or a committed baseline.
 
 ## Quality floor
 

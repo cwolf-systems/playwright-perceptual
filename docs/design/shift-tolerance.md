@@ -8,11 +8,12 @@ and what was kept.
 - **Reproducible here.** `npm run bench:accuracy` reproduces the counts on this repository's
   benchmark pairs, synthetic set included; `npm run bench` reproduces the speed figures; the unit
   tests pin down every case named below.
-- **Measured outside this repository.** Verdict counts against 0.2.0's first draft, the share of a
-  real overlay change counted, the margin and the sensitivity tables come from an evaluation
-  harness that judges this benchmark's pairs together with a downstream renderer's captures, which
-  are not included. They are not reproducible from this repository alone, and were measured on one
-  machine (Apple M4). "Lost" and "gained" are verdicts that change against the first draft, with no
+- **Measured with captures not in this repository.** Verdict counts against 0.2.0's first draft,
+  the share of a real overlay change counted, the margin and the sensitivity tables come from
+  `bench/judge.mjs`, run on this benchmark's pairs together with a downstream renderer's captures,
+  which are not included. Figures on this repository's pairs can be rerun with the judge and the
+  constant under test edited; figures on the captures cannot. All were measured on one machine
+  (Apple M4). "Lost" and "gained" are verdicts that change against the first draft, with no
   pixels allowed / with 0.1% allowed. The margin is the counted pixels of pairs that should match,
   as a share of the 0.1% allowance, worst over pairs allowed 10 pixels or more.
 

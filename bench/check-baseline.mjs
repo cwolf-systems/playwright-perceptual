@@ -11,16 +11,17 @@
 //   that the result lacks are skipped.
 // - Rendered pairs are screenshots taken by the judge on the machine it runs on, so their bytes
 //   depend on the operating system, its fonts and its GPU. They are compared only when the result
-//   and the baseline come from the same platform, or with --rendered. Playwright's fixtures and the
-//   synthetic set are the same bytes everywhere and are always compared.
+//   and the baseline come from the same platform and CPU, or with --rendered. Playwright's fixtures
+//   and the synthetic set are the same bytes everywhere and are always compared.
 //   Rendered pairs a machine cannot render (the GPU pairs off macOS, WebGL pages without WebGL)
-//   are left out by the judge, and skipped here.
+//   are left out by the judge, and skipped here, except on a machine like the baseline's: there a
+//   rendered pair the result lacks was lost, not left out.
 // Any other pair the baseline has and the result lacks fails the check: the benchmark lost it.
 //
 // Exit codes: 0, no verdict lost; 1, a verdict lost or a pair missing; 2, the two files cannot be
-// compared (different labels, or not judge results).
+// compared (different labels, not judge results, or the same file twice).
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -57,7 +58,7 @@ const isRendered = (id) => id.startsWith('rendered');
 const isReal = (set) => set.startsWith('real');
 const correct = (pair, tolerance) => pair.pass[tolerance] === pair.match;
 
-function check(result, baseline, compareRendered) {
+function check(result, baseline, compareRendered, sameMachine) {
   const now = new Map(result.accuracy.pairs.map((p) => [p.id, p]));
   const out = {
     lost: [],
@@ -78,7 +79,7 @@ function check(result, baseline, compareRendered) {
       if (isReal(before.set)) out.skippedReal++;
       // The judge leaves out what a machine cannot render: WebGL pages without WebGL, and the GPU
       // pairs off macOS.
-      else if (isRendered(before.id)) out.notRendered++;
+      else if (isRendered(before.id) && !sameMachine) out.notRendered++;
       else out.missing.push(before.id);
       continue;
     }
@@ -96,6 +97,10 @@ function check(result, baseline, compareRendered) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (realpathSync(args.result) === realpathSync(args.baseline)) {
+    console.log('The result and the baseline are the same file: run bench/judge.mjs first.');
+    return 2;
+  }
   const result = readResult(args.result);
   const baseline = readResult(args.baseline);
 
@@ -109,8 +114,13 @@ function main() {
     return 2;
   }
 
-  const samePlatform = result.machine?.platform === baseline.machine?.platform;
-  const r = check(result, baseline, args.rendered || samePlatform);
+  // Rendered bytes depend on the machine, not only its operating system: they are compared on a
+  // machine like the baseline's, or with --rendered. There, a rendered pair that is missing was
+  // lost, not left out.
+  const sameMachine =
+    result.machine?.platform === baseline.machine?.platform &&
+    result.machine?.cpu === baseline.machine?.cpu;
+  const r = check(result, baseline, args.rendered || sameMachine, sameMachine);
 
   const name = (file) => file.split(/[\\/]/).pop();
   console.log(
@@ -121,8 +131,8 @@ function main() {
   if (r.skippedRendered) {
     console.log(
       `- Rendered pairs not compared: ${r.skippedRendered}. They were rendered on ` +
-        `${result.machine.platform} and the baseline on ${baseline.machine.platform}, so their ` +
-        'bytes differ.',
+        `${result.machine.platform} (${result.machine.cpu}) and the baseline on ` +
+        `${baseline.machine.platform} (${baseline.machine.cpu}), so their bytes differ.`,
     );
   }
   if (r.notRendered) {
