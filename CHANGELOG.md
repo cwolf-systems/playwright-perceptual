@@ -2,6 +2,13 @@
 
 ## 0.2.0 (2026-10-22)
 
+What this release is for: it stops passing real colour changes that 0.1.0 took for noise, a tint
+across a flat panel, a fainter overlay, a drift of a few levels over texture and changes in slivers
+one or two pixels across, and it compares whole-frame changes faster. On more than 300 probe pairs
+written for this release, and 128 held out from its design, it misses nothing 0.1.0 caught. It is
+not a broad gain in accuracy on everyday UI: on the 128 held-out pairs it and 0.1.0 score about the
+same, and both share the limits listed below.
+
 ### Stricter: may fail renders that passed before
 
 - **Shift tolerance no longer takes a change of colour for a move.** In 0.1.0 it passed any pixel
@@ -23,7 +30,12 @@
 - **Some pairs that should match count more pixels.** In this repository's benchmark
   (`npm run bench:accuracy`): the 2D map through the GPU against the software rasteriser, which
   already failed, from 894 to 953 at 1× and from 5,067 to 10,034 at 2×; CSS effects through the
-  GPU, from 3 to 8 at 1× and from 48 to 85 at 2×, still within 0.1%.
+  GPU, from 3 to 8 at 1× and from 48 to 85 at 2×, still within 0.1%. On probe pages not included
+  here: blurred shadows through the GPU against software at 2×, 313 pixels against 0 (a failure
+  with no allowance only); WebKit text against Chromium, 735 against 406; a calendar in WebKit
+  against Chromium, 323 against 289, and a canvas dashboard in Firefox against Chromium, 470
+  against 298, which now fail at 0.1%; and a list scrolled half a pixel, among other sub-pixel
+  moves. Keep one baseline per browser and per device scale.
 - **Anti-aliasing detection asks that the flat area beside a slope keep its colour**, give or take
   a level. A uniform change of colour no longer passes there as anti-aliasing.
 - If a test starts failing, look at the diff image: red is what counts. If the change is
@@ -63,21 +75,32 @@
 
 ### Limits
 
-- Beside an edge that did not move, a faint change of colour can pass as a shift: a move of the
-  edge by a small part of a pixel carries as much colour across each box's border as the change
-  took away. Ground three levels darker within a few pixels of an edge passes, as it does with
-  0.1.0, and so does part of a faint overlay change beside contour lines.
-- Not every sub-pixel move passes. A thin line moved by half a pixel can gather into a pixel darker
-  than any beside it, which looks exactly like a line of new colour and counts. On random noise
-  most sub-pixel moves count as changes for the same reason; the box tests alone pass every
-  bilinear move of such content.
-- Anti-aliasing detection compares brightness, not hue, as in 0.1.0. Beside a black edge, a column
-  of white that turns pure blue or red is taken for anti-aliasing, and so can a coloured ring a
-  pixel wide round a dark shape.
-- In an image one pixel high or wide, what lies beyond the image across that side is unknown, so
-  shift tolerance allows no move across it: a sub-pixel move of content across such a sliver
-  counts as a change. In 0.1.0 such slivers took any change within three levels of the colours
-  nearby for a shift.
+All but the last are shared with 0.1.0; [How it works](docs/concepts/how-it-works.md#limits)
+describes each. Figures are from probe pages not included in this repository.
+
+- **Whole-pixel moves pass:** a one-pixel layout shift, a one-pixel padding change, a one-pixel
+  crop. A two-pixel shift counts. `ignoreShifts: false` counts them.
+- **Thin lines beside strong edges:** a one-pixel focus ring round a dark control removed,
+  recoloured or lightened counts nothing, and so does a one-pixel divider or border between a dark
+  and a light area. Anti-aliasing detection compares brightness, not hue. Two pixels wide, they
+  count.
+- **Element screenshots:** a border along the image's own edge thickened from one to two pixels in
+  the same colour counts nothing. Inside a full-page screenshot the same change counts.
+- **A ring thickened beside a dark panel** from one to two pixels counts about 2% of its pixels (12
+  of 572) at about ΔE00 15.
+- **Small changes made only of edge pixels**, such as a comma turned into a period, an I into an
+  l or an icon's corner moved one pixel, count few pixels or none: anti-aliasing explains them.
+- **A faint change beside an edge that did not move** can pass, as ground three levels darker
+  within a few pixels of an edge does.
+- **One-pixel lines moved by part of a pixel**, such as bordered cards, table rules, chart grid
+  lines or dividers under a fractional transform or scroll, often count more than 0.1% of the
+  image: the line's own colour is then nowhere in the other image. On random noise most sub-pixel
+  moves count for the same reason.
+- **Whole pages moved by part of a pixel fail**, since browsers draw text again at the new
+  position, and so do most pairs from different engines or device scales.
+- In an image one pixel high or wide, shift tolerance allows no move across it: a sub-pixel move of
+  content across such a sliver counts as a change. In 0.1.0 such slivers took any change within
+  three levels of the colours nearby for a shift.
 
 ### Speed
 

@@ -6,16 +6,22 @@ is adopted, on pages written before the change was run against them.
 
 ## Known gaps
 
-These come from the benchmark, at the default settings with 0.1% of the image allowed.
+These come from the benchmark and from probe pages not included in this repository, at the default
+settings with 0.1% of the image allowed.
 
 1. Sub-pixel movement mostly fails. Text, maps and 3D cameras moved by 0.3 px leave hundreds to
    thousands of changed pixels. Shift tolerance passes about 95% of the changed pixels in these
-   cases, but rarely all of them, and a few hundred left over still fails the test.
+   cases, but rarely all of them, and a few hundred left over still fails the test. A one-pixel
+   line moved by part of a pixel, such as a card's border, a table rule, a chart grid line or a
+   divider in a list scrolled half a pixel, fades into two rows, and its own colour is then nowhere
+   in the other image: about one pixel counts per pixel of line. Whole pages moved by part of a
+   pixel fail by thousands, since browsers draw text again at the new position.
 2. The 2D map through Chromium's GPU and through its software rasteriser fails: 1.5% of pixels at
    1× scale, 3.9% at 2×. The differences are hairlines along the seams between raster tiles and
    along the edges of thick stroked lines.
-3. Shift tolerance passes a hard edge moved by exactly one pixel. That is the price of looking one
-   pixel around; `ignoreShifts: false` turns it off.
+3. Shift tolerance passes a hard edge moved by exactly one pixel: a one-pixel layout shift, a
+   one-pixel padding change, a one-pixel crop. That is the price of looking one pixel around;
+   `ignoreShifts: false` turns it off.
 4. Comparison is slow when much of the image changes: about 2.6 s for a fully changed 3200×2000
    screenshot in `npm run bench`, against 40 ms for pixelmatch. Passing tests and small changes
    cost less than decoding the screenshot, so this is mostly paid by failing tests.
@@ -41,11 +47,24 @@ These come from the benchmark, at the default settings with 0.1% of the image al
 9. Across an image one pixel high or wide, what lies beyond the image is unknown, so shift
    tolerance allows no move across it, and content moved by part of a pixel across such a sliver
    counts as changed. The same holds on the outermost pixels of any image.
-10. Anti-aliasing detection compares brightness, not hue. Beside a black edge, a column of white
-    that turns pure blue or red sits on a slope between a darker and a brighter neighbour and is
-    taken for anti-aliasing; a coloured ring a pixel wide round a dark shape can pass the same way.
-    Requiring the pixel to lie within its darker and brighter neighbours' colours, channel by
-    channel, would close it.
+10. Thin lines beside strong edges pass. A one-pixel focus ring round a dark control, or a
+    one-pixel divider or border between a dark and a light area, can be removed, recoloured or
+    lightened and count nothing: each pixel lies on a slope between a darker and a brighter
+    neighbour, so anti-aliasing detection explains it, and a grey line is locally the same as the
+    edge moving by part of a pixel. Anti-aliasing detection compares brightness, not hue, and each
+    channel takes its own move, so a seam between two saturated colours can change hue and pass.
+    Requiring an anti-aliased pixel to be a mix of its darker and brighter neighbours in every
+    channel is not enough alone: shift tolerance then passes the same pixels, since each channel
+    takes its own move. Both would need to change.
+11. In an element screenshot whose border runs along the image's edge, a border thickened from one
+    to two pixels in the same colour counts nothing: the outer rings read as the content moved
+    inward by a pixel. Testing, at such pixels, a box that does not move across the border would
+    tell them apart. A light ring round a dark panel thickened the same way counts about 2% of its
+    pixels.
+12. Small changes made only of edge pixels pass as anti-aliasing: a comma turned into a period, an
+    I into an l, an icon's corner moved one pixel.
+13. Pairs from different engines, or at 1× against 2×, mostly fail: text and shadows are drawn
+    differently, not moved. Keep one baseline per browser and per device scale.
 
 Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pixel by pixel.
 

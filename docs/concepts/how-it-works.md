@@ -60,29 +60,63 @@ lightness, chroma and hue, and for blues, where earlier formulas were least accu
 
 ## Limits
 
-- A hard-edged shape moved by a whole pixel passes shift tolerance, because every colour it shows
-  was already within a pixel. Turn it off with `ignoreShifts: false` where that matters. Over a
-  translucent box or textured ground, a shape moved a whole pixel does not always pass: a label
-  that lands on the next pixel in another page load, or an aliased edge that runs within 1/32 px
-  of a row of pixel centres and covers that row in one rasteriser but not another, leaves a few
-  pixels counted.
-- Beside an edge that did not move, shift tolerance can take a faint change of colour for a
-  move: a move of the edge by a small part of a pixel carries as much colour across each box's
-  border as the change took away. Ground three levels darker within a few pixels of an edge
-  passes; further from the edge it counts. 0.1.0 passes it too. Part of a faint overlay change
-  over terrain passes the same way, beside contour lines.
-- Not every sub-pixel move passes. Thin text, maps and 3D scenes moved 0.3 px still leave changed
-  pixels where edges overlap: a rasteriser draws an edge more sharply than resampling mixes it, so
-  a thin line moved by half a pixel can gather into a pixel darker than any beside it. That looks
-  exactly like a line of new colour, which must count. On random noise most sub-pixel moves count
-  as changes for the same reason.
-- Anti-aliasing detection compares brightness, not hue. Beside a black edge, a column of white
-  that turns pure blue or red sits on a slope between a darker and a brighter neighbour, and is
-  taken for anti-aliasing (0.1.0 does the same). A coloured ring a pixel wide round a dark shape
-  can pass the same way.
-- A drift of one level everywhere passes as rounding while shift tolerance is on, even where it
-  passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over a flat or gently
-  shaded area counts.
+Shift tolerance and anti-aliasing detection set changed pixels aside as rendering noise. Some real
+changes look exactly like that noise and pass; some noise does not look like it and counts. 0.1.0
+has every miss below too. Unless a figure says it comes from this repository's benchmark, it was
+measured on probe pages not included here.
+
+Changes that can pass:
+
+- **Whole-pixel moves.** A shape, a block of text or the whole page moved by exactly one pixel
+  passes, because every colour it shows was already a pixel away. A one-pixel layout shift, a
+  padding change of one pixel and a one-pixel crop all pass this way; a two-pixel shift counts.
+  Turn shift tolerance off with `ignoreShifts: false` where that matters.
+- **Thin lines beside strong edges.** A one-pixel focus ring round a dark control can be removed,
+  recoloured or lightened and count nothing, and so can a one-pixel divider or border between a
+  dark and a light area. Each of its pixels lies between a darker and a brighter neighbour, so it
+  passes as anti-aliasing, and a grey line is locally the same as the edge moving by part of a
+  pixel. Anti-aliasing detection compares brightness, not hue, and each channel takes its own move,
+  so a seam between two saturated colours can change hue and pass too. A ring or line two pixels
+  wide counts.
+- **A border one pixel thicker in an element screenshot.** Where the border runs along the image's
+  own edge, a border thickened from one to two pixels in the same colour counts nothing: the
+  image's outer rings read as the content moved inward by a pixel. The same change inside a
+  full-page screenshot counts.
+- **A ring thickened beside a dark panel.** A light ring round a dark panel thickened from one to
+  two pixels counts about 2% of its pixels (12 of 572), though each is about ΔE00 15 off: the
+  panel's edge lets every box take the change for a move.
+- **Small changes made only of edge pixels.** A comma turned into a period, an I into an l, an
+  icon's corner moved one pixel, a spinner one frame on: all their changed pixels lie on slopes,
+  so anti-aliasing explains them and few or none count.
+- **A faint change beside an edge that did not move.** A move of the edge by a small part of a
+  pixel carries as much colour across each box's border as the change took away: ground three
+  levels darker within a few pixels of an edge passes, and so does part of a faint overlay change
+  beside contour lines.
+- **A drift of one level everywhere** passes as rounding while shift tolerance is on, even where it
+  passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over an area counts.
+
+Noise that can count:
+
+- **One-pixel lines moved by part of a pixel.** A hairline under a fractional transform or at a
+  fractional coordinate, such as a bordered card, a table's rules, a chart's grid lines, or a list
+  of dividers scrolled half a pixel, fades into two rows at part strength. The line's own colour is
+  then nowhere in the other image, so roughly one pixel per pixel of line length counts, often more
+  than 0.1% of the image. A thin line moved by half a pixel can also gather into a pixel darker
+  than any beside it, which looks exactly like a line of new colour.
+- **Whole pages moved by part of a pixel.** Browsers draw text again at the new position rather
+  than resampling it, so the glyphs' shades change rather than blend, and a page moved by a
+  quarter or half a pixel fails, by thousands of pixels.
+- **Other engines and other scales.** Firefox or WebKit against Chromium, and 1× against 2×, mostly
+  fail: text and shadows are drawn differently, not moved. Keep one baseline per browser and per
+  device scale, as Playwright does by default.
+- **The GPU against the software rasteriser.** Rounded corners and blurred shadows can differ by
+  a few levels and count a few pixels with no allowance; 0.1% covers them in the cases measured.
+- **Different JPEG quality or decoders.** Compression error of tens of levels is none of the noise
+  modelled here.
+- On random noise most sub-pixel moves count, for the same reason as the one-pixel lines.
+
+Other limits:
+
 - In an image one pixel high or wide, what lies beyond the image across that side is unknown, so
   a move across it explains nothing and is not allowed for; a move along it is. A sub-pixel move
   of content across such a sliver counts as a change.
