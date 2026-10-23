@@ -100,6 +100,27 @@ describe('PerceptualComparator', () => {
     expect(strictThreshold).toMatchObject({ rounded: 1, differing: 0 });
   });
 
+  it('counts ground beside an edge changed by 6 to 32 levels, as 0.1.0 does', () => {
+    // A dark shape at grey 40 on ground at 200; the first one or two columns of ground beside it
+    // change. Lighter, a single column is a colour no move brings there; two columns either way
+    // keep a colour across a width no edge pixel spans.
+    const ground = (columns: number, d: number) => {
+      const image = solid(40, 10, [200, 200, 200, 255]);
+      for (let y = 0; y < 10; y++) {
+        for (let x = 0; x < 20 + columns; x++) {
+          const v = x < 20 ? 40 : 200 + d;
+          setPixel(image, x, y, [v, v, v, 255]);
+        }
+      }
+      return image;
+    };
+    for (const d of [6, 8, 12, 16, 24, 32]) {
+      expect(compareImages(ground(1, 0), ground(1, d)).differing).toBe(10);
+      expect(compareImages(ground(2, 0), ground(2, d)).differing).toBe(20);
+      expect(compareImages(ground(2, 0), ground(2, -d)).differing).toBe(20);
+    }
+  });
+
   it('judges transparent pixels as they appear over white', () => {
     expect(
       compareImages(solid(2, 2, [0, 0, 0, 0]), solid(2, 2, [255, 255, 255, 255])).differing,

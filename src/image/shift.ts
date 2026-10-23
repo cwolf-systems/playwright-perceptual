@@ -21,17 +21,14 @@ import type { Pixels } from './types.js';
 // - 5×5: a real change smaller than the large box, such as a faint stroke, survives this one.
 //
 // And over the pixel alone, where the rule says the pixel's colour lies within the colours next to
-// it in the other image, both ways round. A rasteriser covers an edge more sharply than bilinear
-// resampling mixes it, so beside a neighbour that kept its colour the range is widened by the
-// contrast across it.
+// it in the other image, both ways round, so a colour that appears or goes away is not a move.
 //
 // Each box is judged by its own move, per channel. An edge inside a box lets its total take a wide
 // range, so a faint change of colour beside an edge that did not move passes as a move.
 
 /**
- * The boxes tested, the most decisive first: each one's side, the levels per pixel of the box by
- * which a total may lie outside the range, for rounding, and the share of the range itself by which
- * it may, for sharpness.
+ * The boxes tested, the most decisive first: each one's side, and the levels per pixel of the box
+ * by which a total may lie outside the range, for rounding.
  *
  * Rounding in either image enters a box's total by up to half a level per pixel, so a level per
  * pixel covers it. Renderings of the same scene through the GPU and in software differ by a little
@@ -43,19 +40,17 @@ import type { Pixels } from './types.js';
  * of a faint overlay change, which a tighter bound would count.
  */
 const BOXES = [
-  { side: 65, slack: 0.75, widen: 0 },
-  { side: 5, slack: ROUNDING_LEVELS + 0.25, widen: 0 },
+  { side: 65, slack: 0.75 },
+  { side: 5, slack: ROUNDING_LEVELS + 0.25 },
 ] as const;
 
 /**
  * The pixel alone, with three levels of slack: 0.1.0's. With one or two, real renders of the same
- * scene fail. What a rasteriser moves across a box's border matches bilinear resampling on
- * average, but a single pixel along an edge only roughly: a thin line moved by half a pixel, for
- * one, gathers into a pixel darker than any beside it. Widened by the whole range, such moves of
- * text, SVG and charts pass; from 0.8 to 1.2 of the range, no verdict changes for the worse. A flat
- * neighbourhood has no range, so a speck there still counts.
+ * scene fail. The pixel's range is not widened for edges drawn more sharply than resampling mixes
+ * them: a band of new colour one pixel wide beside an edge, such as a ring or an outline, lies
+ * beyond the colours next to it just as such an edge pixel does, and must count.
  */
-const PIXEL = { side: 1, slack: 3, widen: 1 } as const;
+const PIXEL = { side: 1, slack: 3 } as const;
 
 type Box = (typeof BOXES)[number] | typeof PIXEL;
 
@@ -66,7 +61,7 @@ const LEVELS = [red, green, blue];
 const TILE = { rows: 256, columns: 512 } as const;
 
 /** Pixels read beyond a tile, for the boxes that judge the pixels at its edge. */
-const MARGIN = BOXES[0].side + 1;
+const MARGIN = Math.max(...BOXES.map((box) => box.side)) + 1;
 
 /** Directions a box may move along a side: both, or none along a side of one pixel. */
 const SIGNS = [-1, 1];
@@ -165,30 +160,12 @@ function moved(from: Tile, to: Tile, box: Box, x: number, y: number): boolean {
         const lo = Math.min(here, across, down, both);
         const hi = Math.max(here, across, down, both);
         if (target >= lo - slack && target <= hi + slack) continue channels;
-        // Widened only beside a neighbour that kept its colour, give or take rounding: an edge
-        // drawn more sharply leaves the colour beside it, while an edge whose sides changed colour
-        // too is a change. From no level to three, no verdict is lost; one counts the fewest
-        // pixels on pairs that should match.
-        const allowed = slack + box.widen * (hi - lo);
-        if (
-          target >= lo - allowed &&
-          target <= hi + allowed &&
-          (kept(from, to, nx, ny, c, x0 + sx, y0) ||
-            kept(from, to, nx, ny, c, x0, y0 + sy) ||
-            kept(from, to, nx, ny, c, x0 + sx, y0 + sy))
-        ) {
-          continue channels;
-        }
       }
     }
     return false;
   }
   return true;
 }
-
-/** Whether channel `c`'s total over the box at (x, y) is the same in both, give or take rounding. */
-const kept = (from: Tile, to: Tile, nx: number, ny: number, c: number, x: number, y: number) =>
-  Math.abs(total(from, nx, ny, c, x, y) - total(to, nx, ny, c, x, y)) <= ROUNDING_LEVELS * nx * ny;
 
 /**
  * Whether the change at pixel (x, y) is what a move of under a pixel leaves in every box, either
