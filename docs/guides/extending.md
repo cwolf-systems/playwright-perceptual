@@ -19,7 +19,9 @@ Options given to an assertion override the suite's. `perceptualMatchers` is
 
 Anything that implements `ImageComparator` can replace the built-in comparison, per assertion or
 for a suite. A comparison reports the image size, how many pixels changed, and `notes`: lines that
-follow the count in a failure message.
+follow the count in a failure message. `compare` may be given a `limit`, the pixels allowed, when
+only the verdict is needed, as while the matcher waits for a stable screenshot; a comparator may
+then stop counting once more than `limit` pixels changed and set `exceeded`, or ignore it.
 
 ```ts
 import type { ImageComparator } from '@cwolf-systems/playwright-perceptual';
@@ -69,6 +71,9 @@ const shift: NoiseDetector = (image, other, x, y) => y >= 40 && isShifted(image,
 
 const comparator = new PerceptualComparator({}, { shift });
 ```
+
+`isShifted` keeps the box filter of the tiles it has read for each `Pixels` object, so an image
+must not change while it is being judged; the comparator passes new ones for each comparison.
 
 ## Other storage
 

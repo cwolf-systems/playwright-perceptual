@@ -11,22 +11,26 @@ These come from the benchmark, at the default settings with 0.1% of the image al
 1. Sub-pixel movement mostly fails. Text, maps and 3D cameras moved by 0.3 px leave hundreds to
    thousands of changed pixels. Shift tolerance passes about 95% of the changed pixels in these
    cases, but rarely all of them, and a few hundred left over still fails the test.
-2. The 2D map through Chromium's GPU and through its software rasteriser fails: 1.4% of pixels at
+2. The 2D map through Chromium's GPU and through its software rasteriser fails: 1.5% of pixels at
    1× scale, 2.2% at 2×. The differences are hairlines along the seams between raster tiles and
    along the edges of thick stroked lines.
 3. Shift tolerance passes a hard edge moved by exactly one pixel. That is the price of looking one
    pixel around; `ignoreShifts: false` turns it off.
-4. Comparison is slow when much of the image changes: about 4.4 s for a fully changed 3200×2000
+4. Comparison is slow when much of the image changes: about 3.0 s for a fully changed 3200×2000
    screenshot, against 40 ms for pixelmatch. Passing tests and small changes cost less than
    decoding the screenshot, so this is mostly paid by failing tests.
 5. The thresholds are rules of thumb. ΔE00 1 as "just noticeable" comes from the formula's design
    and from viewing uniform patches, not from people looking at screenshots.
 6. Part of a faint uniform change still passes as shifts. The noise detectors no longer explain a
    translucent overlay made 5 points more transparent over terrain (from a renderer's tests), but
-   along contour lines and other edges a move could carry as much colour across a 5×5 window as
-   the change adds, so shift tolerance still sets aside a quarter to a third of its pixels. The
-   rest fail the test, so the verdict is right; a test with an allowance of thousands of pixels
-   would not be.
+   along contour lines and other edges a move could change a 5×5 box's total by as much as the
+   change does, so shift tolerance still sets aside about a fifth of its pixels. Over fine texture
+   it is worse: a drift of one to three levels over a whole textured frame is nearly all set aside,
+   since where the colour changes by a level or more per pixel, a drift of a level or two and a
+   move of a pixel look alike in any small box. A larger box, or asking both images to explain the
+   box, counts more of it, and fails real renders of the same scene; see
+   [the design log](design/box-filter.md). Registration, below, would tell the two apart by
+   finding the move first.
 7. The same scene can land on different pixels between page loads or rasterisers. A label whose
    projected anchor falls either side of a pixel boundary moves by a whole pixel; an aliased
    overlay edge within 1/32 px of a row of pixel centres covers the row in a rasteriser that
@@ -38,9 +42,8 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    drift of two over an area counts. A renderer whose exposure differs by one or two levels
    between loads of the same scene used to pass through shift tolerance and now fails, as in one
    of 28 scenes of the renderer's golden set.
-9. Shift tolerance cannot test conservation along a side under three pixels long, since what lies
-   beyond the image there is unknown: in such slivers any change within three levels of the
-   colours nearby passes as a shift.
+9. Shift tolerance cannot test an image one pixel high or wide, since what lies beyond the image
+   there is unknown: in such slivers any change passes as a shift.
 
 Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pixel by pixel.
 
@@ -108,8 +111,8 @@ as a reference when choosing filter settings and thresholds, or as an opt-in com
 SSIM (Wang et al., 2004) passes scattered rendering noise but, measured here, calls faint uniform
 colour changes noise too. A structural test that also requires the mean colour of the
 neighbourhood to stay within the threshold might keep the first without the second. Shift
-tolerance now applies a version of that requirement: a move may change a window's total colour
-only by what crosses its border. Anti-aliasing detection could take the same test. Multi-scale
+tolerance now applies a version of that requirement: a move may change a box's total colour only
+by what crosses its border. Anti-aliasing detection could take the same test. Multi-scale
 SSIM (Wang, Simoncelli and Bovik, 2003) is the natural variant to measure alongside.
 
 ### Other colour differences
@@ -130,8 +133,10 @@ pages (Mahajan and Halfond, 2015), would make failure messages more useful.
 ### Speed
 
 Most of the time on heavily changed images goes to colour maths and noise checks per changed
-pixel. Stopping a failing comparison once it is certain to fail, when no diff image is wanted,
-would bound it. Decoding, about 330 ms for two 3200×2000 PNGs, is pngjs; a faster decoder would
+pixel. The screenshot matcher already stops counting past the allowance while it waits for a
+stable screenshot; the comparison its failure message reports still runs in full, and so does
+`toBePerceptuallyNear`'s. Reporting "more than N" there would bound a failing test's cost, at the
+price of a less informative message. Decoding, about 330 ms for two 3200×2000 PNGs, is pngjs; a faster decoder would
 mean a native dependency, which this package avoids.
 
 ## Out of scope

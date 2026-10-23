@@ -23,15 +23,20 @@ Two images of the same size are compared pixel by pixel.
 5. A pixel that sits on a slope between a darker and a brighter neighbour, one of which lies in a
    flat area in both images and keeps its colour there give or take a level, is anti-aliasing
    that rasterisers place differently (Vyšniauskas, 2009). It is reported, not counted.
-6. So is a sub-pixel shift. Content moved by part of a pixel is resampled between neighbours, so
-   each image's colour at a changed pixel lies within the range of colours in the 3×3
-   neighbourhood of the same place in the other image, channel by channel, give or take three
-   levels for rounding. A move also conserves colour: over the 5×5 window around the pixel, each
-   channel's total can change only by what a move of under a pixel carries across the window's
-   border, plus a level per pixel for rounding. Near the image's border the window moves inward,
-   so the colour just beyond it is known. A pixel that passes both tests, both ways round,
-   is reported as shifted. A real change brings in a colour that was not nearby, such as a line
-   that went away or a new colour on an edge, or changes the colour of a whole area at once,
+6. So is a sub-pixel shift. Content moved by part of a pixel keeps its colour: over a box of
+   pixels, each channel's total changes only by what the move carries across the box's border.
+   For a move of (tx, ty), each up to a pixel, resampled bilinearly, that change is bilinear in tx
+   and ty, so it lies between its values for whole-pixel moves: the box's total moved one pixel
+   across, down, both, or not at all. Both images are box-filtered with running sums, and at a
+   changed pixel one image's box total must lie within the range of the other's totals at the box
+   and one pixel over, in one of the four directions, give or take a level per pixel of the box
+   for rounding. The test runs over a 5×5 box, either image being the one that moved, and over
+   the pixel alone, both ways round and give or take three levels: there it says each image's
+   colour lies within the colours next to it in the other. Near the image's border the 5×5 box
+   moves inward so that the box moved is in the image too; a box of one pixel stays on the pixel,
+   so on the outermost pixels a move from beyond the border explains nothing. A pixel that passes
+   both is reported as shifted. A real change brings in a colour that was not nearby, such as a
+   line that went away or a new colour on an edge, or changes the colour of a whole box at once,
    such as a translucent overlay made a little stronger or weaker over textured ground.
 
 The result is the number of changed pixels and the distribution of ΔE00 over the whole image:
@@ -55,15 +60,17 @@ lightness, chroma and hue, and for blues, where earlier formulas were least accu
   that lands on the next pixel in another page load, or an aliased edge that runs within 1/32 px
   of a row of pixel centres and covers that row in one rasteriser but not another, leaves a few
   pixels counted.
-- Along edges, shift tolerance can still take part of a uniform change for a move, where a move
-  could carry as much colour across the window as the change adds: a quarter to a third of the
-  pixels of a faint overlay change, in the cases measured.
+- Along edges and over texture, shift tolerance can still take part of a uniform change for a
+  move, where a move of the content could change a 5×5 box's total by as much as the change does:
+  about a fifth of the pixels of a faint overlay change, and nearly all of a drift of one to three
+  levels over fine texture, in the cases measured. Over texture whose colour changes by a level or
+  more per pixel, a drift of a level or two and a move of a pixel look alike in any small box.
 - A drift of one level everywhere passes as rounding while shift tolerance is on, even where it
-  passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over an area counts.
-- In an image under three pixels high or wide, what lies beyond the image along that side is
-  unknown, so shift tolerance cannot test whether colour was conserved, and any change within
-  three levels of the colours nearby passes as a shift. Use `ignoreShifts: false` for such
-  slivers.
+  passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over a flat or gently
+  shaded area counts.
+- In an image one pixel high or wide, what lies beyond the image along that side is unknown, so
+  shift tolerance cannot test it, and any change passes as a shift. Use `ignoreShifts: false` for
+  such slivers. From two pixels, it is tested.
 - Not every sub-pixel move passes. Thin text, maps and 3D scenes moved 0.3 px still leave changed
   pixels where edges overlap and produce colours neither image has nearby.
 - Fine detail is judged at full resolution. CIEDE2000 was built for uniform patches; the eye blends
