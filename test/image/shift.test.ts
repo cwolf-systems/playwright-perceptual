@@ -181,13 +181,15 @@ describe('isShifted, on smooth texture', () => {
 
   /** The share of changed pixels taken for a move. */
   function shiftedShare(before: RgbaImage, after: RgbaImage): number {
+    // The same two rasters throughout, so each tile is read once, as in a comparison.
+    const [expected, actual] = [new Raster(before), new Raster(after)];
     let changed = 0;
     let moved = 0;
     for (let y = 0; y < SIDE; y++) {
       for (let x = 0; x < SIDE; x++) {
-        if (sameAt(before, after, x, y)) continue;
+        if (expected.rgbAt(x, y) === actual.rgbAt(x, y)) continue;
         changed++;
-        if (shifted(before, after, x, y)) moved++;
+        if (isShifted(expected, actual, x, y)) moved++;
       }
     }
     return moved / changed;

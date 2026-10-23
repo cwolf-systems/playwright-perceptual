@@ -68,7 +68,7 @@ describe('tiles', () => {
       [0, 44],
     ] as const) {
       const window = windowAround(image, x, y);
-      const { tile } = tileAt(image, other, x, y);
+      const tile = tileAt(image, other, x, y);
       const expected = bruteForce(image, other, window);
       Object.values(Sum).forEach((quantity) => {
         expect(tile.sum(quantity, window)).toBeCloseTo(expected[quantity]!, 6);
@@ -80,7 +80,7 @@ describe('tiles', () => {
     const image = pattern(1, 9, 1);
     const other = pattern(1, 9, 2);
     const window = windowAround(image, 0, 4);
-    const { tile } = tileAt(image, other, 0, 4);
+    const tile = tileAt(image, other, 0, 4);
     expect(tile.sum(Sum.gxx, window)).toBe(0);
     expect(tile.sum(Sum.gyy, window)).toBeCloseTo(bruteForce(image, other, window)[Sum.gyy]!, 6);
   });
@@ -89,14 +89,13 @@ describe('tiles', () => {
     const image = pattern(64, 64, 1);
     const other = pattern(64, 64, 2);
     const first = tileAt(image, other, 5, 5);
-    expect(first.swapped).toBe(false);
-    expect(tileAt(image, other, 20, 10).tile).toBe(first.tile);
-    expect(tileAt(other, image, 5, 5, true)).toEqual({ tile: first.tile, swapped: true });
+    expect(tileAt(image, other, 20, 10)).toBe(first);
+    expect(tileAt(other, image, 5, 5, true)).toBe(first);
     // Without leave to swap, the other way round is a pair of its own.
-    expect(tileAt(other, image, 5, 5).tile).not.toBe(first.tile);
+    expect(tileAt(other, image, 5, 5)).not.toBe(first);
     // Another row, or another image to compare with, starts afresh.
-    expect(tileAt(image, other, 5, 40).tile).not.toBe(first.tile);
-    expect(tileAt(image, other, 5, 5).tile).not.toBe(first.tile);
-    expect(tileAt(image, pattern(64, 64, 3), 5, 5).tile).not.toBe(first.tile);
+    expect(tileAt(image, other, 5, 40)).not.toBe(first);
+    expect(tileAt(image, other, 5, 5)).not.toBe(first);
+    expect(tileAt(image, pattern(64, 64, 3), 5, 5)).not.toBe(first);
   });
 });

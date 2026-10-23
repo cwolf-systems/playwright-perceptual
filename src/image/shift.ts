@@ -1,4 +1,3 @@
-import { ROUNDING_LEVELS } from '../color/rgb.js';
 import { CHANNELS, Sum, tileAt, windowAround, type Box, type Tile } from './tiles.js';
 import type { Pixels } from './types.js';
 
@@ -56,23 +55,28 @@ const AGREEMENT = 0.4;
  */
 const DAMPING = 0.1;
 
+/** Where the pixels of the 3×3 neighbourhood of (x, y) start in the tile's channels. */
+function neighbourhood(tile: Tile, x: number, y: number): number[] {
+  const at: number[] = [];
+  // Clamping repeats the border pixel, which leaves the range as clipping would.
+  for (let ny = y - RADIUS; ny <= y + RADIUS; ny++) {
+    for (let nx = x - RADIUS; nx <= x + RADIUS; nx++) at.push(tile.at(nx, ny));
+  }
+  return at;
+}
+
 /**
- * Whether each channel of the pixel at `index` in plane `from` lies within the colours of plane
- * `among` around (x, y), give or take `SLACK`.
+ * Whether each channel of the pixel at `own` in channels `from` lies within the colours of
+ * `among` at `around`, give or take `SLACK`.
  */
-function inNeighbourhood(tile: Tile, from: Uint8Array, among: Uint8Array, x: number, y: number) {
-  const { planes } = tile;
-  const own = planes.at(x, y);
+function inRange(from: Uint8Array, own: number, among: Uint8Array, around: number[]): boolean {
   for (let c = 0; c < CHANNELS; c++) {
     let lo = Infinity;
     let hi = -Infinity;
-    for (let ny = y - RADIUS; ny <= y + RADIUS; ny++) {
-      for (let nx = x - RADIUS; nx <= x + RADIUS; nx++) {
-        // Clamping repeats the border pixel, which leaves the range as clipping would.
-        const v = among[planes.at(nx, ny) + c]!;
-        if (v < lo) lo = v;
-        if (v > hi) hi = v;
-      }
+    for (const at of around) {
+      const v = among[at + c]!;
+      if (v < lo) lo = v;
+      if (v > hi) hi = v;
     }
     const value = from[own + c]!;
     if (value < lo - SLACK || value > hi + SLACK) return false;
@@ -166,14 +170,6 @@ function mixes(plane: Uint8Array, at: number, ends: Uint8Array, from: number, to
   return true;
 }
 
-/** Whether no channel at `at` differs between the planes by more than rounding. */
-function kept(before: Uint8Array, after: Uint8Array, at: number): boolean {
-  for (let c = 0; c < CHANNELS; c++) {
-    if (Math.abs(before[at + c]! - after[at + c]!) > ROUNDING_LEVELS) return false;
-  }
-  return true;
-}
-
 /**
  * Whether the pixel is, in both images, a mixture of the same two colours on opposite sides of it
  * in the window, each of which kept its colour, give or take rounding.
@@ -181,16 +177,16 @@ function kept(before: Uint8Array, after: Uint8Array, at: number): boolean {
 function remixed(tile: Tile, window: Box, x: number, y: number): boolean {
   // The pixel itself changed: two pixels around it must have kept their colour.
   if (tile.sum(Sum.kept, window) < 2) return false;
-  const { planes } = tile;
-  const { image: before, other: after } = planes;
+  const { before, after } = tile;
   const sides: { dx: number; dy: number; at: number }[] = [];
   for (let ny = window.y0; ny <= window.y1; ny++) {
     for (let nx = window.x0; nx <= window.x1; nx++) {
-      const at = planes.at(nx, ny);
-      if (kept(before, after, at)) sides.push({ dx: nx - x, dy: ny - y, at });
+      if (tile.sum(Sum.kept, { x0: nx, y0: ny, x1: nx, y1: ny }) === 1) {
+        sides.push({ dx: nx - x, dy: ny - y, at: tile.at(nx, ny) });
+      }
     }
   }
-  const at = planes.at(x, y);
+  const at = tile.at(x, y);
   for (let i = 0; i < sides.length; i++) {
     for (let j = i + 1; j < sides.length; j++) {
       const a = sides[i]!;
@@ -207,12 +203,13 @@ function remixed(tile: Tile, window: Box, x: number, y: number): boolean {
 
 /** Whether pixel (x, y) differs only because content moved by less than a pixel. */
 export function isShifted(image: Pixels, other: Pixels, x: number, y: number): boolean {
-  const { tile } = tileAt(image, other, x, y);
-  const { image: before, other: after } = tile.planes;
+  const tile = tileAt(image, other, x, y);
   const window = windowAround(image, x, y);
+  const own = tile.at(x, y);
+  const around = neighbourhood(tile, x, y);
   return (
-    (inNeighbourhood(tile, after, before, x, y) &&
-      inNeighbourhood(tile, before, after, x, y) &&
+    (inRange(tile.after, own, tile.before, around) &&
+      inRange(tile.before, own, tile.after, around) &&
       (keepsColour(tile, window) || explainedByMove(tile, window))) ||
     remixed(tile, window, x, y)
   );

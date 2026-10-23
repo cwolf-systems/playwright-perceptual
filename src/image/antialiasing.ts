@@ -1,5 +1,5 @@
-import { channelLuma, ROUNDING_LEVELS, withinLevels } from '../color/rgb.js';
-import { CHANNELS, Sum, tileAt } from './tiles.js';
+import { luma, ROUNDING_LEVELS, withinLevels } from '../color/rgb.js';
+import { Sum, tileAt, windowAround } from './tiles.js';
 import type { Pixels } from './types.js';
 import { contains, NEIGHBOURS, onEdge } from './raster.js';
 
@@ -33,21 +33,11 @@ function inFlatArea(pixels: Pixels, x: number, y: number): boolean {
 
 /** Whether pixel (x, y) of `image` looks like anti-aliasing, judged against `other`. */
 export function isAntialiased(image: Pixels, other: Pixels, x: number, y: number): boolean {
-  // Either image's tile will do: they hold the same pixels.
-  const { tile, swapped } = tileAt(image, other, x, y, true);
-  // The flat neighbour must have kept its colour. Most changed pixels have no such neighbour,
-  // and are turned away here with four lookups.
-  const neighbours = {
-    x0: Math.max(0, x - 1),
-    y0: Math.max(0, y - 1),
-    x1: Math.min(image.width - 1, x + 1),
-    y1: Math.min(image.height - 1, y + 1),
-  };
-  if (tile.sum(Sum.kept, neighbours) === 0) return false;
-  const { planes } = tile;
-  const plane = swapped ? planes.other : planes.image;
-  const at = planes.at(x, y);
-  const own = channelLuma(plane[at]!, plane[at + 1]!, plane[at + 2]!);
+  // The flat neighbour must keep its colour. Most changed pixels have no neighbour that did, and
+  // are turned away with a lookup in either image's tile: they hold the same pixels.
+  const tile = tileAt(image, other, x, y, true);
+  if (tile.sum(Sum.kept, windowAround(image, x, y, 1)) === 0) return false;
+  const own = luma(image.rgbAt(x, y));
   let same = edgeAllowance(image, x, y);
   let darkest = 0;
   let brightest = 0;
@@ -56,13 +46,11 @@ export function isAntialiased(image: Pixels, other: Pixels, x: number, y: number
   let brightX = 0;
   let brightY = 0;
 
-  for (let n = 0; n < NEIGHBOURS.length; n++) {
-    const [dx, dy] = NEIGHBOURS[n]!;
+  for (const [dx, dy] of NEIGHBOURS) {
     const nx = x + dx;
     const ny = y + dy;
     if (!contains(image, nx, ny)) continue;
-    const i = at + dy * planes.rowStride + dx * CHANNELS;
-    const delta = channelLuma(plane[i]!, plane[i + 1]!, plane[i + 2]!) - own;
+    const delta = luma(image.rgbAt(nx, ny)) - own;
     if (delta === 0) {
       if (++same > FLAT_NEIGHBOURS) return false;
     } else if (delta < darkest) {

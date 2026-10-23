@@ -25,12 +25,9 @@ export const withinLevels = (a: number, b: number, levels: number): boolean =>
   Math.abs(green(a) - green(b)) <= levels &&
   Math.abs(blue(a) - blue(b)) <= levels;
 
-/** Brightness from 0 to 255, of a colour given by its channels. */
-export const channelLuma = (r: number, g: number, b: number): number =>
-  LUMA_R * r + LUMA_G * g + LUMA_B * b;
-
 /** Brightness from 0 to 255. */
-export const luma = (rgb: number): number => channelLuma(red(rgb), green(rgb), blue(rgb));
+export const luma = (rgb: number): number =>
+  LUMA_R * red(rgb) + LUMA_G * green(rgb) + LUMA_B * blue(rgb);
 
 /** An 8-bit channel blended over white, as a transparent screenshot is seen. */
 export const overWhite = (channel: number, alpha: number): number =>
