@@ -20,11 +20,14 @@ import type { Pixels } from './types.js';
 //   colour in as out, and the drift remains.
 // - 5×5: a real change smaller than the large box, such as a faint stroke, survives this one.
 // - The pixel alone, where the rule says the pixel's colour lies within the colours next to it in
-//   the other image, both ways round, so a colour that appears or goes away is not a move.
+//   the other image, both ways round, so a colour that appears or goes away is not a move. A
+//   rasteriser covers an edge more sharply than bilinear resampling mixes it, so here the range is
+//   widened by the contrast across it.
 
 /**
- * The boxes tested, the most decisive first: each one's side, and the levels per pixel of the box
- * by which a total may lie outside the range, for rounding.
+ * The boxes tested, the most decisive first: each one's side, the levels per pixel of the box by
+ * which a total may lie outside the range, for rounding, and the share of the range itself by which
+ * it may, for sharpness.
  *
  * - Rounding in either image enters a box's total by up to half a level per pixel, so a level per
  *   pixel covers it, and the 5×5 box needs all of it for renderings through the GPU against
@@ -32,12 +35,15 @@ import type { Pixels } from './types.js';
  *   level per pixel still fails those renderings, where one is lighter across an area, and three
  *   quarters leaves room above that.
  * - Over the pixel alone, three levels: 0.1.0's slack. With one or two, real renders of the same
- *   scene fail.
+ *   scene fail. What a rasteriser moves across a box's border matches bilinear resampling on
+ *   average, but a single pixel along an edge only roughly: widened by the whole range, sub-pixel
+ *   moves of text, SVG and charts pass, and no faint change counts less. Half the range passes
+ *   fewer of them; a flat neighbourhood has no range, so a speck there still counts.
  */
 const BOXES = [
-  { side: 65, slack: 0.75 },
-  { side: 5, slack: ROUNDING_LEVELS },
-  { side: 1, slack: 3 },
+  { side: 65, slack: 0.75, widen: 0 },
+  { side: 5, slack: ROUNDING_LEVELS, widen: 0 },
+  { side: 1, slack: 3, widen: 1 },
 ] as const;
 
 const CHANNELS = 3;
@@ -151,7 +157,7 @@ function tile(pixels: Pixels, x: number, y: number): Tile {
 function moved(from: Tile, to: Tile, b: number, x: number, y: number): boolean {
   const { nx, ny } = from.boxes[b]!;
   const { width, height } = from.pixels;
-  const slack = BOXES[b]!.slack * nx * ny;
+  const { slack, widen } = BOXES[b]!;
   channels: for (let c = 0; c < CHANNELS; c++) {
     for (const sx of width > 1 ? SIGNS : STILL) {
       const x0 = place(x, nx, width, sx);
@@ -163,9 +169,10 @@ function moved(from: Tile, to: Tile, b: number, x: number, y: number): boolean {
         const down = total(from, b, c, x0, y0 + sy);
         const both = total(from, b, c, x0 + sx, y0 + sy);
         const target = total(to, b, c, x0, y0);
-        const lo = Math.min(here, across, down, both) - slack;
-        const hi = Math.max(here, across, down, both) + slack;
-        if (target >= lo && target <= hi) continue channels;
+        const lo = Math.min(here, across, down, both);
+        const hi = Math.max(here, across, down, both);
+        const allowed = slack * nx * ny + widen * (hi - lo);
+        if (target >= lo - allowed && target <= hi + allowed) continue channels;
       }
     }
     return false;
