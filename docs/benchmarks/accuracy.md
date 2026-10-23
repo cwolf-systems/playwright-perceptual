@@ -272,12 +272,12 @@ and the CSS effects page through the GPU at 1×, from 3 to 59 against 64. Text a
 at 1× lose counted pixels. In the synthetic set the faint overlay change, 0 counted pixels in
 0.1.0, now has 21,156 at ΔE00 1, 93% of its pixels past the threshold.
 
-Comparison is faster than 0.1.0 wherever the whole frame changes. On a downstream renderer's
-captures (1346×819, not included), a whole-frame real change took 350 ms against 421 ms, and a
-film-grain scene 77 ms against 255 ms; a drift of one to three levels over a whole textured frame
-of that size, 402 ms against 586 ms; `npm run bench`'s fully changed 3200×2000 image, 3.4 s against
-4.4 s. The detectors read each pair of images once per tile and sum windows from summed-area
-tables.
+Comparison is faster than 0.1.0 in every case the redesign's judge times. On a downstream
+renderer's captures (1346×819, not included), a whole-frame real change took 374 ms against
+444 ms, and a film-grain scene 61 ms against 260 ms; a drift of one to three levels over a whole
+textured frame of that size, 451 ms against 604 ms; `npm run bench`'s fully changed 3200×2000
+image, 3.5 s against 4.6 s. The detectors read each pair of images once per tile and sum windows
+from summed-area tables.
 
 These rules were measured on the held-out set while being developed, so for them it is no longer
 unseen.

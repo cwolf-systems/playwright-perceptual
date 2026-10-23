@@ -193,19 +193,21 @@ kept. The anti-aliasing rule, otherwise as in PR #1,
 turns away a pixel with no neighbour that kept its colour with one lookup in the same tables,
 which is most pixels of a whole-frame change.
 
-Medians of 5, milliseconds, the same machine and load, in one process per build:
+The judge's timings at the final head, medians of 5, milliseconds, each build in its own process:
 
 | case                                   | 0.1.0 | PR #1 | register first |
 | -------------------------------------- | ----- | ----- | -------------- |
-| bench 1280×720, 100%                   | 636   | 578   | 497            |
-| bench 1920×1080, 100%                  | 1,383 | 1,064 | 1,055          |
-| bench 3200×2000, 100%                  | 4,419 | 3,425 | 3,437          |
-| textured drift of 1–3 levels, 1346×819 | 586   | 765   | 402            |
-| film grain of ±1 level, 1346×819       | 422   | 61    | 53             |
-| real whole-frame change                | 421   | 1,109 | 350            |
-| real film grain                        | 255   | 52    | 77             |
-| bench 3200×2000, 1%                    | 57    | 51    | 42             |
+| bench 1280×720, 100%                   | 711   | 603   | 573            |
+| bench 1920×1080, 100%                  | 1,484 | 1,203 | 1,189          |
+| bench 3200×2000, 100%                  | 4,556 | 3,772 | 3,541          |
+| bench 3200×2000, 1%                    | 63    | 54    | 45             |
+| textured drift of 1–3 levels, 1346×819 | 604   | 708   | 451            |
+| film grain of ±1 level, 1346×819       | 439   | 51    | 51             |
+| real whole-frame change                | 444   | 996   | 374            |
+| real film grain                        | 260   | 51    | 61             |
 
 Before the tiles, with reads per pixel, the real whole-frame change took 1,927 ms. Smaller tiles
-cost less where a few scattered pixels need the detectors and more where many do: 16-pixel tiles
-took 68 ms on the real grain and 388 ms on the real whole-frame change, 24-pixel tiles 73 and 373.
+cost less where a few scattered pixels need the detectors and more where many do: in one run of
+the same cases, 16-pixel tiles took 68 ms on the real grain and 388 ms on the real whole-frame
+change, 24-pixel tiles 73 and 373, 32-pixel tiles 77 and 350. Building the fit's tables only where
+needed took the bench's fully changed 3200×2000 image from 4,264 to 3,541 ms in the judge.

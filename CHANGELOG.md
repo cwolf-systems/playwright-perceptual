@@ -57,12 +57,13 @@
 
 ### Speed
 
-- Changed images compare faster than in 0.1.0 wherever the whole frame changed: 3.4 s for a fully
-  changed 3200×2000 image in `npm run bench`, from 4.4 s; a drift of one to three levels over a
-  whole textured 1346×819 frame, 402 ms from 586 ms; a real whole-frame change in a renderer's
-  capture, 350 ms from 421 ms; grainy images about eight times faster (53 ms from 422 ms), since
-  rounding is checked before the detectors. The detectors read a pair of images once per 32×32
-  tile, where they need to, and sum each window from summed-area tables in a few lookups.
+- Changed images compare faster than in 0.1.0 in every case the redesign's judge times (medians
+  of 5, one machine): a fully changed 3200×2000 image in `npm run bench`, 3.5 s from 4.6 s; a
+  drift of one to three levels over a whole textured 1346×819 frame, 451 ms from 604 ms; a real
+  whole-frame change in a renderer's capture, 374 ms from 444 ms; film grain over that frame,
+  51 ms from 439 ms, since rounding is checked before the detectors. The detectors read a pair of
+  images once per 32×32 tile, where they need to, and sum each window from summed-area tables in
+  a few lookups.
 
 ### Other
 
