@@ -127,6 +127,20 @@ describe('PerceptualComparator', () => {
     expect(never.compare(solid(2, 2, GREY), actual).differing).toBe(0);
     const everyEdge = new PerceptualComparator({}, { antialiasing: () => true });
     expect(everyEdge.compare(solid(2, 2, GREY), actual).antialiased).toBe(1);
+    // A detector passed in is asked each way round, the images swapped.
+    const asked: [unknown, unknown][] = [];
+    const recording = new PerceptualComparator(
+      {},
+      {
+        antialiasing: (image, other) => {
+          asked.push([image, other]);
+          return false;
+        },
+      },
+    );
+    recording.compare(solid(2, 2, GREY), actual);
+    expect(asked).toHaveLength(2);
+    expect(asked[1]).toEqual([asked[0]![1], asked[0]![0]]);
     const everyShift = new PerceptualComparator({}, { antialiasing: null, shift: () => true });
     expect(everyShift.compare(solid(2, 2, GREY), actual).shifted).toBe(1);
     const noDetectors = new PerceptualComparator({}, { antialiasing: null, shift: null });

@@ -3,7 +3,7 @@ import { rgbToLab } from '../color/cielab.js';
 import { ROUNDING_LEVELS, withinLevels } from '../color/rgb.js';
 import { resolveCompareOptions, type ResolvedCompareOptions } from '../defaults.js';
 import { ImageSizeError } from '../errors.js';
-import { isAntialiased } from '../image/antialiasing.js';
+import { isAntialiasedEitherWay } from '../image/antialiasing.js';
 import { Raster } from '../image/raster.js';
 import { isShifted } from '../image/shift.js';
 import type { ColorDifference, Lab } from '../color/types.js';
@@ -69,7 +69,13 @@ export class PerceptualComparator implements ImageComparator {
   constructor(options: CompareOptions = {}, parts: ComparatorParts = {}) {
     this.options = resolveCompareOptions(options);
     this.colorDifference = parts.colorDifference ?? deltaE2000;
-    const antialiasing = parts.antialiasing === undefined ? isAntialiased : parts.antialiasing;
+    // Anti-aliasing is asked both ways round. The default asks once for both, sharing the check
+    // that a neighbour kept its colour; a detector passed in is asked each way.
+    const custom = parts.antialiasing;
+    const antialiasing: NoiseDetector | null =
+      custom === undefined
+        ? isAntialiasedEitherWay
+        : custom && ((a, b, x, y) => custom(a, b, x, y) || custom(b, a, x, y));
     const shift = parts.shift === undefined ? isShifted : parts.shift;
     this.antialiasing = this.options.ignoreAntialiasing ? antialiasing : null;
     this.shift = this.options.ignoreShifts ? shift : null;
@@ -150,10 +156,7 @@ export class PerceptualComparator implements ImageComparator {
       }
       const x = index % expected.width;
       const y = (index - x) / expected.width;
-      if (
-        this.antialiasing?.(expected, actual, x, y) ||
-        this.antialiasing?.(actual, expected, x, y)
-      ) {
+      if (this.antialiasing?.(expected, actual, x, y)) {
         antialiased++;
         diff?.antialiased(index);
       } else if (this.shift?.(expected, actual, x, y)) {

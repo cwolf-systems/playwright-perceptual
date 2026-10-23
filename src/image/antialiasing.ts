@@ -67,3 +67,24 @@ export function isAntialiased(image: Pixels, other: Pixels, x: number, y: number
     inFlatArea(other, nx, ny);
   return flatInBoth(darkX, darkY) || flatInBoth(brightX, brightY);
 }
+
+/**
+ * `isAntialiased` asked both ways round. Either way needs a neighbour that kept its colour, so
+ * where none did, as across most of a real change, it is settled after one pass.
+ */
+export function isAntialiasedEitherWay(
+  image: Pixels,
+  other: Pixels,
+  x: number,
+  y: number,
+): boolean {
+  const kept = NEIGHBOURS.some(([dx, dy]) => {
+    const nx = x + dx;
+    const ny = y + dy;
+    return (
+      contains(image, nx, ny) &&
+      withinLevels(image.rgbAt(nx, ny), other.rgbAt(nx, ny), ROUNDING_LEVELS)
+    );
+  });
+  return kept && (isAntialiased(image, other, x, y) || isAntialiased(other, image, x, y));
+}
