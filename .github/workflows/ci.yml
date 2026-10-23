@@ -113,3 +113,37 @@ jobs:
       - run: npm run typecheck
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --project=chromium
+
+  judge:
+    name: Judge accuracy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # The judge renders the benchmark's fixture pages in all three browsers.
+      - run: npx playwright install --with-deps
+      # Playwright's image-comparison fixtures, which the benchmark downloads from GitHub on first
+      # use. Cached, so that runs don't spend the API's rate limit for anonymous requests.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: bench/data/playwright-v1.60.0
+          key: playwright-fixtures-v1.60.0
+      # The judge's accuracy section only: the benchmark and synthetic sets. The real captures
+      # aren't in the repository, and speed on a shared runner says little.
+      - run: node bench/judge.mjs --skip-speed --name ci --out "$RUNNER_TEMP/judge.json"
+      # Fails if a verdict the 0.2.0 baseline got right is now wrong. Rendered pairs are compared
+      # only on the platform the baseline was made on; check-baseline.mjs says why.
+      - name: No verdict lost against 0.2.0
+        shell: bash
+        run: node bench/check-baseline.mjs "$RUNNER_TEMP/judge.json" | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: judge-result
+          path: ${{ runner.temp }}/judge.json
+          retention-days: 7
