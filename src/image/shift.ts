@@ -94,7 +94,6 @@ function span(centre: number, size: number, end: 0 | 1): number {
 const H = new Float64Array(12);
 const V = new Float64Array(12);
 const C = new Float64Array(12);
-const corners = new Int32Array(16);
 
 /** Steps across a move's horizontal part when looking for one that explains a change. */
 const STEPS = 16;
@@ -131,11 +130,14 @@ function reachable(d: number, change: Float64Array, rounding: number): boolean {
   return false;
 }
 
+/** What a move of a whole pixel carries in, by channel and side: 4·channel + side. */
+const carries = new Float64Array(12);
+
 /**
  * Whether a move of under a pixel in `moved`, whose sums are `sums`, explains `change` within
- * rounding. Channel by channel, a direction is dropped once the channel cannot reach its change
+ * rounding. Direction by direction, a channel drops the direction once it cannot reach its change
  * even alone: a·H + b·V + a·b·C lies between its values at the unit square's corners. Most real
- * changes are refused there, before the other channels are measured.
+ * changes are refused there; each channel is measured only when a direction first needs it.
  */
 function explains(
   moved: Pixels,
@@ -153,47 +155,45 @@ function explains(
   const after = Math.min(moved.width - 1, x1 + 1);
   const above = Math.max(0, y0 - 1);
   const below = Math.min(moved.height - 1, y1 + 1);
-  // The four pixels of each direction's corner term, read once for all three channels: the one
-  // diagonally beyond the window, the ones beside it on the row and column pushed out, and the
-  // corner pushed out.
+  // Channels measured so far, one bit each.
+  let measured = 0;
+  // What each side carries, for channel c: rightwards a move brings in the column before the
+  // window and pushes out its last; leftwards, the column after and its first; rows the same,
+  // down and up.
+  const measure = (c: number): void => {
+    measured |= 1 << c;
+    carries[4 * c] = sums.total(c, before, y0, before, y1) - sums.total(c, x1, y0, x1, y1);
+    carries[4 * c + 1] = sums.total(c, after, y0, after, y1) - sums.total(c, x0, y0, x0, y1);
+    carries[4 * c + 2] = sums.total(c, x0, above, x1, above) - sums.total(c, x0, y1, x1, y1);
+    carries[4 * c + 3] = sums.total(c, x0, below, x1, below) - sums.total(c, x0, y0, x1, y0);
+  };
   for (let d = 0; d < 4; d++) {
-    const inX = d < 2 ? before : after;
-    const outX = d < 2 ? x1 : x0;
-    const inY = d % 2 === 0 ? above : below;
-    const outY = d % 2 === 0 ? y1 : y0;
-    corners[4 * d] = moved.rgbAt(inX, inY);
-    corners[4 * d + 1] = moved.rgbAt(outX, inY);
-    corners[4 * d + 2] = moved.rgbAt(inX, outY);
-    corners[4 * d + 3] = moved.rgbAt(outX, outY);
-  }
-  let open = 0b1111;
-  for (let c = 0; c < 3; c++) {
-    const channel = CHANNELS[c]!;
-    // Rightwards a move brings in the column before the window and pushes out its last;
-    // leftwards, the column after and its first. Rows the same, down and up.
-    const rightwards = sums.total(c, before, y0, before, y1) - sums.total(c, x1, y0, x1, y1);
-    const leftwards = sums.total(c, after, y0, after, y1) - sums.total(c, x0, y0, x0, y1);
-    const downwards = sums.total(c, x0, above, x1, above) - sums.total(c, x0, y1, x1, y1);
-    const upwards = sums.total(c, x0, below, x1, below) - sums.total(c, x0, y0, x1, y0);
-    for (let d = 0; d < 4; d++) {
-      if ((open & (1 << d)) === 0) continue;
+    const toRight = d < 2;
+    const toBottom = d % 2 === 0;
+    // The corner term's four pixels: the one diagonally beyond the window, the ones beside it on
+    // the row and column pushed out, and the corner pushed out.
+    const inX = toRight ? before : after;
+    const outX = toRight ? x1 : x0;
+    const inY = toBottom ? above : below;
+    const outY = toBottom ? y1 : y0;
+    const beyond = moved.rgbAt(inX, inY);
+    const onRow = moved.rgbAt(outX, inY);
+    const onColumn = moved.rgbAt(inX, outY);
+    const pushed = moved.rgbAt(outX, outY);
+    let open = true;
+    for (let c = 0; c < 3 && open; c++) {
+      const channel = CHANNELS[c]!;
       const i = 3 * d + c;
-      const h = (H[i] = d < 2 ? rightwards : leftwards);
-      const v = (V[i] = d % 2 === 0 ? downwards : upwards);
-      const k = (C[i] =
-        channel(corners[4 * d]!) -
-        channel(corners[4 * d + 1]!) -
-        channel(corners[4 * d + 2]!) +
-        channel(corners[4 * d + 3]!));
+      if ((measured & (1 << c)) === 0) measure(c);
+      const h = (H[i] = carries[4 * c + (toRight ? 0 : 1)]!);
+      const v = (V[i] = carries[4 * c + (toBottom ? 2 : 3)]!);
+      const k = (C[i] = channel(beyond) - channel(onRow) - channel(onColumn) + channel(pushed));
       // Between its values at the unit square's corners: 0, h, v and h + v + k.
       const lowest = Math.min(0, h, v, h + v + k);
       const highest = Math.max(0, h, v, h + v + k);
-      if (change[c]! + rounding < lowest || change[c]! - rounding > highest) open &= ~(1 << d);
+      open = change[c]! + rounding >= lowest && change[c]! - rounding <= highest;
     }
-    if (open === 0) return false;
-  }
-  for (let d = 0; d < 4; d++) {
-    if ((open & (1 << d)) !== 0 && reachable(d, change, rounding)) return true;
+    if (open && reachable(d, change, rounding)) return true;
   }
   return false;
 }
