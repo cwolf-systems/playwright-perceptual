@@ -16,7 +16,7 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    along the edges of thick stroked lines.
 3. Shift tolerance passes a hard edge moved by exactly one pixel. That is the price of looking one
    pixel around; `ignoreShifts: false` turns it off.
-4. Comparison is slow when much of the image changes: about 3.5 s for a fully changed 3200×2000
+4. Comparison is slow when much of the image changes: about 4.3 s for a fully changed 3200×2000
    screenshot, against 40 ms for pixelmatch. Passing tests and small changes cost less than
    decoding the screenshot, so this is mostly paid by failing tests.
 5. The thresholds are rules of thumb. ΔE00 1 as "just noticeable" comes from the formula's design

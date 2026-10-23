@@ -58,7 +58,7 @@
 ### Speed
 
 - Changed images compare faster than in 0.1.0 in every case the redesign's judge times (medians
-  of 5, one machine): a fully changed 3200×2000 image in `npm run bench`, 3.5 s from 4.6 s; a
+  of 5, one machine): `npm run bench`'s fully changed 3200×2000 picture, 3.5 s from 4.6 s; a
   drift of one to three levels over a whole textured 1346×819 frame, 451 ms from 604 ms; a real
   whole-frame change in a renderer's capture, 374 ms from 444 ms; film grain over that frame,
   51 ms from 439 ms, since rounding is checked before the detectors. The detectors read a pair of
