@@ -40,9 +40,11 @@ function notes(
   rounded: number,
   antialiased: number,
   shifted: number,
+  exceeded: boolean,
 ): string[] {
+  const over = exceeded ? 'Over the pixels read before counting stopped' : 'Over all pixels';
   const lines = [
-    `Changed means ΔE00 above ${maxDeltaE}. Over all pixels: median ${fixed(deltaE.median)}, p95 ${fixed(deltaE.p95)}, p99 ${fixed(deltaE.p99)}, max ${fixed(deltaE.max)}.`,
+    `Changed means ΔE00 above ${maxDeltaE}. ${over}: median ${fixed(deltaE.median)}, p95 ${fixed(deltaE.p95)}, p99 ${fixed(deltaE.p99)}, max ${fixed(deltaE.max)}.`,
   ];
   if (rounded > 0) {
     lines.push(`${rounded} pixels within one level in every channel were not counted.`);
@@ -60,7 +62,7 @@ export class PerceptualComparator implements ImageComparator {
   private readonly shift: NoiseDetector | null;
   private readonly ignoreRounding: boolean;
   private readonly labColours = new Int32Array(1 << CACHE_BITS).fill(-1);
-  private readonly labs: Lab[] = [];
+  private readonly labs = new Array<Lab | null>(1 << CACHE_BITS).fill(null);
   private readonly deltaPairs = new Float64Array(1 << CACHE_BITS).fill(-1);
   private readonly deltas = new Float64Array(1 << CACHE_BITS);
 
@@ -77,13 +79,13 @@ export class PerceptualComparator implements ImageComparator {
     this.ignoreRounding = options.ignoreRounding ?? this.shift !== null;
   }
 
-  compare(expected: RgbaImage, actual: RgbaImage): PerceptualComparison {
-    return this.run(expected, actual, null);
+  compare(expected: RgbaImage, actual: RgbaImage, limit = Infinity): PerceptualComparison {
+    return this.run(expected, actual, null, limit);
   }
 
   diff(expected: RgbaImage, actual: RgbaImage): PerceptualComparison & DiffedComparison {
     const diff = new DiffImage(expected.width, expected.height);
-    return { ...this.run(expected, actual, diff), diff: diff.image };
+    return { ...this.run(expected, actual, diff, Infinity), diff: diff.image };
   }
 
   private lab(rgb: number): Lab {
@@ -109,6 +111,7 @@ export class PerceptualComparator implements ImageComparator {
     expectedImage: RgbaImage,
     actualImage: RgbaImage,
     diff: DiffImage | null,
+    limit: number,
   ): PerceptualComparison {
     if (expectedImage.width !== actualImage.width || expectedImage.height !== actualImage.height) {
       throw new ImageSizeError(expectedImage, actualImage);
@@ -159,6 +162,8 @@ export class PerceptualComparator implements ImageComparator {
       } else {
         differing++;
         diff?.changed(index);
+        // Past the limit the verdict is known, and only a diff image would need the rest.
+        if (differing > limit) break;
       }
     }
     histogram.add(0, identical);
@@ -178,7 +183,15 @@ export class PerceptualComparator implements ImageComparator {
       antialiased,
       shifted,
       deltaE,
-      notes: notes(this.options.maxDeltaE, deltaE, rounded, antialiased, shifted),
+      exceeded: differing > limit,
+      notes: notes(
+        this.options.maxDeltaE,
+        deltaE,
+        rounded,
+        antialiased,
+        shifted,
+        differing > limit,
+      ),
     };
   }
 }

@@ -4,9 +4,12 @@ const percent = (part: number, whole: number): string => `${((part / whole) * 10
 
 /** How a comparison came out, for failure messages. */
 export function describeComparison(comparison: Comparison): string {
-  const { width, height, differing, notes } = comparison;
+  const { width, height, differing, exceeded, notes } = comparison;
   const share = percent(differing, width * height);
-  return [`${differing} pixels (${share} of the image) changed.`, ...notes].join('\n');
+  const count = exceeded
+    ? `More than ${differing - 1} pixels (over ${share} of the image) changed; counting stopped there.`
+    : `${differing} pixels (${share} of the image) changed.`;
+  return [count, ...notes].join('\n');
 }
 
 export const describeSize = (

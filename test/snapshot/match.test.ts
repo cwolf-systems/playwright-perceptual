@@ -129,6 +129,26 @@ describe('matchSnapshot', () => {
     expect(result.message).toMatch(/kept changing for 20 ms\.\nThe last two:/);
   });
 
+  it('stops counting past the allowance only while waiting, and reports the full count', async () => {
+    const limits: (number | undefined)[] = [];
+    const comparator = new (class extends PerceptualComparator {
+      override compare(...[expected, actual, limit]: Parameters<PerceptualComparator['compare']>) {
+        limits.push(limit);
+        return super.compare(expected, actual, limit);
+      }
+    })();
+    const result = await matchSnapshot({
+      source: screens(RED),
+      store: new MemoryStore(GREY),
+      comparator,
+      tolerance: { maxDiffPixels: 2 },
+      mode: 'default',
+    });
+    // The first capture against the baseline, the second against the first, then the verdict.
+    expect(limits).toEqual([2, 2, undefined]);
+    expect(result.message).toMatch(/^16 pixels \(100\.00% of the image\) changed\./);
+  });
+
   it('reports a change of size instead of comparing', async () => {
     const store = new MemoryStore(WIDE);
     const result = await run(store, 'default', [GREY]);

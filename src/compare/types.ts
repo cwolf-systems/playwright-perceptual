@@ -22,6 +22,11 @@ export interface Comparison {
   readonly height: number;
   /** Pixels that count as changed. */
   readonly differing: number;
+  /**
+   * Whether counting stopped once `differing` passed the limit asked of `compare`: more pixels may
+   * have changed. Absent or false when every pixel was compared.
+   */
+  readonly exceeded?: boolean;
   /** Lines for a failure message, after the count of changed pixels. */
   readonly notes: readonly string[];
 }
@@ -33,7 +38,11 @@ export interface DiffedComparison extends Comparison {
 
 /** Compares two images of the same size. */
 export interface ImageComparator {
-  compare(expected: RgbaImage, actual: RgbaImage): Comparison;
+  /**
+   * With `limit`, the comparator may stop counting once more than `limit` pixels have changed, as
+   * a verdict against that many allowed needs no more, and report the comparison as `exceeded`.
+   */
+  compare(expected: RgbaImage, actual: RgbaImage, limit?: number): Comparison;
   /** Like `compare`, and also paints where the images differ. */
   diff(expected: RgbaImage, actual: RgbaImage): DiffedComparison;
 }

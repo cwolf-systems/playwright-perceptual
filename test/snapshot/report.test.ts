@@ -9,6 +9,13 @@ describe('report', () => {
     );
   });
 
+  it('says when counting stopped early', () => {
+    const comparison = { width: 10, height: 10, differing: 3, exceeded: true, notes: [] };
+    expect(describeComparison(comparison)).toBe(
+      'More than 2 pixels (over 3.00% of the image) changed; counting stopped there.',
+    );
+  });
+
   it('describes a change of size', () => {
     expect(describeSize({ width: 6, height: 4 }, { width: 4, height: 4 })).toBe(
       'Expected an image 6×4, got 4×4.',
