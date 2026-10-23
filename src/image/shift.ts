@@ -29,7 +29,9 @@ const TILE = { rows: 128, columns: 512 } as const;
 /** Pixels read beyond a tile, for the boxes that judge the pixels at its edge. */
 const MARGIN = BOXES[0]! + 1;
 
+/** Directions a box may move along a side: both, or none along a side of one pixel. */
 const SIGNS = [-1, 1];
+const STILL = [0];
 
 /**
  * Levels a pixel's colour may lie outside the colours next to it: rounding in the resampling. One
@@ -39,10 +41,11 @@ const PIXEL_SLACK = 3;
 
 /**
  * Where a box of `n` pixels starts along a side of `size` to judge the pixel at `p` against a move
- * of a pixel towards `sign`, or -1 if none can. The box sits around the pixel, moved inward near
+ * of a pixel towards `sign` (0 for none), or -1 if none can. The box sits around the pixel, moved inward near
  * the border so that the box moved is in the image too: colour is conserved over any box, so the
  * test stays sound off centre. A box of one pixel judges that pixel's own colour, so it cannot
- * move: on the outermost pixels, a move from beyond the border explains nothing.
+ * move: on the outermost pixels, a move from beyond the border explains nothing, and across an
+ * image one pixel wide no move does.
  */
 function place(p: number, n: number, size: number, sign: number): number {
   const start = Math.max(sign < 0 ? 1 : 0, Math.min(p - (n >> 1), size - n - (sign > 0 ? 1 : 0)));
@@ -91,9 +94,9 @@ function filter(pixels: Pixels, column: number, row: number): Tile {
   }
   // Separable running sums: totals down each column over the box's rows, then across.
   const boxes = BOXES.map((n) => {
-    // At most n, leaving room to move the box by a pixel.
-    const nx = Math.min(n, width - 1);
-    const ny = Math.min(n, height - 1);
+    // At most n, leaving room to move the box by a pixel where the side has room.
+    const nx = Math.max(1, Math.min(n, width - 1));
+    const ny = Math.max(1, Math.min(n, height - 1));
     const columns = across - nx + 1;
     if (nx === 1 && ny === 1) return { nx, ny, columns, totals: levels };
     const totals = new Uint16Array(rows * columns * CHANNELS);
@@ -137,9 +140,9 @@ function moved(from: Tile, to: Tile, b: number, x: number, y: number): boolean {
   const { width, height } = from.pixels;
   const slack = BOXES[b] === 1 ? PIXEL_SLACK : ROUNDING_LEVELS * nx * ny;
   channels: for (let c = 0; c < CHANNELS; c++) {
-    for (const sx of SIGNS) {
+    for (const sx of width > 1 ? SIGNS : STILL) {
       const x0 = place(x, nx, width, sx);
-      for (const sy of SIGNS) {
+      for (const sy of height > 1 ? SIGNS : STILL) {
         const y0 = place(y, ny, height, sy);
         if (x0 < 0 || y0 < 0) continue;
         const here = total(from, b, c, x0, y0);
@@ -159,8 +162,6 @@ function moved(from: Tile, to: Tile, b: number, x: number, y: number): boolean {
 
 /** Whether pixel (x, y) differs only because content moved by less than a pixel. */
 export function isShifted(image: Pixels, other: Pixels, x: number, y: number): boolean {
-  // A side of one pixel: what a move along it would bring in is unknown.
-  if (image.width < 2 || image.height < 2) return true;
   const before = tile(image, x, y);
   const after = tile(other, x, y);
   return BOXES.every((n, b) =>

@@ -157,15 +157,27 @@ describe('isShifted, on a faint tint over a flat dark panel, at every size', () 
     expect(shiftedPixels(width, height)).toBe(0);
   });
 
-  it('takes none of a panel two pixels high or wide for a move, at any size', () => {
+  it('takes none of a panel one or two pixels high or wide for a move', () => {
     expect(shiftedPixels(200, 2)).toBe(0);
     expect(shiftedPixels(2, 50)).toBe(0);
     expect(shiftedPixels(2, 2)).toBe(0);
+    expect(shiftedPixels(200, 1)).toBe(0);
+    expect(shiftedPixels(1, 50)).toBe(0);
+    expect(shiftedPixels(1, 1)).toBe(0);
   });
 
-  it('takes all of a panel one pixel high or wide for a move: what lies beyond is unknown', () => {
-    expect(shiftedPixels(200, 1)).toBe(200);
-    expect(shiftedPixels(1, 50)).toBe(50);
+  it('accepts a soft edge moved along an image one pixel high, though not across it', () => {
+    const row = (values: number[]) => {
+      const image = solid(values.length, 1, WHITE);
+      values.forEach((v, x) => {
+        setPixel(image, x, 0, grey(v));
+      });
+      return image;
+    };
+    const before = row([0, 0, 64, 192, 255, 255, 255, 255]);
+    const after = row([0, 0, 32, 160, 255, 255, 255, 255]);
+    expect(shifted(before, after, 2, 0)).toBe(true);
+    expect(shifted(before, after, 3, 0)).toBe(true);
   });
 });
 
