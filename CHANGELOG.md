@@ -7,21 +7,26 @@
 - **Shift tolerance no longer takes a change of colour for a move.** In 0.1.0 it passed any pixel
   within three levels per channel of the colours around it, and a pixel's own old colour is
   always around it, so any change of up to three levels per channel passed as a shift: a tint
-  across a flat panel, a dark theme a shade lighter, a GPU readback drifting by two levels. A
-  pixel now counts as shifted only if the colour in the 5×5 window around it is also conserved,
-  as a move of under a pixel conserves it, give or take a level per pixel for rounding. Near the
-  image's border the window moves inward, so the border and small element screenshots are
-  judged too.
-- **Renders whose colour drifts by two levels or more over an area now fail.** In a renderer's
-  golden set of 56 pairs of identical input, 10 failed with 0.1.0 and 12 now: one scene's first
-  capture is one to two levels darker over nearly half the frame (41,872 pixels counted against
-  each of the other two captures).
-- **Pairs that already differed gain counted pixels.** Self-noise in that golden set: a map label
-  one pixel over between loads, 139 → 150 pixels; a second scene's label and box edge, 82 → 94.
-  In this repository's benchmark, among pairs that should match: the 2D map through the GPU
-  against software at 2×, 5,067 → 5,581; the map and 3D view moved 0.3 px at 2×, by up to 72;
-  CSS effects through the GPU against software, 3 → 9 at 1× and 48 → 116 at 2×, where it now
-  also fails at ΔE00 1.5 (11 pixels).
+  across a flat panel, a dark theme a shade lighter, a GPU readback drifting by two levels. Shift
+  tolerance now models the move: a pixel counts as shifted only if resampling one image at some
+  offset of up to a pixel each way reproduces the other around it. Each image's pixel must lie
+  within the range of the other's 3×3 neighbourhood, widened by three levels and half that range,
+  and one offset must make the mean colour of the other image, resampled bilinearly, match within
+  1.15 levels in all three channels at once, over the 7×7 window around the pixel and the 65×65
+  window holding it. A tint, a fainter overlay or a drift of two levels changes those means.
+  Panels of any size are judged, down to one pixel high.
+- **Renders whose colour drifts by two levels or more over an area now fail**, over flat colour
+  and over texture alike: a textured frame drifting by one to three levels per channel is counted
+  in full. In a renderer's golden set of 56 pairs of identical input, 10 failed with 0.1.0 and 9
+  now. One scene's first capture is one to two levels darker over nearly half the frame (34,695
+  pixels counted against each of the other two captures, which passed in 0.1.0); three pairs that
+  failed in 0.1.0 by one to eight stray pixels now pass.
+- **Some pairs that already differed count more pixels, most count fewer.** In this repository's
+  benchmark, among pairs that should match: the 2D map through the GPU against software, 894 →
+  986 pixels at 1× and 5,067 → 11,243 at 2×; CSS effects through the GPU against software, 3 → 9
+  at 1× and 48 → 86 at 2×. Pages moved 0.3 px count far fewer: the 2D map 383 → 9 and the 3D view
+  161 → 0 at 1× in Chromium, and the text, SVG and 3D view of every browser now pass with 0.1% of
+  the image allowed. In the golden set, a label one pixel over between loads counts 139 → 32.
 - **Anti-aliasing detection asks that the flat area beside a slope keep its colour**, give or take
   a level. A uniform change of colour no longer passes there as anti-aliasing.
 - If a test starts failing, look at the diff image: red is what counts. If the change is
@@ -48,19 +53,18 @@
 
 ### Limits
 
-- In an image under three pixels high or wide, shift tolerance cannot test whether colour was
-  conserved along that side, since what lies beyond the image is unknown, so 0.1.0's rule still
-  applies there. Use `ignoreShifts: false` for such slivers.
+- A uniform change over a smooth gradient can still pass as a move where both windows are
+  gradients a move slides along, as beside contour lines: about a seventh of a faint overlay
+  change in a renderer's capture. An image under 67 pixels on a side is judged by the 7×7 window
+  alone, which takes more of such a change for a move.
 
 ### Speed
 
-- Fully changed images compare about a fifth faster than in 0.1.0: 4.4 s for 3200×2000 in
-  `npm run bench`, from 5.5 s. Shift tolerance reads each neighbourhood once for all three
-  channels, and measures a window's border only until it explains the change.
-- Where many changed pixels need the conservation test, comparison is up to about 1.3 times
-  slower than 0.1.0: a drift of one to three levels over a whole textured 1346×819 frame takes
-  220 ms, from 170 ms. Grainy images are about five times faster (42 ms, from 233 ms), since
-  rounding is checked before the detectors.
+- Whole-frame changes compare faster than in 0.1.0: in `npm run bench`, a fully changed
+  3200×2000 image in about 3.3 s, from 5.1 s; a textured drift over a 1346×819 frame in about
+  0.5 s, from 0.6 s; film grain three to eight times faster, since rounding is checked before the
+  detectors. Window sums come from totals computed a block of a row at a time, with column sums
+  updated as rows enter and leave, and most real changes are refused before any offset is sought.
 
 ### Other
 

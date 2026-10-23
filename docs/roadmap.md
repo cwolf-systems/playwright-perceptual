@@ -16,17 +16,17 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    along the edges of thick stroked lines.
 3. Shift tolerance passes a hard edge moved by exactly one pixel. That is the price of looking one
    pixel around; `ignoreShifts: false` turns it off.
-4. Comparison is slow when much of the image changes: about 4.4 s for a fully changed 3200×2000
+4. Comparison is slow when much of the image changes: about 3.3 s for a fully changed 3200×2000
    screenshot, against 40 ms for pixelmatch. Passing tests and small changes cost less than
    decoding the screenshot, so this is mostly paid by failing tests.
 5. The thresholds are rules of thumb. ΔE00 1 as "just noticeable" comes from the formula's design
    and from viewing uniform patches, not from people looking at screenshots.
-6. Part of a faint uniform change still passes as shifts. The noise detectors no longer explain a
-   translucent overlay made 5 points more transparent over terrain (from a renderer's tests), but
-   along contour lines and other edges a move could carry as much colour across a 5×5 window as
-   the change adds, so shift tolerance still sets aside a quarter to a third of its pixels. The
-   rest fail the test, so the verdict is right; a test with an allowance of thousands of pixels
-   would not be.
+6. Part of a faint uniform change still passes as shifts. Shift tolerance asks one offset to
+   reproduce the mean colour of a 7×7 and a 65×65 window, and beside contour lines and other
+   edges both can be gradients a move slides along: about a seventh of a translucent overlay made
+   5 points more transparent over terrain (from a renderer's tests) is still set aside. The rest
+   fails the test, so the verdict is right; a test with an allowance of thousands of pixels would
+   not be.
 7. The same scene can land on different pixels between page loads or rasterisers. A label whose
    projected anchor falls either side of a pixel boundary moves by a whole pixel; an aliased
    overlay edge within 1/32 px of a row of pixel centres covers the row in a rasteriser that
@@ -38,9 +38,9 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    drift of two over an area counts. A renderer whose exposure differs by one or two levels
    between loads of the same scene used to pass through shift tolerance and now fails, as in one
    of 28 scenes of the renderer's golden set.
-9. Shift tolerance cannot test conservation along a side under three pixels long, since what lies
-   beyond the image there is unknown: in such slivers any change within three levels of the
-   colours nearby passes as a shift.
+9. An image under 67 pixels on a side is too small for the large window, so there a uniform
+   drift over a smooth gradient can pass as a move. Tints over flat colour are counted at any
+   size.
 
 Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pixel by pixel.
 
