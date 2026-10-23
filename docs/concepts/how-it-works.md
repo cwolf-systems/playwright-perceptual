@@ -61,7 +61,7 @@ lightness, chroma and hue, and for blues, where earlier formulas were least accu
   pixels counted.
 - Along edges, shift tolerance can still take part of a uniform change for a move, where a single
   move could explain the change in every channel at once: under a tenth of the pixels of a faint
-  overlay change in the benchmark's synthetic pair, about an eighth in the capture it reproduces.
+  overlay change in the benchmark's synthetic pair, about a seventh in the capture it reproduces.
 - A drift of one level everywhere passes as rounding while shift tolerance is on, even where it
   passes ΔE00 1 (up to 2.45 in near-black greys). A drift of two levels over an area counts.
 - In an image under three pixels high or wide, what lies beyond the image along that side is

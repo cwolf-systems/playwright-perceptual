@@ -200,13 +200,13 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
 | pixelmatch 0.2 (Playwright default)                    | **0**                               | 0                                | **98**                         | **8**                               | 0                                    | 0                                     | 0                                     |
 | ssim-cie94 (Playwright, experimental)                  | 728                                 | **73**                           | **120**                        | **34**                              | 0                                    | **218**                               | 0                                     |
 | looks-same (ΔE00 2.3)                                  | **0**                               | **differ**                       | **differ**                     | **differ**                          | 0                                    | **differ**                            | 0                                     |
-| perceptual ΔE00 1                                      | 15074                               | **10**                           | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
-| perceptual ΔE00 1.5                                    | 2783                                | **3**                            | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
-| perceptual ΔE00 2                                      | 1227                                | 0                                | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
-| perceptual ΔE00 2.3                                    | 1                                   | 0                                | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
-| perceptual ΔE00 3                                      | **0**                               | 0                                | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
+| perceptual ΔE00 1                                      | 20602                               | **10**                           | **2**                          | **5**                               | 0                                    | **33**                                | 0                                     |
+| perceptual ΔE00 1.5                                    | 3896                                | **3**                            | **2**                          | **5**                               | 0                                    | **33**                                | 0                                     |
+| perceptual ΔE00 2                                      | 1534                                | 0                                | **2**                          | **5**                               | 0                                    | **33**                                | 0                                     |
+| perceptual ΔE00 2.3                                    | 1                                   | 0                                | **2**                          | **5**                               | 0                                    | **33**                                | 0                                     |
+| perceptual ΔE00 3                                      | **0**                               | 0                                | **2**                          | **5**                               | 0                                    | **33**                                | 0                                     |
 | perceptual ΔE00 1.5, shifts counted                    | 4259                                | **301**                          | **116**                        | **32**                              | 0                                    | **213**                               | 0                                     |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 79                                  | **2**                            | **2**                          | **5**                               | 0                                    | **29**                                | 0                                     |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 78                                  | **2**                            | **2**                          | **5**                               | 0                                    | **34**                                | 0                                     |
 | perceptual ΔE00 1.5, structural only (experiment)      | 90                                  | **62**                           | **120**                        | **34**                              | 0                                    | **218**                               | 0                                     |
 
 ## Reading the results
@@ -223,17 +223,17 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
   held-out set.
 - What still fails at the default with 0.1% allowed: a WebKit artefact from Playwright's fixtures;
   two large regressions of a few pixels, which fall under the allowance; most sub-pixel shifts;
-  and the 2D map through the GPU against the software rasteriser, with 895 changed pixels (1.4%)
-  at 1× and 5,581 (2.2%) at 2×. Those lie along the seams between basemap tiles, which the two
+  and the 2D map through the GPU against the software rasteriser, with 1,179 changed pixels (1.8%)
+  at 1× and 8,291 (3.2%) at 2×. Those lie along the seams between basemap tiles, which the two
   rasterisers blend differently, and along the edges of the thick flight tracks: hairlines nobody
   would notice, though they reach ΔE00 28. Playwright's default passes this pair; ssim-cie94 and
-  the structural rule fail it too. The 3D mission view through the GPU passes (2 and 45 pixels).
+  the structural rule fail it too. The 3D view through the GPU passes at 0.1% (2 and 52 pixels).
 - The structural rule passes more rendering noise but hides faint changes. It misses the faint SVG
   regression, a stroke colour nudged, in all three browsers on both sets: a uniform change keeps
   the structure, so SSIM calls it noise. That is the failure this package exists to prevent, so
   the rule stays an experiment.
 - Sub-pixel shifts are mostly unsolved. Shift tolerance passes some text and SVG moves at 2×, but
-  the map and the 3D camera moved 0.3 px leave 160–560 changed pixels at 1× and 570–5,500 at 2×,
+  the map and the 3D camera moved 0.3 px leave 160–620 changed pixels at 1× and 650–6,000 at 2×,
   and text at 1× leaves 200–450.
 
 - In the synthetic set, the faint overlay change, two or three levels per channel and nothing
@@ -250,27 +250,23 @@ Three changes to the noise detection, each judged on these pairs before it was a
 0.1.0 on the same machine:
 
 - **Shift tolerance requires a move to conserve colour** over the 5×5 window around a pixel,
-  moved inward near the image's border.
+  moved inward near the image's border: a single move of under a pixel, the same for all three
+  channels, must explain each channel's change, give or take a level per pixel.
 - **Rounding is its own class**: while shift tolerance is on, a pixel within one level in every
   channel is not counted.
 - **Anti-aliasing detection requires the flat side of a slope to keep its colour**, give or take a
   level.
 
 In the design and held-out sets, one verdict changed: at ΔE00 1.5 with no pixels allowed,
-Chromium's CSS effects page through the GPU against its software rasteriser at 2× fails with 11
-pixels (it already failed at ΔE00 1, with 48 pixels before and 116 now). Nothing else changed at
+Chromium's CSS effects page through the GPU against its software rasteriser at 2× fails with 18
+pixels (it already failed at ΔE00 1, with 48 pixels before and 197 now). Nothing else changed at
 any threshold or allowance. Regressions gain counted pixels, and some pairs that should match gain
-a few: the 2D map through the GPU at 2×, from 5,067 to 5,581; the map and 3D view moved 0.3 px
-at 2×, by up to 72; the CSS effects page through the GPU at 1×, from 3 to 9. In the synthetic set
-the faint overlay change, 0 counted pixels before, now has 15,074 at ΔE00 1.
+more: the 2D map through the GPU, from 894 to 1,179 at 1× and from 5,067 to 8,291 at 2×; the map
+and 3D view moved 0.3 px at 2×, by up to 613; the CSS effects page through the GPU at 1×, from 3
+to 9. In the synthetic set the faint overlay change, 0 counted pixels before, now has 20,602 at
+ΔE00 1, of 22,810 past it.
 
-Comparison is slower where shift tolerance must test conservation at many pixels, and faster on
-grainy images, where rounding is checked before the detectors. On a downstream renderer's captures
-(1346×819, not included), a whole-frame real change took about twice as long (830–900 ms
-against 422–480 ms), and a film-grain scene 50–59 ms against 240–255 ms. A synthetic worst case, a
-drift of one to three levels over a whole textured frame of that size, took 3.6 times as long
-(2.0 s against 0.56 s). `npm run bench` changes a solid block of colour, which shift tolerance
-rejects at once, so its times are unchanged within run-to-run noise.
+Speed is in [speed.md](speed.md): no frame that changes everywhere compares slower than in 0.1.0.
 
 These rules were measured on the held-out set while being developed, so for them it is no longer
 unseen.

@@ -20,18 +20,18 @@ Node 22.22, Apple M4, milliseconds.
 
 | Size      | Changed | PNG decode ×2 | perceptual | perceptual + diff | pixelmatch | looks-same (incl. decode) |
 | --------- | ------- | ------------- | ---------- | ----------------- | ---------- | ------------------------- |
-| 1280×720  | 0%      | 53.8          | 4.8        | 24.2              | 0.8        | 0.0                       |
-| 1280×720  | 1%      | 43.6          | 5.9        | 24.1              | 1.2        | 66.0                      |
-| 1280×720  | 10%     | 53.5          | 48.7       | 77.6              | 3.3        | 127.9                     |
-| 1280×720  | 100%    | 47.8          | 334.3      | 351.7             | 5.5        | 673.7                     |
-| 1920×1080 | 0%      | 110.9         | 7.8        | 49.1              | 2.2        | 0.0                       |
-| 1920×1080 | 1%      | 111.1         | 14.0       | 57.5              | 3.3        | 159.6                     |
-| 1920×1080 | 10%     | 113.7         | 74.5       | 132.8             | 4.2        | 328.7                     |
-| 1920×1080 | 100%    | 110.3         | 858.1      | 906.4             | 12.5       | 1553.3                    |
-| 3200×2000 | 0%      | 336.8         | 23.3       | 159.8             | 6.7        | 0.1                       |
-| 3200×2000 | 1%      | 336.0         | 66.5       | 222.5             | 12.5       | 464.6                     |
-| 3200×2000 | 10%     | 345.3         | 465.2      | 578.8             | 12.8       | 839.8                     |
-| 3200×2000 | 100%    | 335.2         | 4390.4     | 4622.0            | 38.6       | 4585.6                    |
+| 1280×720  | 0%      | 41.8          | 4.1        | 21.9              | 0.8        | 0.0                       |
+| 1280×720  | 1%      | 43.7          | 6.9        | 24.8              | 1.3        | 66.2                      |
+| 1280×720  | 10%     | 52.4          | 23.2       | 43.1              | 1.9        | 121.3                     |
+| 1280×720  | 100%    | 48.3          | 258.8      | 282.3             | 5.6        | 692.9                     |
+| 1920×1080 | 0%      | 111.6         | 7.7        | 50.6              | 2.2        | 0.0                       |
+| 1920×1080 | 1%      | 113.4         | 14.9       | 58.6              | 3.3        | 160.1                     |
+| 1920×1080 | 10%     | 113.9         | 52.5       | 94.7              | 4.1        | 277.3                     |
+| 1920×1080 | 100%    | 110.8         | 630.8      | 663.3             | 12.5       | 1488.5                    |
+| 3200×2000 | 0%      | 332.8         | 23.3       | 152.1             | 6.6        | 0.1                       |
+| 3200×2000 | 1%      | 332.8         | 42.4       | 185.9             | 10.2       | 406.4                     |
+| 3200×2000 | 10%     | 332.7         | 181.4      | 315.5             | 13.1       | 782.5                     |
+| 3200×2000 | 100%    | 335.4         | 1775.9     | 1879.4            | 39.0       | 4542.1                    |
 
 ## Reading the results
 
@@ -43,7 +43,26 @@ Node 22.22, Apple M4, milliseconds.
   anti-aliasing check and a shift check. A heavily changed image is a failing test, so this cost
   is paid on failure.
 - Against looks-same, compare like with like. Its times include decoding, so set them against
-  decode plus perceptual: at 3200×2000 that is 403 against 465 ms with 1% changed, 811 against
-  840 ms with 10%, and 4,726 against 4,586 ms with everything changed. Close throughout, with
-  looks-same a little ahead only when everything changed. It returns at once for identical files,
-  since it compares the encoded bytes first.
+  decode plus perceptual: at 3200×2000 that is 375 against 406 ms with 1% changed, 514 against
+  783 ms with 10%, and 2,111 against 4,542 ms with everything changed. It returns at once for
+  identical files, since it compares the encoded bytes first.
+
+## Frames that change everywhere, against 0.1.0
+
+Measured with the detector judge of the 0.2.0 redesign (`node bench/judge.mjs`, on its own
+branch), each build in a process of its own, median of 5 runs, Node 22.22, Apple M4. The real
+captures come from a downstream renderer and are not in this repository.
+
+| Case                                                          | 0.1.0    | 0.2.0    |
+| ------------------------------------------------------------- | -------- | -------- |
+| `npm run bench`'s scene, 1280×720, everything changed         | 751 ms   | 363 ms   |
+| `npm run bench`'s scene, 1920×1080, everything changed        | 1,481 ms | 665 ms   |
+| `npm run bench`'s scene, 3200×2000, everything changed        | 4,479 ms | 1,587 ms |
+| A drift of one to three levels over a textured 1346×819 frame | 567 ms   | 332 ms   |
+| Film grain of ±1 level over the same frame                    | 420 ms   | 24 ms    |
+| A real capture changed everywhere, 1346×819                   | 419 ms   | 351 ms   |
+| A real capture with film grain, 1346×819                      | 247 ms   | 47 ms    |
+
+Shift tolerance reads its windows from summed-area tables, so each test costs a few lookups
+however much of the image changed; anti-aliasing and the 3×3 neighbourhood test are settled at
+once where the answer is plain; and ΔE00 for each pair of colours is kept in a fixed table.

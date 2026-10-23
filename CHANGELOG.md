@@ -17,14 +17,14 @@
   edge is taken to continue.
 - **Renders whose colour drifts by two levels or more over an area now fail.** In a renderer's
   golden set of 56 pairs of identical input, 10 failed with 0.1.0 and 12 now: one scene's first
-  capture is one to two levels darker over nearly half the frame (41,872 pixels counted against
+  capture is one to two levels darker over nearly half the frame (45,327 pixels counted against
   each of the other two captures).
 - **Pairs that already differed gain counted pixels.** Self-noise in that golden set: a map label
-  one pixel over between loads, 139 → 150 pixels; a second scene's label and box edge, 82 → 94.
+  one pixel over between loads, 139 → 167 pixels; a second scene's label and box edge, 82 → 94.
   In this repository's benchmark, among pairs that should match: the 2D map through the GPU
-  against software at 2×, 5,067 → 5,581; the map and 3D view moved 0.3 px at 2×, by up to 72;
-  CSS effects through the GPU against software, 3 → 9 at 1× and 48 → 116 at 2×, where it now
-  also fails at ΔE00 1.5 (11 pixels).
+  against software, 894 → 1,179 at 1× and 5,067 → 8,291 at 2×; the map and 3D view moved 0.3 px
+  at 2×, by up to 613; CSS effects through the GPU against software, 3 → 9 at 1× and 48 → 197 at
+  2×, where it now also fails at ΔE00 1.5 (18 pixels).
 - **Anti-aliasing detection asks that the flat area beside a slope keep its colour**, give or take
   a level. A uniform change of colour no longer passes there as anti-aliasing.
 - If a test starts failing, look at the diff image: red is what counts. If the change is
@@ -64,13 +64,19 @@
 
 ### Speed
 
-- Fully changed images compare about a sixth faster than in 0.1.0: 4.4 s for 3200×2000 in
-  `npm run bench`, from 5.3 s. Shift tolerance reads each neighbourhood once for all three
-  channels, and measures a window's border only until it explains the change.
-- Where many changed pixels need the conservation test, comparison is slower than in 0.1.0: the
-  benchmark's 320×200 overlay change takes 41 ms, from 17 ms, and a drift of one to three levels
-  over a whole textured 1346×819 frame 220 ms, from 170 ms. Grainy images are about five times
-  faster (42 ms, from 233 ms), since rounding is checked before the detectors.
+Measured with the detector judge of the 0.2.0 redesign, each build in a process of its own,
+median of 5 runs, Node 22.22, Apple M4; see `docs/benchmarks/speed.md`.
+
+- No frame that changes everywhere compares slower than in 0.1.0. `npm run bench`'s fully
+  changed scene takes 363 ms at 1280×720 (751 ms in 0.1.0) and 1,587 ms at 3200×2000
+  (4,479 ms); a drift of one to three levels over a textured 1346×819 frame 332 ms (567 ms); a
+  real capture changed everywhere 351 ms (419 ms).
+- Film grain is many times faster, since rounding is checked before the detectors: 24 ms for
+  ±1-level grain over a 1346×819 frame (420 ms), 47 ms for a real capture (247 ms).
+- Shift tolerance reads its windows from summed-area tables, built a row at a time as far down
+  as needed, so each test costs a few lookups. The anti-aliasing and neighbourhood tests are
+  settled at once where the answer is plain, and ΔE00 for each pair of colours is kept in a fixed
+  table rather than a map.
 
 ### Other
 

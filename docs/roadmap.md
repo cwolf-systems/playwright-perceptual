@@ -16,17 +16,19 @@ These come from the benchmark, at the default settings with 0.1% of the image al
    along the edges of thick stroked lines.
 3. Shift tolerance passes a hard edge moved by exactly one pixel. That is the price of looking one
    pixel around; `ignoreShifts: false` turns it off.
-4. Comparison is slow when much of the image changes: about 4.4 s for a fully changed 3200×2000
+4. Comparison is slow when much of the image changes: about 1.8 s for a fully changed 3200×2000
    screenshot, against 40 ms for pixelmatch. Passing tests and small changes cost less than
    decoding the screenshot, so this is mostly paid by failing tests.
 5. The thresholds are rules of thumb. ΔE00 1 as "just noticeable" comes from the formula's design
    and from viewing uniform patches, not from people looking at screenshots.
 6. Part of a faint uniform change still passes as shifts. The noise detectors no longer explain a
    translucent overlay made 5 points more transparent over terrain (from a renderer's tests), but
-   along contour lines and other edges a move could carry as much colour across a 5×5 window as
-   the change adds, so shift tolerance still sets aside a quarter to a third of its pixels. The
-   rest fail the test, so the verdict is right; a test with an allowance of thousands of pixels
-   would not be.
+   along contour lines and other edges a single move of under a pixel can explain the change in
+   every channel at once, so shift tolerance still sets aside under a tenth of its pixels in the
+   synthetic pair, and about a seventh in the capture it reproduces. A drift over grey texture
+   whose channels move together is explained the same way: most of a one-to-three-level drift
+   over such a frame passes as shifts. A test with an allowance of thousands of pixels would not
+   catch either.
 7. The same scene can land on different pixels between page loads or rasterisers. A label whose
    projected anchor falls either side of a pixel boundary moves by a whole pixel; an aliased
    overlay edge within 1/32 px of a row of pixel centres covers the row in a rasteriser that
