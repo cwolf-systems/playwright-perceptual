@@ -95,13 +95,18 @@ jobs:
 
   playwright-versions:
     name: Playwright ${{ matrix.playwright }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
       fail-fast: false
-      # The oldest and newest releases in the peer range.
+      # The oldest and newest releases in the peer range. Playwright 1.53 predates Ubuntu 26.04 and
+      # refuses to install its browsers there, so it runs on the last Ubuntu it supports.
       matrix:
-        playwright: ['1.53.0', 'latest']
+        include:
+          - playwright: '1.53.0'
+            os: ubuntu-24.04
+          - playwright: 'latest'
+            os: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
