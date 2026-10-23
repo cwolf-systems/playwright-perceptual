@@ -1,183 +1,170 @@
 import { blue, green, red, ROUNDING_LEVELS } from '../color/rgb.js';
-import { contains } from './raster.js';
 import type { Pixels } from './types.js';
 
-// Content moved by less than a pixel is resampled between neighbours, so each image's colour at a
-// pixel lies within the range of colours around the same place in the other image. A real change
-// brings in colours that weren't there.
+// Content moved by less than a pixel keeps its colour: over a box, each channel's total changes
+// only by what the move carries across the box's border. A real change, such as a tint, a fainter
+// overlay or a drift of a few levels, changes the total over the whole box.
 //
-// Moving content also keeps its colour: over a window, the total of each channel changes only by
-// what crosses the window's border. A uniform change, such as an overlay made a little more
-// transparent over textured ground, stays within the range of colours nearby but changes that
-// total everywhere at once, so it is not a shift.
+// Moving by (tx, ty), each between 0 and 1 in one of four directions, and resampling bilinearly,
+// changes a box's total by tx·Lx + ty·Ly + tx·ty·K, where Lx is the column brought in less the
+// column taken out, Ly the same for rows, and K the corners where they cross. That is bilinear in
+// tx and ty, so it ranges between its values at the corners of the square: the change in the
+// box's total when the box is moved by a whole pixel across, down, both or neither.
 //
-// Near the image's border the window is moved inward rather than skipped, so the colour a move
-// would carry in from beyond it is known. Only a side under three pixels long leaves it unknown;
-// there any value is allowed, which in practice lets a move explain almost any change.
+// So, one rule: box-filter both images, and one image's box total at a pixel must lie within the
+// range of the other's box totals there and one pixel over, in one of the four directions, give
+// or take rounding. It is tested over a 5×5 box, which a real change survives, either image being
+// the one that moved; and over the pixel alone, where it says the pixel's colour lies within the
+// colours next to it in the other image, both ways round, so a colour that appears or goes away
+// is not a move.
 
-/** Half the side of the neighbourhood searched: 1 for 3×3. */
-const RADIUS = 1;
+/** The sides of the boxes tested, the most decisive first. */
+const BOXES = [5, 1];
 
-/** Channel levels allowed outside the neighbourhood's range, for rounding in the resampling. */
-const SLACK = 3;
+const CHANNELS = 3;
 
-/** Half the side of the window whose colour must be conserved: 2 for 5×5. */
-const WINDOW_RADIUS = 2;
+/** Rows of an image filtered at once: bands are filtered only where a pixel is judged. */
+const BAND = 64;
 
-const WINDOW_SIDE = 2 * WINDOW_RADIUS + 1;
+/** Rows read beyond a band, for the boxes that judge the pixels at its edge. */
+const MARGIN = BOXES[0]! + 1;
 
-const MAX_CHANNEL = 255;
+const SIGNS = [-1, 1];
 
-/** Whether each channel of `rgb` lies within the colours of `pixels` around (x, y). */
-function inNeighbourhood(rgb: number, pixels: Pixels, x: number, y: number): boolean {
-  // One pass over the neighbourhood for all three channels.
-  let loR = MAX_CHANNEL;
-  let loG = MAX_CHANNEL;
-  let loB = MAX_CHANNEL;
-  let hiR = 0;
-  let hiG = 0;
-  let hiB = 0;
-  for (let ny = Math.max(0, y - RADIUS); ny <= Math.min(pixels.height - 1, y + RADIUS); ny++) {
-    for (let nx = Math.max(0, x - RADIUS); nx <= Math.min(pixels.width - 1, x + RADIUS); nx++) {
-      const v = pixels.rgbAt(nx, ny);
-      const r = red(v);
-      const g = green(v);
-      const b = blue(v);
-      if (r < loR) loR = r;
-      if (r > hiR) hiR = r;
-      if (g < loG) loG = g;
-      if (g > hiG) hiG = g;
-      if (b < loB) loB = b;
-      if (b > hiB) hiB = b;
+/**
+ * Levels a pixel's colour may lie outside the colours next to it: rounding in the resampling. One
+ * level per pixel, as over the box, fails real renders of the same scene; three does not.
+ */
+const PIXEL_SLACK = 3;
+
+/** A box's side along a side of `size`: at most `n`, leaving room to move it by a pixel. */
+const side = (n: number, size: number): number => Math.min(n, size - 1);
+
+/**
+ * Where a box of `n` pixels starts along a side of `size` to judge the pixel at `p` against a move
+ * of a pixel towards `sign`, or -1 if none can. The box sits around the pixel, moved inward near
+ * the border so that the box moved is in the image too: colour is conserved over any box, so the
+ * test stays sound off centre. A box of one pixel judges that pixel's own colour, so it cannot
+ * move: on the outermost pixels, a move from beyond the border explains nothing.
+ */
+function place(p: number, n: number, size: number, sign: number): number {
+  const start = Math.max(sign < 0 ? 1 : 0, Math.min(p - (n >> 1), size - n - (sign > 0 ? 1 : 0)));
+  return n === 1 && start !== p ? -1 : start;
+}
+
+/** Each channel's totals over boxes of one size, for a band of an image's rows. */
+interface Boxes {
+  readonly nx: number;
+  readonly ny: number;
+  /** Boxes in a row. */
+  readonly columns: number;
+  readonly totals: Uint16Array;
+}
+
+/** A band of an image's rows, box-filtered at each size of box. */
+class Band {
+  readonly top: number;
+  readonly boxes: readonly Boxes[];
+
+  constructor(
+    readonly pixels: Pixels,
+    readonly index: number,
+  ) {
+    const { width, height } = pixels;
+    this.top = Math.max(0, index * BAND - MARGIN);
+    const rows = Math.min(height, (index + 1) * BAND + MARGIN) - this.top;
+    const stride = width * CHANNELS;
+    const levels = new Uint16Array(rows * stride);
+    for (let y = 0, i = 0; y < rows; y++) {
+      for (let x = 0; x < width; x++, i += CHANNELS) {
+        const rgb = pixels.rgbAt(x, this.top + y);
+        levels[i] = red(rgb);
+        levels[i + 1] = green(rgb);
+        levels[i + 2] = blue(rgb);
+      }
     }
+    // Separable running sums: totals down each column over the box's rows, then across.
+    this.boxes = BOXES.map((n) => {
+      const nx = side(n, width);
+      const ny = side(n, height);
+      const columns = width - nx + 1;
+      if (nx === 1 && ny === 1) return { nx, ny, columns, totals: levels };
+      const totals = new Uint16Array(rows * columns * CHANNELS);
+      const down = new Uint16Array(stride);
+      const across = new Int32Array(stride);
+      for (let y = 0; y < rows; y++) {
+        const row = (y - ny + 1) * columns * CHANNELS;
+        for (let i = 0; i < stride; i++) {
+          down[i]! += levels[y * stride + i]! - (y < ny ? 0 : levels[(y - ny) * stride + i]!);
+          across[i] = down[i]! + (i < CHANNELS ? 0 : across[i - CHANNELS]!);
+          // The box ending at this pixel starts nx pixels back; its total, once it is all read.
+          const before = i - nx * CHANNELS;
+          if (row >= 0 && before >= -CHANNELS) {
+            totals[row + before + CHANNELS] = across[i]! - (before < 0 ? 0 : across[before]!);
+          }
+        }
+      }
+      return { nx, ny, columns, totals };
+    });
   }
-  const within = (value: number, lo: number, hi: number) =>
-    value >= lo - SLACK && value <= hi + SLACK;
-  return within(red(rgb), loR, hiR) && within(green(rgb), loG, hiG) && within(blue(rgb), loB, hiB);
-}
 
-/**
- * The first and last index of the window along a side of `size` pixels, around `centre`. The
- * window is moved inward near the image's border, so that the pixel just beyond it on each side,
- * the colour a move would carry in, is in the image. A move conserves colour over any window, so
- * the test stays sound where the window no longer centres on the pixel. A side under three pixels
- * leaves no room for that: the window spans it, and what lies beyond is unknown.
- */
-function span(centre: number, size: number): readonly [number, number] {
-  if (size < 3) return [0, size - 1];
-  const first = Math.max(1, Math.min(centre - WINDOW_RADIUS, size - 1 - WINDOW_SIDE));
-  return [first, Math.min(size - 2, first + WINDOW_SIDE - 1)];
-}
-
-/** Red, green and blue totals over a window. */
-type Totals = [number, number, number];
-
-/** Where a colour would come from beyond the image's border, which is unknown. */
-const BEYOND = -1;
-
-const rgbOrBeyond = (pixels: Pixels, x: number, y: number): number =>
-  contains(pixels, x, y) ? pixels.rgbAt(x, y) : BEYOND;
-
-type Channel = typeof red;
-
-/**
- * The most a move can change a channel by replacing `out`, inside the window, with `into`. A
- * colour from beyond the image is unknown and may be anything from 0 to 255.
- */
-function crossing(into: number, out: number, channel: Channel): number {
-  const level = channel(out);
-  return into === BEYOND ? Math.max(level, MAX_CHANNEL - level) : Math.abs(channel(into) - level);
-}
-
-/**
- * Adds what a move can carry across the window along one row or column: moving one way brings in
- * `before` and takes out `last`; moving the other way brings in `after` and takes out `first`.
- */
-function addLine(totals: Totals, before: number, first: number, last: number, after: number): void {
-  totals[0] += Math.max(crossing(before, last, red), crossing(after, first, red));
-  totals[1] += Math.max(crossing(before, last, green), crossing(after, first, green));
-  totals[2] += Math.max(crossing(before, last, blue), crossing(after, first, blue));
-}
-
-/** The window over which a pixel's colour must be conserved, as [x0, y0, x1, y1]. */
-type Window = readonly [number, number, number, number];
-
-const reaches = (totals: Totals, need: Totals): boolean =>
-  totals[0] >= need[0] && totals[1] >= need[1] && totals[2] >= need[2];
-
-/**
- * Whether a move of under a pixel in `pixels` can carry `need` of each channel into or out of the
- * window from x0 to x1 and y0 to y1. What it can carry is summed into `carried` along each row and
- * each column, and the sum stops once it covers the need, since more would not change the answer.
- *
- * A move of (tx, ty), resampled bilinearly, changes the window's total by tx·A + ty·B + tx·ty·C,
- * where A sums the rows, B the columns, and C reaches the pixels diagonally beyond the window's
- * corners, which are not read. Bounding C from one image alone would take the row sum moved a row
- * up or down. The bound is taken from both images, though, and the moved image shows what C
- * carried in on its own border: 400,000 random bilinear moves found none that this rejects, while
- * adding C cost about a thousand counted pixels (6.5%) of the benchmark's faint overlay change.
- */
-function carries(pixels: Pixels, [x0, y0, x1, y1]: Window, need: Totals, carried: Totals): boolean {
-  carried.fill(0);
-  const at = (x: number, y: number) => rgbOrBeyond(pixels, x, y);
-  for (let y = y0; y <= y1; y++) {
-    addLine(carried, at(x0 - 1, y), at(x0, y), at(x1, y), at(x1 + 1, y));
-    if (reaches(carried, need)) return true;
+  /** Channel `c`'s total over the `b`th size of box whose top left pixel is (x, y). */
+  at(b: number, c: number, x: number, y: number): number {
+    const { columns, totals } = this.boxes[b]!;
+    return totals[((y - this.top) * columns + x) * CHANNELS + c]!;
   }
-  for (let x = x0; x <= x1; x++) {
-    addLine(carried, at(x, y0 - 1), at(x, y0), at(x, y1), at(x, y1 + 1));
-    if (reaches(carried, need)) return true;
-  }
-  return false;
 }
 
-// Reused for every pixel, to spare an allocation each.
-const needed: Totals = [0, 0, 0];
-const carried: Totals = [0, 0, 0];
+// The last band filtered for each image. Pixels are judged row by row, so a band is filtered once.
+const bands = new WeakMap<Pixels, Band>();
+
+function band(pixels: Pixels, y: number): Band {
+  const index = Math.floor(y / BAND);
+  const cached = bands.get(pixels);
+  if (cached?.index === index) return cached;
+  const filtered = new Band(pixels, index);
+  bands.set(pixels, filtered);
+  return filtered;
+}
 
 /**
- * Whether the colour in the window around (x, y) is conserved between the images, as a move of
- * under a pixel conserves it: each channel's total may change by no more than rounding and what a
- * move in either image can carry across the window's border. Most noise changes it by less than
- * rounding alone allows, so only then is the border measured, and the other image's only for the
- * channels the first image's border can't explain.
+ * Whether, in every channel, `to`'s total over the `b`th size of box around (x, y) lies within
+ * what a move of under a pixel in `from` leaves, give or take rounding.
  */
-function conserved(image: Pixels, other: Pixels, x: number, y: number): boolean {
-  const [x0, x1] = span(x, image.width);
-  const [y0, y1] = span(y, image.height);
-
-  let r = 0;
-  let g = 0;
-  let b = 0;
-  for (let ny = y0; ny <= y1; ny++) {
-    for (let nx = x0; nx <= x1; nx++) {
-      const before = image.rgbAt(nx, ny);
-      const after = other.rgbAt(nx, ny);
-      r += red(after) - red(before);
-      g += green(after) - green(before);
-      b += blue(after) - blue(before);
+function moved(from: Band, to: Band, b: number, x: number, y: number): boolean {
+  const { nx, ny } = from.boxes[b]!;
+  const { width, height } = from.pixels;
+  const slack = BOXES[b] === 1 ? PIXEL_SLACK : ROUNDING_LEVELS * nx * ny;
+  channels: for (let c = 0; c < CHANNELS; c++) {
+    for (const sx of SIGNS) {
+      const x0 = place(x, nx, width, sx);
+      for (const sy of SIGNS) {
+        const y0 = place(y, ny, height, sy);
+        if (x0 < 0 || y0 < 0) continue;
+        const here = from.at(b, c, x0, y0);
+        const across = from.at(b, c, x0 + sx, y0);
+        const down = from.at(b, c, x0, y0 + sy);
+        const both = from.at(b, c, x0 + sx, y0 + sy);
+        const total = to.at(b, c, x0, y0);
+        const lo = Math.min(here, across, down, both) - slack;
+        const hi = Math.max(here, across, down, both) + slack;
+        if (total >= lo && total <= hi) continue channels;
+      }
     }
+    return false;
   }
-  // Each pixel of the window may have rounded the other way. What's left is what a move would
-  // have to carry across the border.
-  const rounding = ROUNDING_LEVELS * (x1 - x0 + 1) * (y1 - y0 + 1);
-  needed[0] = Math.abs(r) - rounding;
-  needed[1] = Math.abs(g) - rounding;
-  needed[2] = Math.abs(b) - rounding;
-  if (needed[0] <= 0 && needed[1] <= 0 && needed[2] <= 0) return true;
-
-  const window: Window = [x0, y0, x1, y1];
-  if (carries(image, window, needed, carried)) return true;
-  // The sum ran to the end, so it is exact: channels it explains need nothing more.
-  for (let c = 0; c < 3; c++) if (carried[c]! >= needed[c]!) needed[c] = 0;
-  return carries(other, window, needed, carried);
+  return true;
 }
 
 /** Whether pixel (x, y) differs only because content moved by less than a pixel. */
 export function isShifted(image: Pixels, other: Pixels, x: number, y: number): boolean {
-  return (
-    inNeighbourhood(image.rgbAt(x, y), other, x, y) &&
-    inNeighbourhood(other.rgbAt(x, y), image, x, y) &&
-    conserved(image, other, x, y)
+  // A side of one pixel: what a move along it would bring in is unknown.
+  if (image.width < 2 || image.height < 2) return true;
+  const before = band(image, y);
+  const after = band(other, y);
+  return BOXES.every((n, b) =>
+    n === 1
+      ? moved(before, after, b, x, y) && moved(after, before, b, x, y)
+      : moved(before, after, b, x, y) || moved(after, before, b, x, y),
   );
 }

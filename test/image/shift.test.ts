@@ -157,8 +157,53 @@ describe('isShifted, on a faint tint over a flat dark panel, at every size', () 
     expect(shiftedPixels(width, height)).toBe(0);
   });
 
-  it('takes all of a panel under three pixels high for a move: what lies beyond is unknown', () => {
-    expect(shiftedPixels(200, 2)).toBe(400);
+  it('takes none of a panel two pixels high or wide for a move, at any size', () => {
+    expect(shiftedPixels(200, 2)).toBe(0);
+    expect(shiftedPixels(2, 50)).toBe(0);
+    expect(shiftedPixels(2, 2)).toBe(0);
+  });
+
+  it('takes all of a panel one pixel high or wide for a move: what lies beyond is unknown', () => {
+    expect(shiftedPixels(200, 1)).toBe(200);
     expect(shiftedPixels(1, 50)).toBe(50);
   });
 });
+
+describe('isShifted, as a box filter', () => {
+  it('rejects a colour that appears in a corner, where no move from beyond can explain it', () => {
+    const actual = solid(4, 4, GREY);
+    setPixel(actual, 0, 0, [255, 0, 0, 255]);
+    expect(shifted(solid(4, 4, GREY), actual, 0, 0)).toBe(false);
+    setPixel(actual, 0, 0, [101, 100, 100, 255]);
+    expect(shifted(solid(4, 4, GREY), actual, 0, 0)).toBe(true);
+  });
+
+  it('rejects a colour that appears beside an edge, though the edge could carry colour', () => {
+    const before = [0, 0, 0, 0, 0, 255, 255, 255, 255, 255, 255];
+    const expected = columns(before);
+    const actual = columns(before);
+    setPixel(actual, 8, 2, [200, 40, 40, 255]);
+    expect(shifted(expected, actual, 8, 2)).toBe(false);
+  });
+
+  it('judges every band of rows the same way', () => {
+    // Taller than the bands the image is filtered in, so pixels on either side of a band's edge
+    // are judged from different bands.
+    const edge = (values: number[]) => {
+      const image = solid(values.length, 200, WHITE);
+      values.forEach((v, x) => {
+        for (let y = 0; y < 200; y++) setPixel(image, x, y, grey(v));
+      });
+      return image;
+    };
+    const before = new Raster(edge([0, 0, 0, 64, 192, 255, 255, 255]));
+    const after = new Raster(edge([0, 0, 0, 32, 160, 255, 255, 255]));
+    for (let y = 0; y < 200; y++) {
+      expect([edgeMoved(before, after, y), edgeMoved(after, before, y)]).toEqual([true, true]);
+    }
+  });
+});
+
+/** Whether both pixels of the soft edge in row y pass as moved. */
+const edgeMoved = (before: Raster, after: Raster, y: number): boolean =>
+  isShifted(before, after, 3, y) && isShifted(before, after, 4, y);
