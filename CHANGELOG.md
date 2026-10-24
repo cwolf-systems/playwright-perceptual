@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Docs
+
+- Generic wording for the benchmark's map scenes, fixture comments and test names: overlay
+  outlines, tracks and markers, a 3D terrain view. Rendered pixels and pair ids are unchanged.
+
 ## 0.2.0 (2026-10-23)
 
 What this release is for: it stops passing real colour changes that 0.1.0 took for noise, a tint

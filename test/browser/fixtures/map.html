@@ -11,11 +11,11 @@
 </style>
 <canvas width="320" height="200"></canvas>
 <script>
-  // An operations map: raster basemap tiles drawn between zoom levels, so the browser resamples
-  // them, with a road, geofences, flight tracks and labelled drones drawn over the top.
+  // A 2D map: raster basemap tiles drawn between zoom levels, so the browser resamples
+  // them, with a road, overlay outlines, tracks and labelled markers drawn over the top.
   //
   // Variants: subtle moves the water's blue one level; shifted pans the map 0.3 px; regression
-  // drops the restricted zone; faint makes its fill a little stronger.
+  // drops the red zone; faint makes its fill a little stronger.
   const variant = new URLSearchParams(location.search).get('variant');
 
   const TILE = 128;
@@ -133,7 +133,7 @@
     ctx.fillText(text, x, y);
   }
 
-  function drone(x, y, heading, colour, name) {
+  function marker(x, y, heading, colour, name) {
     ctx.beginPath();
     ctx.arc(x, y, 6.5, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
@@ -219,8 +219,8 @@
     2,
     'rgba(255, 255, 255, 0.8)',
   );
-  drone(226, 56, 1.1, '#00838f', 'UAV-1');
-  drone(130, 168, -1.9, '#ef6c00', 'UAV-2');
+  marker(226, 56, 1.1, '#00838f', 'UAV-1');
+  marker(130, 168, -1.9, '#ef6c00', 'UAV-2');
 
   ctx.fillStyle = '#263238';
   ctx.fillRect(12, 188, 48, 2);
