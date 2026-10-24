@@ -289,16 +289,16 @@ export function labelEdge() {
 const SUBPIXEL = 16;
 const snap = (v) => Math.round(v * SUBPIXEL) / SUBPIXEL;
 
-// A geofence fill; its bottom edge runs 0.02 px past the centres of row 129 (y = 129.5), its
-// sloped edges pass near many centres.
-const GEOFENCE = [
+// A translucent overlay fill; its bottom edge runs 0.02 px past the centres of row 129
+// (y = 129.5), its sloped edges pass near many centres.
+const OVERLAY = [
   [60, 40.3],
   [230, 46.7],
   [262, 129.52],
   [44, 129.52],
 ];
-const GEOFENCE_FILL = [213, 0, 0];
-const GEOFENCE_OPACITY = 0.35;
+const OVERLAY_FILL = [213, 0, 0];
+const OVERLAY_OPACITY = 0.35;
 
 // Point (x, y) is covered when strictly inside: a centre on an edge belongs to the neighbour.
 function covered(polygon, x, y) {
@@ -319,12 +319,12 @@ function snapError(x, y) {
 }
 
 function rasteriserScene(snapped, overlay) {
-  const polygon = snapped ? GEOFENCE.map(([x, y]) => [snap(x), snap(y)]) : GEOFENCE;
+  const polygon = snapped ? OVERLAY.map(([x, y]) => [snap(x), snap(y)]) : OVERLAY;
   return (x, y) => {
     const [dx, dy] = snapped ? snapError(x, y) : [0, 0];
     const terrain = terrainColour(ROUGH, x + dx, y + dy, 3);
     return overlay && covered(polygon, x, y)
-      ? blend(terrain, GEOFENCE_FILL, GEOFENCE_OPACITY)
+      ? blend(terrain, OVERLAY_FILL, OVERLAY_OPACITY)
       : terrain;
   };
 }
@@ -337,7 +337,7 @@ export function rasteriserTerrain() {
   };
 }
 
-/** Finding 3. The terrain with an aliased, translucent geofence over it, through each rasteriser. */
+/** Finding 3. The terrain with an aliased, translucent overlay over it, through each rasteriser. */
 export function rasteriserOverlay() {
   return {
     expected: renderCentres(rasteriserScene(false, true)),

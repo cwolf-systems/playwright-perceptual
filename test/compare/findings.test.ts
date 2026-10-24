@@ -84,7 +84,7 @@ describe('finding 3: one rasteriser snaps vertices to 1/16 px, the other does no
     expect(compareImages(expected, actual).differing).toBe(0);
   });
 
-  it('fails a geofence whose bottom edge passes 0.02 px from a row of pixel centres', () => {
+  it('fails an overlay whose bottom edge passes 0.02 px from a row of pixel centres', () => {
     const { expected, actual } = rasteriserOverlay();
     const result = compareImages(expected, actual);
     expect(result.differing).toBeGreaterThan(0);
