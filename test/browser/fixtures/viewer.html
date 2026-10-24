@@ -10,11 +10,11 @@
 </style>
 <canvas width="320" height="200"></canvas>
 <script>
-  // A 3D mission view: a perspective terrain mesh with hillshading, a colour ramp by height,
-  // contour lines and distance fog, and drones with altitude stems and tracks above it.
+  // A 3D terrain view: a perspective terrain mesh with hillshading, a colour ramp by height,
+  // contour lines and distance fog, and markers with altitude stems and tracks above it.
   //
   // Variants: subtle turns the sun a fraction of a degree; shifted nudges the camera 0.3 px;
-  // regression drops a drone; faint darkens the contour lines.
+  // regression drops a marker; faint darkens the contour lines.
   const variant = new URLSearchParams(location.search).get('variant');
 
   const canvas = document.querySelector('canvas');
@@ -38,7 +38,7 @@
       0.15 * Math.sin(x * 5.3 - z * 3.1) +
       0.05 * Math.cos(x * 11 + z * 9));
 
-  const DRONES = [
+  const MARKERS = [
     {
       colour: [0, 0.51, 0.56],
       track: [
@@ -215,7 +215,7 @@
     gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
   }
 
-  function drawDrones(matrix) {
+  function drawMarkers(matrix) {
     const p = program(
       `#version 300 es
       in vec3 position;
@@ -249,7 +249,7 @@
       gl.drawArrays(mode, 0, points.length);
     };
 
-    for (const { colour, track } of DRONES) {
+    for (const { colour, track } of MARKERS) {
       const path = track.map(([x, z]) => [x, ground(x, z) + ALTITUDE, z]);
       const [x, y, z] = path.at(-1);
       draw(gl.LINE_STRIP, path, colour, 1, false);
@@ -276,6 +276,6 @@
     drawTerrain(matrix);
     // Markers stay visible through terrain, as map markers do.
     gl.disable(gl.DEPTH_TEST);
-    drawDrones(matrix);
+    drawMarkers(matrix);
   }
 </script>

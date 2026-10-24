@@ -83,7 +83,7 @@ Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pi
 - **Small counts.** With 9 to 24 pairs per group, one pair moves a rate by 4 to 11 points. The
   tables should give 95% intervals (Wilson, 1927) so differences of one or two pairs are not read
   as real.
-- **Missing cases.** No pair removes a one-pixel line, such as a geofence outline or a grid line.
+- **Missing cases.** No pair removes a one-pixel line, such as an overlay outline or a grid line.
   Spatial filtering, below, could hide exactly that, so the case has to exist before filtering is
   tried. Also missing: text anti-aliasing changes (subpixel to greyscale), font hinting changes,
   and dark themes.
@@ -146,7 +146,7 @@ carry it. Each plugs in as the comparator's `colorDifference`.
 ### Regions and layers
 
 A map is layers: basemap, overlays, labels. Comparing them with different tolerances, a loose one
-for the basemap and a strict one for geofences and tracks, needs either masks with their own
+for the basemap and a strict one for overlay outlines and tracks, needs either masks with their own
 options or captures of each layer. Region masks with per-region `maxDeltaE` and allowance are the
 simple first step. Localising a failure to the element that caused it, as WebSee does for HTML
 pages (Mahajan and Halfond, 2015), would make failure messages more useful.

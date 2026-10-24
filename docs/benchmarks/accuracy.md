@@ -13,16 +13,16 @@ Labelled pairs from four sources.
   a missing caret, single pixels, and traps for SSIM-based comparison). They are downloaded on
   first run and not redistributed.
 - **This repository's fixture pages** (text, SVG, CSS effects, a scaled image, a canvas chart, a
-  WebGL height field, and two GIS scenes: a 2D operations map of resampled raster tiles with
-  geofences, flight tracks and labelled drones, and a 3D mission view of hillshaded terrain with
-  contours, fog and drones on altitude stems), rendered in Chromium, Firefox and WebKit:
+  WebGL height field, and two GIS scenes: a 2D map of resampled raster tiles with overlay
+  outlines, tracks and labelled markers, and a 3D terrain view of hillshaded terrain with
+  contours, fog and markers on height stems), rendered in Chromium, Firefox and WebKit:
   - **should match:** a colour change too small to see (15), and the same page through Chromium's
     software rasteriser and through the GPU (8, on machines with a GPU; measured here as
     SwiftShader against ANGLE on Metal, Apple M4);
   - **large regression:** a word changed, an icon removed, a bar taller, a shadow turned red, the
-    light moved across, a geofence or a drone gone (24);
+    light moved across, an overlay or a marker gone (24);
   - **faint regression:** visible but small, ΔE00 3 to 11: text grey lightened, a stroke or bar
-    colour nudged, a shadow a third stronger, the light turned a few degrees, a geofence fill a
+    colour nudged, a shadow a third stronger, the light turned a few degrees, an overlay fill a
     little stronger, contour lines a little darker (24);
   - **sub-pixel shift:** text, strokes, paths, the map and the 3D camera moved 0.25–0.3 px,
     invisible but reported apart (15).
@@ -38,7 +38,7 @@ Labelled pairs from four sources.
     two loads, so it moves a whole pixel; and its box one row taller for the same reason. They
     count as should-match because the input is identical, so failing them counts against every
     comparator, though the pixels did change and failing them is defensible;
-  - **software vs GPU, should match:** terrain, and terrain under an aliased translucent geofence,
+  - **software vs GPU, should match:** terrain, and terrain under an aliased translucent overlay,
     rasterised exactly and with vertices snapped to 1/16 px;
   - **rounding, should match:** a 4×4 texture magnified bilinearly, exactly and in half
     precision; every channel within one level.
@@ -213,7 +213,7 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
 
 - Playwright's default misses every faint regression, 24 of 24 in each set, and a quarter to a
   third of the large ones. At threshold 0.2 pixelmatch passed the WebGL terrain lit from the
-  opposite side, a card shadow turned red, a stronger geofence fill and darker contours on the 3D
+  opposite side, a card shadow turned red, a stronger overlay fill and darker contours on the 3D
   terrain, in all three browsers.
 - This package catches every faint regression at ΔE00 2.3 and below, in both sets and at both
   tolerances, the GIS scenes included. Exact bytes and looks-same do too, but fail far more pairs
@@ -225,7 +225,7 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
   two large regressions of a few pixels, which fall under the allowance; most sub-pixel shifts;
   and the 2D map through the GPU against the software rasteriser, with 953 changed pixels (1.5%)
   at 1× and 10,034 (3.9%) at 2×. Those lie along the seams between basemap tiles, which the two
-  rasterisers blend differently, and along the edges of the thick flight tracks: hairlines nobody
+  rasterisers blend differently, and along the edges of the thick tracks: hairlines nobody
   would notice, though they reach ΔE00 28. Playwright's default passes this pair; ssim-cie94 and
   the structural rule fail it too. The 3D view through the GPU passes (2 and 46 pixels).
 - The structural rule passes more rendering noise but hides faint changes. It misses the faint SVG
@@ -240,7 +240,7 @@ synthetic pair's changed pixels (looks-same reports only whether two images diff
   at ΔE00 2 and below at both allowances. At ΔE00 2.3 it is caught by a single pixel with none
   allowed, and missed with 0.1% allowed. Its control, the same scene panned 0.3 px, passes at
   0.1%. The other five pairs should match: the terrain and the bilinear pair pass at both
-  allowances; the moved label, the taller label box and the geofence through two rasterisers fail
+  allowances; the moved label, the taller label box and the overlay through two rasterisers fail
   with none allowed and pass at 0.1% (see the roadmap's known gaps).
 
 ## Changes since 0.1.0
