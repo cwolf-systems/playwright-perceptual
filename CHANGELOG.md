@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Benchmark
+
+- Every rate in the accuracy tables, and in the judge's accuracy summary, carries its 95% Wilson
+  interval (`bench/stats.mjs`, checked against Newcombe's published values). The counts are
+  unchanged: `npm run bench:accuracy` on the machine the tables came from reproduces every one.
+
 ### Docs
 
 - Generic wording for the benchmark's map scenes, fixture comments and test names: overlay

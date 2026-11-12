@@ -24,6 +24,7 @@ import pixelmatch from 'pixelmatch';
 import { decodePng, PerceptualComparator } from '../dist/index.js';
 import { playwrightPairs, renderedPairs, syntheticPairs } from './corpus.mjs';
 import { structural } from './experiments/detectors.mjs';
+import { rateCell } from './stats.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const TOLERANCES = [0, 0.001];
@@ -132,7 +133,11 @@ for (const [set, pairs] of Object.entries(SETS)) {
   }
 }
 
-/** Wrong verdicts by comparator, in a markdown table per tolerance. */
+/**
+ * Wrong verdicts by comparator, in a markdown table per tolerance. Each cell gives the count, its
+ * share of the group and the share's 95% interval (Wilson), since a group of 9 to 24 pairs moves 4
+ * to 11 points with each pair.
+ */
 function report(set, rows) {
   const sizes = Object.fromEntries(
     GROUPS.map((g) => [g, rows.filter((r) => group(r) === g).length]),
@@ -147,12 +152,14 @@ function report(set, rows) {
     );
     console.log(`|---|${GROUPS.map(() => '---').join('|')}|`);
     for (const name of Object.keys(COMPARATORS)) {
-      const wrong = GROUPS.map(
-        (g) =>
+      const wrong = GROUPS.map((g) =>
+        rateCell(
           rows.filter((r) => {
             const allowed = tolerance * r.expected.width * r.expected.height;
             return group(r) === g && r.counts[name] <= allowed !== r.shouldMatch;
           }).length,
+          sizes[g],
+        ),
       );
       console.log(`| ${name} | ${wrong.join(' | ')} |`);
     }
