@@ -1,7 +1,7 @@
 // Does each comparator pass what it should and fail what it should? Run with
 // `npm run bench:accuracy`; it builds first.
 //
-// Labelled image pairs from four sources:
+// Labelled image pairs from five sources:
 // - Playwright's own image-comparison fixtures (tests/image_tools/fixtures at v1.60.0), downloaded
 //   on first run into bench/data. They are Playwright's files and are not redistributed here.
 // - This repository's fixture pages, rendered now in each browser, with labelled variants.
@@ -9,6 +9,8 @@
 //   were designed on, and reported separately.
 // - Synthetic pairs that reproduce findings from a renderer's test suite (bench/synthetic.mjs),
 //   also reported separately, pair by pair.
+// - Synthetic should-fail cases the pages lack (bench/cases.mjs): a removed one-pixel line, text
+//   anti-aliasing and hinting changes, dark themes. Reported separately, pair by pair.
 //
 // Comparators: exact bytes, pixelmatch at its default threshold and at Playwright's, Playwright's
 // experimental ssim-cie94 (loaded from Playwright's own bundle, as its tests do), looks-same, and
@@ -22,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import looksSame from 'looks-same';
 import pixelmatch from 'pixelmatch';
 import { decodePng, PerceptualComparator } from '../dist/index.js';
-import { playwrightPairs, renderedPairs, syntheticPairs } from './corpus.mjs';
+import { casePairs, playwrightPairs, renderedPairs, syntheticPairs } from './corpus.mjs';
 import { structural } from './experiments/detectors.mjs';
 import { rateCell } from './stats.mjs';
 
@@ -122,6 +124,7 @@ const SETS = {
   'design set': decoded([...(await playwrightPairs()), ...(await renderedPairs(1))]),
   'held-out set': decoded(await renderedPairs(2)),
   'synthetic set': decoded(syntheticPairs()),
+  'cases set': decoded(casePairs()),
 };
 
 const results = [];
@@ -188,7 +191,7 @@ function reportPairs(rows) {
 for (const set of Object.keys(SETS)) {
   const rows = results.filter((r) => r.set === set);
   report(set, rows);
-  if (set === 'synthetic set') reportPairs(rows);
+  if (set === 'synthetic set' || set === 'cases set') reportPairs(rows);
 }
 
 const resultsDir = join(ROOT, 'bench', 'results');

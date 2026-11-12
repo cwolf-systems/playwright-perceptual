@@ -4,7 +4,8 @@
 // scratch and reproduce each phenomenon, so the same pixel classes reach the comparator.
 //
 // Every generator is deterministic: the same arguments give the same bytes on every platform.
-// Images are 8-bit RGBA, { data, width, height }, row by row from the top left.
+// Images are 8-bit RGBA, { data, width, height }, row by row from the top left. The terrain, the
+// blend and the area render are shared with bench/cases.mjs.
 
 const WIDTH = 320;
 const HEIGHT = 200;
@@ -47,7 +48,7 @@ const SMOOTH = {
   relief: 6,
   contours: 6,
 };
-const ROUGH = {
+export const ROUGH = {
   octaves: [
     [48, 1],
     [24, 0.5],
@@ -126,17 +127,17 @@ function terrainAt(terrain, x, y, seed, height = (px, py) => terrainHeight(terra
   return { colour, h };
 }
 
-const terrainColour = (terrain, x, y, seed) => terrainAt(terrain, x, y, seed).colour;
+export const terrainColour = (terrain, x, y, seed) => terrainAt(terrain, x, y, seed).colour;
 
 // Written out per channel rather than mapped: a render calls it millions of times.
-const blend = (under, over, alpha) => [
+export const blend = (under, over, alpha) => [
   under[0] * (1 - alpha) + over[0] * alpha,
   under[1] * (1 - alpha) + over[1] * alpha,
   under[2] * (1 - alpha) + over[2] * alpha,
 ];
 
 /** Renders a scene, given as a colour at a point, by the average over each pixel's area. */
-function renderArea(colourAt, width = WIDTH, height = HEIGHT) {
+export function renderArea(colourAt, width = WIDTH, height = HEIGHT) {
   const data = new Uint8Array(width * height * 4);
   const step = 1 / SUPERSAMPLE;
   for (let y = 0; y < height; y++) {
