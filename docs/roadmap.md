@@ -151,6 +151,22 @@ options or captures of each layer. Region masks with per-region `maxDeltaE` and 
 simple first step. Localising a failure to the element that caused it, as WebSee does for HTML
 pages (Mahajan and Halfond, 2015), would make failure messages more useful.
 
+### Recurring differences
+
+Some differences come back run after run: a label landing on the other pixel (gap 7), a seam
+between raster tiles (gap 2). Hosted review services such as Argos handle these with history
+rather than a different comparison: a diff gets a fingerprint, so visually similar diffs on the
+same test are recognised as the same change, and a change seen a set number of times in approved
+runs is treated as flaky. Both are counting rules on a deterministic pixel diff, not a model.
+
+Here, a fingerprint could be the set of changed pixels coarsened to a grid, with each cell's ΔE
+binned, kept in a small file beside the baseline with a count and the date last seen. A
+difference matching an approved fingerprint would be reported as known, not passed silently.
+The risk is the same as an allowance's: a real change that lands on a known fingerprint's cells
+is hidden. Measure it on the self-noise renders (Gaps in the benchmark) before adopting it, and
+count how many of the design and held-out set's should-fail pairs a fingerprint learned from
+should-match pairs would let through; that number has to be zero.
+
 ### Speed
 
 Most of the time on heavily changed images goes to colour maths and noise checks per changed
