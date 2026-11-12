@@ -81,8 +81,8 @@ Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pi
   benchmark. Pairs from other projects' test suites (looks-same, pixelmatch) and labelled
   screenshots of real applications would show whether the results carry over.
 - **Small counts.** With 9 to 24 pairs per group, one pair moves a rate by 4 to 11 points. The
-  tables should give 95% intervals (Wilson, 1927) so differences of one or two pairs are not read
-  as real.
+  tables give each rate's 95% interval (Wilson, 1927): 10 to 45 points wide on the design and
+  held-out sets. Only more pairs per group would narrow them.
 - **Missing cases.** No pair removes a one-pixel line, such as an overlay outline or a grid line.
   Spatial filtering, below, could hide exactly that, so the case has to exist before filtering is
   tried. Also missing: text anti-aliasing changes (subpixel to greyscale), font hinting changes,

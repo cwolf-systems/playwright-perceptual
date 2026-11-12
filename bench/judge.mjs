@@ -74,6 +74,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { PNG } from 'pngjs';
 import ts from 'typescript';
 import { playwrightPairs, renderedPairs } from './corpus.mjs';
+import { rateCell } from './stats.mjs';
 import { SYNTHETIC_PAIRS, surfaceOpacity } from './synthetic.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -911,13 +912,14 @@ function markdown(r) {
 
   out.push('## 1. Accuracy\n');
   out.push(
-    'Wrong verdicts against the frozen labels; the current checkout on the same bytes in brackets.\n',
+    'Wrong verdicts against the frozen labels, each with its share of the set and 95% interval ' +
+      '(Wilson); the current checkout on the same bytes in brackets.\n',
   );
   const accRows = Object.entries(r.accuracy.summary).map(([set, s]) => [
     set,
     s.pairs,
-    `${s.none.wrong} (${s.none.checkoutWrong})`,
-    `${s.allowance.wrong} (${s.allowance.checkoutWrong})`,
+    `${rateCell(s.none.wrong, s.pairs)} (${s.none.checkoutWrong})`,
+    `${rateCell(s.allowance.wrong, s.pairs)} (${s.allowance.checkoutWrong})`,
     `${s.none.failing} (${s.none.checkoutFailing})`,
   ]);
   out.push(

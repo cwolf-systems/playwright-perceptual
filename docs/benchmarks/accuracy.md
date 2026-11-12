@@ -73,122 +73,125 @@ Each comparator is judged with no changed pixels allowed, and with 0.1% of the i
 
 ## Results
 
-macOS, Apple M4. Each cell counts wrong verdicts, except in the last table, which gives each
-synthetic pair's changed pixels (looks-same reports only whether two images differ).
+macOS, Apple M4. Each cell counts wrong verdicts, with their share of the group and that share's
+95% interval (Wilson, 1927): with 9 to 24 pairs in a group, one pair moves a share by 4 to 11
+points, and a difference of a pair or two between comparators is not evidence that one is more
+accurate. The last table instead gives each synthetic pair's changed pixels (looks-same reports
+only whether two images differ).
 
 ### Design set (107 pairs), no changed pixels allowed
 
 | Comparator                                             | Should match (35): false failures | Large regression (33): missed | Faint regression (24): missed | Sub-pixel shift (15): false failures |
 | ------------------------------------------------------ | --------------------------------- | ----------------------------- | ----------------------------- | ------------------------------------ |
-| exact bytes                                            | 33                                | 0                             | 0                             | 15                                   |
-| pixelmatch 0.05                                        | 8                                 | 1                             | 9                             | 15                                   |
-| pixelmatch 0.1 (its default)                           | 3                                 | 1                             | 21                            | 15                                   |
-| pixelmatch 0.2 (Playwright default)                    | 2                                 | 9                             | 24                            | 12                                   |
-| ssim-cie94 (Playwright, experimental)                  | 4                                 | 0                             | 3                             | 15                                   |
-| looks-same (ΔE00 2.3)                                  | 10                                | 1                             | 0                             | 15                                   |
-| perceptual ΔE00 1                                      | 8                                 | 0                             | 0                             | 12                                   |
-| perceptual ΔE00 1.5                                    | 7                                 | 0                             | 0                             | 12                                   |
-| perceptual ΔE00 2                                      | 7                                 | 1                             | 0                             | 12                                   |
-| perceptual ΔE00 2.3                                    | 7                                 | 1                             | 0                             | 12                                   |
-| perceptual ΔE00 3                                      | 6                                 | 1                             | 0                             | 12                                   |
-| perceptual ΔE00 1.5, shifts counted                    | 12                                | 0                             | 0                             | 15                                   |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 3                                 | 0                             | 3                             | 12                                   |
-| perceptual ΔE00 1.5, structural only (experiment)      | 4                                 | 0                             | 3                             | 15                                   |
+| exact bytes                                            | 33 (94%, 81–98%)                  | 0 (0%, 0–10%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| pixelmatch 0.05                                        | 8 (23%, 12–39%)                   | 1 (3%, 1–15%)                 | 9 (38%, 21–57%)               | 15 (100%, 80–100%)                   |
+| pixelmatch 0.1 (its default)                           | 3 (9%, 3–22%)                     | 1 (3%, 1–15%)                 | 21 (88%, 69–96%)              | 15 (100%, 80–100%)                   |
+| pixelmatch 0.2 (Playwright default)                    | 2 (6%, 2–19%)                     | 9 (27%, 15–44%)               | 24 (100%, 86–100%)            | 12 (80%, 55–93%)                     |
+| ssim-cie94 (Playwright, experimental)                  | 4 (11%, 5–26%)                    | 0 (0%, 0–10%)                 | 3 (13%, 4–31%)                | 15 (100%, 80–100%)                   |
+| looks-same (ΔE00 2.3)                                  | 10 (29%, 16–45%)                  | 1 (3%, 1–15%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| perceptual ΔE00 1                                      | 8 (23%, 12–39%)                   | 0 (0%, 0–10%)                 | 0 (0%, 0–14%)                 | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 1.5                                    | 7 (20%, 10–36%)                   | 0 (0%, 0–10%)                 | 0 (0%, 0–14%)                 | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 2                                      | 7 (20%, 10–36%)                   | 1 (3%, 1–15%)                 | 0 (0%, 0–14%)                 | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 2.3                                    | 7 (20%, 10–36%)                   | 1 (3%, 1–15%)                 | 0 (0%, 0–14%)                 | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 3                                      | 6 (17%, 8–33%)                    | 1 (3%, 1–15%)                 | 0 (0%, 0–14%)                 | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 1.5, shifts counted                    | 12 (34%, 21–51%)                  | 0 (0%, 0–10%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 3 (9%, 3–22%)                     | 0 (0%, 0–10%)                 | 3 (13%, 4–31%)                | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 1.5, structural only (experiment)      | 4 (11%, 5–26%)                    | 0 (0%, 0–10%)                 | 3 (13%, 4–31%)                | 15 (100%, 80–100%)                   |
 
 ### Design set, 0.1% of the image allowed
 
 | Comparator                                             | Should match (35): false failures | Large regression (33): missed | Faint regression (24): missed | Sub-pixel shift (15): false failures |
 | ------------------------------------------------------ | --------------------------------- | ----------------------------- | ----------------------------- | ------------------------------------ |
-| exact bytes                                            | 29                                | 2                             | 0                             | 15                                   |
-| pixelmatch 0.05                                        | 2                                 | 3                             | 9                             | 12                                   |
-| pixelmatch 0.1 (its default)                           | 1                                 | 3                             | 21                            | 12                                   |
-| pixelmatch 0.2 (Playwright default)                    | 0                                 | 11                            | 24                            | 8                                    |
-| ssim-cie94 (Playwright, experimental)                  | 2                                 | 2                             | 3                             | 15                                   |
-| looks-same (ΔE00 2.3)                                  | 10                                | 1                             | 0                             | 15                                   |
-| perceptual ΔE00 1                                      | 2                                 | 2                             | 0                             | 12                                   |
-| perceptual ΔE00 1.5                                    | 2                                 | 2                             | 0                             | 12                                   |
-| perceptual ΔE00 2                                      | 2                                 | 3                             | 0                             | 12                                   |
-| perceptual ΔE00 2.3                                    | 2                                 | 3                             | 0                             | 12                                   |
-| perceptual ΔE00 3                                      | 2                                 | 3                             | 3                             | 9                                    |
-| perceptual ΔE00 1.5, shifts counted                    | 6                                 | 2                             | 0                             | 12                                   |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 1                                 | 2                             | 3                             | 12                                   |
-| perceptual ΔE00 1.5, structural only (experiment)      | 2                                 | 2                             | 3                             | 15                                   |
+| exact bytes                                            | 29 (83%, 67–92%)                  | 2 (6%, 2–20%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| pixelmatch 0.05                                        | 2 (6%, 2–19%)                     | 3 (9%, 3–24%)                 | 9 (38%, 21–57%)               | 12 (80%, 55–93%)                     |
+| pixelmatch 0.1 (its default)                           | 1 (3%, 1–15%)                     | 3 (9%, 3–24%)                 | 21 (88%, 69–96%)              | 12 (80%, 55–93%)                     |
+| pixelmatch 0.2 (Playwright default)                    | 0 (0%, 0–10%)                     | 11 (33%, 20–50%)              | 24 (100%, 86–100%)            | 8 (53%, 30–75%)                      |
+| ssim-cie94 (Playwright, experimental)                  | 2 (6%, 2–19%)                     | 2 (6%, 2–20%)                 | 3 (13%, 4–31%)                | 15 (100%, 80–100%)                   |
+| looks-same (ΔE00 2.3)                                  | 10 (29%, 16–45%)                  | 1 (3%, 1–15%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| perceptual ΔE00 1                                      | 2 (6%, 2–19%)                     | 2 (6%, 2–20%)                 | 0 (0%, 0–14%)                 | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 1.5                                    | 2 (6%, 2–19%)                     | 2 (6%, 2–20%)                 | 0 (0%, 0–14%)                 | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 2                                      | 2 (6%, 2–19%)                     | 3 (9%, 3–24%)                 | 0 (0%, 0–14%)                 | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 2.3                                    | 2 (6%, 2–19%)                     | 3 (9%, 3–24%)                 | 0 (0%, 0–14%)                 | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 3                                      | 2 (6%, 2–19%)                     | 3 (9%, 3–24%)                 | 3 (13%, 4–31%)                | 9 (60%, 36–80%)                      |
+| perceptual ΔE00 1.5, shifts counted                    | 6 (17%, 8–33%)                    | 2 (6%, 2–20%)                 | 0 (0%, 0–14%)                 | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 1 (3%, 1–15%)                     | 2 (6%, 2–20%)                 | 3 (13%, 4–31%)                | 12 (80%, 55–93%)                     |
+| perceptual ΔE00 1.5, structural only (experiment)      | 2 (6%, 2–19%)                     | 2 (6%, 2–20%)                 | 3 (13%, 4–31%)                | 15 (100%, 80–100%)                   |
 
 ### Held-out set (86 pairs), no changed pixels allowed
 
 | Comparator                                             | Should match (23): false failures | Large regression (24): missed | Faint regression (24): missed | Sub-pixel shift (15): false failures |
 | ------------------------------------------------------ | --------------------------------- | ----------------------------- | ----------------------------- | ------------------------------------ |
-| exact bytes                                            | 23                                | 0                             | 0                             | 15                                   |
-| pixelmatch 0.05                                        | 4                                 | 0                             | 9                             | 15                                   |
-| pixelmatch 0.1 (its default)                           | 2                                 | 0                             | 21                            | 15                                   |
-| pixelmatch 0.2 (Playwright default)                    | 1                                 | 6                             | 24                            | 12                                   |
-| ssim-cie94 (Playwright, experimental)                  | 4                                 | 0                             | 0                             | 15                                   |
-| looks-same (ΔE00 2.3)                                  | 5                                 | 0                             | 0                             | 15                                   |
-| perceptual ΔE00 1                                      | 4                                 | 0                             | 0                             | 14                                   |
-| perceptual ΔE00 1.5                                    | 4                                 | 0                             | 0                             | 14                                   |
-| perceptual ΔE00 2                                      | 3                                 | 0                             | 0                             | 14                                   |
-| perceptual ΔE00 2.3                                    | 3                                 | 0                             | 0                             | 14                                   |
-| perceptual ΔE00 3                                      | 3                                 | 0                             | 0                             | 14                                   |
-| perceptual ΔE00 1.5, shifts counted                    | 5                                 | 0                             | 0                             | 15                                   |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 2                                 | 0                             | 0                             | 15                                   |
-| perceptual ΔE00 1.5, structural only (experiment)      | 4                                 | 0                             | 0                             | 15                                   |
+| exact bytes                                            | 23 (100%, 86–100%)                | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| pixelmatch 0.05                                        | 4 (17%, 7–37%)                    | 0 (0%, 0–14%)                 | 9 (38%, 21–57%)               | 15 (100%, 80–100%)                   |
+| pixelmatch 0.1 (its default)                           | 2 (9%, 2–27%)                     | 0 (0%, 0–14%)                 | 21 (88%, 69–96%)              | 15 (100%, 80–100%)                   |
+| pixelmatch 0.2 (Playwright default)                    | 1 (4%, 1–21%)                     | 6 (25%, 12–45%)               | 24 (100%, 86–100%)            | 12 (80%, 55–93%)                     |
+| ssim-cie94 (Playwright, experimental)                  | 4 (17%, 7–37%)                    | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| looks-same (ΔE00 2.3)                                  | 5 (22%, 10–42%)                   | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| perceptual ΔE00 1                                      | 4 (17%, 7–37%)                    | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 14 (93%, 70–99%)                     |
+| perceptual ΔE00 1.5                                    | 4 (17%, 7–37%)                    | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 14 (93%, 70–99%)                     |
+| perceptual ΔE00 2                                      | 3 (13%, 5–32%)                    | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 14 (93%, 70–99%)                     |
+| perceptual ΔE00 2.3                                    | 3 (13%, 5–32%)                    | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 14 (93%, 70–99%)                     |
+| perceptual ΔE00 3                                      | 3 (13%, 5–32%)                    | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 14 (93%, 70–99%)                     |
+| perceptual ΔE00 1.5, shifts counted                    | 5 (22%, 10–42%)                   | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 2 (9%, 2–27%)                     | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| perceptual ΔE00 1.5, structural only (experiment)      | 4 (17%, 7–37%)                    | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
 
 ### Held-out set, 0.1% of the image allowed
 
 | Comparator                                             | Should match (23): false failures | Large regression (24): missed | Faint regression (24): missed | Sub-pixel shift (15): false failures |
 | ------------------------------------------------------ | --------------------------------- | ----------------------------- | ----------------------------- | ------------------------------------ |
-| exact bytes                                            | 23                                | 0                             | 0                             | 15                                   |
-| pixelmatch 0.05                                        | 2                                 | 0                             | 9                             | 9                                    |
-| pixelmatch 0.1 (its default)                           | 1                                 | 0                             | 21                            | 9                                    |
-| pixelmatch 0.2 (Playwright default)                    | 0                                 | 6                             | 24                            | 2                                    |
-| ssim-cie94 (Playwright, experimental)                  | 1                                 | 0                             | 3                             | 15                                   |
-| looks-same (ΔE00 2.3)                                  | 5                                 | 0                             | 0                             | 15                                   |
-| perceptual ΔE00 1                                      | 1                                 | 0                             | 0                             | 9                                    |
-| perceptual ΔE00 1.5                                    | 1                                 | 0                             | 0                             | 9                                    |
-| perceptual ΔE00 2                                      | 1                                 | 0                             | 0                             | 9                                    |
-| perceptual ΔE00 2.3                                    | 1                                 | 0                             | 0                             | 9                                    |
-| perceptual ΔE00 3                                      | 1                                 | 0                             | 3                             | 9                                    |
-| perceptual ΔE00 1.5, shifts counted                    | 4                                 | 0                             | 0                             | 10                                   |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 1                                 | 0                             | 3                             | 9                                    |
-| perceptual ΔE00 1.5, structural only (experiment)      | 1                                 | 0                             | 3                             | 15                                   |
+| exact bytes                                            | 23 (100%, 86–100%)                | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| pixelmatch 0.05                                        | 2 (9%, 2–27%)                     | 0 (0%, 0–14%)                 | 9 (38%, 21–57%)               | 9 (60%, 36–80%)                      |
+| pixelmatch 0.1 (its default)                           | 1 (4%, 1–21%)                     | 0 (0%, 0–14%)                 | 21 (88%, 69–96%)              | 9 (60%, 36–80%)                      |
+| pixelmatch 0.2 (Playwright default)                    | 0 (0%, 0–14%)                     | 6 (25%, 12–45%)               | 24 (100%, 86–100%)            | 2 (13%, 4–38%)                       |
+| ssim-cie94 (Playwright, experimental)                  | 1 (4%, 1–21%)                     | 0 (0%, 0–14%)                 | 3 (13%, 4–31%)                | 15 (100%, 80–100%)                   |
+| looks-same (ΔE00 2.3)                                  | 5 (22%, 10–42%)                   | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 15 (100%, 80–100%)                   |
+| perceptual ΔE00 1                                      | 1 (4%, 1–21%)                     | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 9 (60%, 36–80%)                      |
+| perceptual ΔE00 1.5                                    | 1 (4%, 1–21%)                     | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 9 (60%, 36–80%)                      |
+| perceptual ΔE00 2                                      | 1 (4%, 1–21%)                     | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 9 (60%, 36–80%)                      |
+| perceptual ΔE00 2.3                                    | 1 (4%, 1–21%)                     | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 9 (60%, 36–80%)                      |
+| perceptual ΔE00 3                                      | 1 (4%, 1–21%)                     | 0 (0%, 0–14%)                 | 3 (13%, 4–31%)                | 9 (60%, 36–80%)                      |
+| perceptual ΔE00 1.5, shifts counted                    | 4 (17%, 7–37%)                    | 0 (0%, 0–14%)                 | 0 (0%, 0–14%)                 | 10 (67%, 42–85%)                     |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 1 (4%, 1–21%)                     | 0 (0%, 0–14%)                 | 3 (13%, 4–31%)                | 9 (60%, 36–80%)                      |
+| perceptual ΔE00 1.5, structural only (experiment)      | 1 (4%, 1–21%)                     | 0 (0%, 0–14%)                 | 3 (13%, 4–31%)                | 15 (100%, 80–100%)                   |
 
 ### Synthetic set (7 pairs), no changed pixels allowed
 
 | Comparator                                             | Should match (5): false failures | Large regression (0): missed | Faint regression (1): missed | Sub-pixel shift (1): false failures |
 | ------------------------------------------------------ | -------------------------------- | ---------------------------- | ---------------------------- | ----------------------------------- |
-| exact bytes                                            | 5                                | 0                            | 0                            | 1                                   |
-| pixelmatch 0.05                                        | 3                                | 0                            | 1                            | 0                                   |
-| pixelmatch 0.1 (its default)                           | 3                                | 0                            | 1                            | 0                                   |
-| pixelmatch 0.2 (Playwright default)                    | 2                                | 0                            | 1                            | 0                                   |
-| ssim-cie94 (Playwright, experimental)                  | 3                                | 0                            | 0                            | 1                                   |
-| looks-same (ΔE00 2.3)                                  | 3                                | 0                            | 1                            | 1                                   |
-| perceptual ΔE00 1                                      | 3                                | 0                            | 0                            | 1                                   |
-| perceptual ΔE00 1.5                                    | 3                                | 0                            | 0                            | 1                                   |
-| perceptual ΔE00 2                                      | 3                                | 0                            | 0                            | 0                                   |
-| perceptual ΔE00 2.3                                    | 3                                | 0                            | 0                            | 0                                   |
-| perceptual ΔE00 3                                      | 3                                | 0                            | 1                            | 0                                   |
-| perceptual ΔE00 1.5, shifts counted                    | 3                                | 0                            | 0                            | 1                                   |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 3                                | 0                            | 0                            | 1                                   |
-| perceptual ΔE00 1.5, structural only (experiment)      | 3                                | 0                            | 0                            | 1                                   |
+| exact bytes                                            | 5 (100%, 57–100%)                | 0                            | 0 (0%, 0–79%)                | 1 (100%, 21–100%)                   |
+| pixelmatch 0.05                                        | 3 (60%, 23–88%)                  | 0                            | 1 (100%, 21–100%)            | 0 (0%, 0–79%)                       |
+| pixelmatch 0.1 (its default)                           | 3 (60%, 23–88%)                  | 0                            | 1 (100%, 21–100%)            | 0 (0%, 0–79%)                       |
+| pixelmatch 0.2 (Playwright default)                    | 2 (40%, 12–77%)                  | 0                            | 1 (100%, 21–100%)            | 0 (0%, 0–79%)                       |
+| ssim-cie94 (Playwright, experimental)                  | 3 (60%, 23–88%)                  | 0                            | 0 (0%, 0–79%)                | 1 (100%, 21–100%)                   |
+| looks-same (ΔE00 2.3)                                  | 3 (60%, 23–88%)                  | 0                            | 1 (100%, 21–100%)            | 1 (100%, 21–100%)                   |
+| perceptual ΔE00 1                                      | 3 (60%, 23–88%)                  | 0                            | 0 (0%, 0–79%)                | 1 (100%, 21–100%)                   |
+| perceptual ΔE00 1.5                                    | 3 (60%, 23–88%)                  | 0                            | 0 (0%, 0–79%)                | 1 (100%, 21–100%)                   |
+| perceptual ΔE00 2                                      | 3 (60%, 23–88%)                  | 0                            | 0 (0%, 0–79%)                | 0 (0%, 0–79%)                       |
+| perceptual ΔE00 2.3                                    | 3 (60%, 23–88%)                  | 0                            | 0 (0%, 0–79%)                | 0 (0%, 0–79%)                       |
+| perceptual ΔE00 3                                      | 3 (60%, 23–88%)                  | 0                            | 1 (100%, 21–100%)            | 0 (0%, 0–79%)                       |
+| perceptual ΔE00 1.5, shifts counted                    | 3 (60%, 23–88%)                  | 0                            | 0 (0%, 0–79%)                | 1 (100%, 21–100%)                   |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 3 (60%, 23–88%)                  | 0                            | 0 (0%, 0–79%)                | 1 (100%, 21–100%)                   |
+| perceptual ΔE00 1.5, structural only (experiment)      | 3 (60%, 23–88%)                  | 0                            | 0 (0%, 0–79%)                | 1 (100%, 21–100%)                   |
 
 ### Synthetic set, 0.1% of the image allowed
 
 | Comparator                                             | Should match (5): false failures | Large regression (0): missed | Faint regression (1): missed | Sub-pixel shift (1): false failures |
 | ------------------------------------------------------ | -------------------------------- | ---------------------------- | ---------------------------- | ----------------------------------- |
-| exact bytes                                            | 4                                | 0                            | 0                            | 1                                   |
-| pixelmatch 0.05                                        | 2                                | 0                            | 1                            | 0                                   |
-| pixelmatch 0.1 (its default)                           | 2                                | 0                            | 1                            | 0                                   |
-| pixelmatch 0.2 (Playwright default)                    | 1                                | 0                            | 1                            | 0                                   |
-| ssim-cie94 (Playwright, experimental)                  | 2                                | 0                            | 0                            | 1                                   |
-| looks-same (ΔE00 2.3)                                  | 3                                | 0                            | 1                            | 1                                   |
-| perceptual ΔE00 1                                      | 0                                | 0                            | 0                            | 0                                   |
-| perceptual ΔE00 1.5                                    | 0                                | 0                            | 0                            | 0                                   |
-| perceptual ΔE00 2                                      | 0                                | 0                            | 0                            | 0                                   |
-| perceptual ΔE00 2.3                                    | 0                                | 0                            | 1                            | 0                                   |
-| perceptual ΔE00 3                                      | 0                                | 0                            | 1                            | 0                                   |
-| perceptual ΔE00 1.5, shifts counted                    | 2                                | 0                            | 0                            | 1                                   |
-| perceptual ΔE00 1.5, structural for edges (experiment) | 0                                | 0                            | 0                            | 0                                   |
-| perceptual ΔE00 1.5, structural only (experiment)      | 2                                | 0                            | 0                            | 0                                   |
+| exact bytes                                            | 4 (80%, 38–96%)                  | 0                            | 0 (0%, 0–79%)                | 1 (100%, 21–100%)                   |
+| pixelmatch 0.05                                        | 2 (40%, 12–77%)                  | 0                            | 1 (100%, 21–100%)            | 0 (0%, 0–79%)                       |
+| pixelmatch 0.1 (its default)                           | 2 (40%, 12–77%)                  | 0                            | 1 (100%, 21–100%)            | 0 (0%, 0–79%)                       |
+| pixelmatch 0.2 (Playwright default)                    | 1 (20%, 4–62%)                   | 0                            | 1 (100%, 21–100%)            | 0 (0%, 0–79%)                       |
+| ssim-cie94 (Playwright, experimental)                  | 2 (40%, 12–77%)                  | 0                            | 0 (0%, 0–79%)                | 1 (100%, 21–100%)                   |
+| looks-same (ΔE00 2.3)                                  | 3 (60%, 23–88%)                  | 0                            | 1 (100%, 21–100%)            | 1 (100%, 21–100%)                   |
+| perceptual ΔE00 1                                      | 0 (0%, 0–43%)                    | 0                            | 0 (0%, 0–79%)                | 0 (0%, 0–79%)                       |
+| perceptual ΔE00 1.5                                    | 0 (0%, 0–43%)                    | 0                            | 0 (0%, 0–79%)                | 0 (0%, 0–79%)                       |
+| perceptual ΔE00 2                                      | 0 (0%, 0–43%)                    | 0                            | 0 (0%, 0–79%)                | 0 (0%, 0–79%)                       |
+| perceptual ΔE00 2.3                                    | 0 (0%, 0–43%)                    | 0                            | 1 (100%, 21–100%)            | 0 (0%, 0–79%)                       |
+| perceptual ΔE00 3                                      | 0 (0%, 0–43%)                    | 0                            | 1 (100%, 21–100%)            | 0 (0%, 0–79%)                       |
+| perceptual ΔE00 1.5, shifts counted                    | 2 (40%, 12–77%)                  | 0                            | 0 (0%, 0–79%)                | 1 (100%, 21–100%)                   |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 0 (0%, 0–43%)                    | 0                            | 0 (0%, 0–79%)                | 0 (0%, 0–79%)                       |
+| perceptual ΔE00 1.5, structural only (experiment)      | 2 (40%, 12–77%)                  | 0                            | 0 (0%, 0–79%)                | 0 (0%, 0–79%)                       |
 
 ### Synthetic set, changed pixels by pair (bold: wrong verdict with none allowed)
 
@@ -268,3 +271,11 @@ unseen.
 
 The benchmark's own gaps (one platform, labels by construction, small counts) and what to try
 next are in the [roadmap](../roadmap.md).
+
+## References
+
+- E. B. Wilson (1927). Probable inference, the law of succession, and statistical inference.
+  _Journal of the American Statistical Association_ 22(158).
+- R. G. Newcombe (1998). Two-sided confidence intervals for the single proportion: comparison of
+  seven methods. _Statistics in Medicine_ 17(8). The intervals here are its method 3, checked
+  against its published values in `test/bench/stats.test.ts`.
