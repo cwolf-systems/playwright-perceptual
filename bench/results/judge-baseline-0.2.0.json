@@ -1,11 +1,11 @@
 {
  "judge": {
-  "labels": "c89bd65571c1177d",
-  "commit": "21d0d8679862c7c4d89c7c8bcad313d57af6521a"
+  "labels": "abe0c1237e9ca32c",
+  "commit": "4d814bcf6fdf91239d3c1e6fbf18c9cec83ac2f1"
  },
  "candidate": {
   "name": "0.2.0",
-  "commit": "21d0d8679862c7c4d89c7c8bcad313d57af6521a",
+  "commit": "4d814bcf6fdf91239d3c1e6fbf18c9cec83ac2f1",
   "dirty": false
  },
  "machine": {
@@ -14,53 +14,53 @@
   "platform": "darwin"
  },
  "notices": [
-  "No capture config (PP_JUDGE_CONFIG): real captures are skipped."
+  "No capture config (PP_JUDGE_CONFIG): real captures and 0.1.0 are skipped."
  ],
  "accuracy": {
   "summary": {
    "design": {
-    "pairs": 107,
+    "pairs": 113,
     "none": {
      "wrong": 20,
      "checkoutWrong": 20,
-     "failing": 77,
-     "checkoutFailing": 77
+     "failing": 83,
+     "checkoutFailing": 83
     },
     "allowance": {
      "wrong": 16,
      "checkoutWrong": 16,
-     "failing": 69,
-     "checkoutFailing": 69
+     "failing": 75,
+     "checkoutFailing": 75
     }
    },
    "held-out": {
-    "pairs": 86,
+    "pairs": 92,
     "none": {
      "wrong": 18,
      "checkoutWrong": 18,
-     "failing": 66,
-     "checkoutFailing": 66
+     "failing": 72,
+     "checkoutFailing": 72
     },
     "allowance": {
      "wrong": 10,
      "checkoutWrong": 10,
-     "failing": 58,
-     "checkoutFailing": 58
+     "failing": 64,
+     "checkoutFailing": 64
     }
    },
    "synthetic": {
-    "pairs": 11,
+    "pairs": 19,
     "none": {
      "wrong": 5,
      "checkoutWrong": 5,
-     "failing": 7,
-     "checkoutFailing": 7
+     "failing": 15,
+     "checkoutFailing": 15
     },
     "allowance": {
      "wrong": 1,
      "checkoutWrong": 1,
-     "failing": 3,
-     "checkoutFailing": 3
+     "failing": 11,
+     "checkoutFailing": 11
     }
    }
   },
@@ -123,6 +123,8 @@
    {"id":"rendered/faint regression/chromium/terrain","set":"design","match":false,"pixels":64000,"counted":33664,"checkoutCounted":33664,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered/faint regression/chromium/map","set":"design","match":false,"pixels":64000,"counted":4221,"checkoutCounted":4221,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered/faint regression/chromium/viewer","set":"design","match":false,"pixels":64000,"counted":5683,"checkoutCounted":5683,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered/line removed/chromium/chart","set":"design","match":false,"pixels":64000,"counted":113,"checkoutCounted":113,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered/line removed/chromium/map","set":"design","match":false,"pixels":64000,"counted":594,"checkoutCounted":594,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered/colour/firefox/effects","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered/colour/firefox/image","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered/colour/firefox/terrain","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
@@ -149,6 +151,8 @@
    {"id":"rendered/faint regression/firefox/terrain","set":"design","match":false,"pixels":64000,"counted":33642,"checkoutCounted":33642,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered/faint regression/firefox/map","set":"design","match":false,"pixels":64000,"counted":4224,"checkoutCounted":4224,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered/faint regression/firefox/viewer","set":"design","match":false,"pixels":64000,"counted":5718,"checkoutCounted":5718,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered/line removed/firefox/chart","set":"design","match":false,"pixels":64000,"counted":113,"checkoutCounted":113,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered/line removed/firefox/map","set":"design","match":false,"pixels":64000,"counted":564,"checkoutCounted":564,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered/colour/webkit/effects","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered/colour/webkit/image","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered/colour/webkit/terrain","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
@@ -175,6 +179,8 @@
    {"id":"rendered/faint regression/webkit/terrain","set":"design","match":false,"pixels":64000,"counted":33642,"checkoutCounted":33642,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered/faint regression/webkit/map","set":"design","match":false,"pixels":64000,"counted":4214,"checkoutCounted":4214,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered/faint regression/webkit/viewer","set":"design","match":false,"pixels":64000,"counted":5713,"checkoutCounted":5713,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered/line removed/webkit/chart","set":"design","match":false,"pixels":64000,"counted":113,"checkoutCounted":113,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered/line removed/webkit/map","set":"design","match":false,"pixels":64000,"counted":556,"checkoutCounted":556,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered/software vs GPU/chromium/text","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered/software vs GPU/chromium/svg","set":"design","match":true,"pixels":64000,"counted":31,"checkoutCounted":31,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
    {"id":"rendered/software vs GPU/chromium/effects","set":"design","match":true,"pixels":64000,"counted":8,"checkoutCounted":8,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
@@ -209,6 +215,8 @@
    {"id":"rendered 2×/faint regression/chromium/terrain","set":"held-out","match":false,"pixels":256000,"counted":133786,"checkoutCounted":133786,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered 2×/faint regression/chromium/map","set":"held-out","match":false,"pixels":256000,"counted":17012,"checkoutCounted":17012,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered 2×/faint regression/chromium/viewer","set":"held-out","match":false,"pixels":256000,"counted":26687,"checkoutCounted":26687,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered 2×/line removed/chromium/chart","set":"held-out","match":false,"pixels":256000,"counted":502,"checkoutCounted":502,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered 2×/line removed/chromium/map","set":"held-out","match":false,"pixels":256000,"counted":3575,"checkoutCounted":3575,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered 2×/colour/firefox/effects","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered 2×/colour/firefox/image","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered 2×/colour/firefox/terrain","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
@@ -235,6 +243,8 @@
    {"id":"rendered 2×/faint regression/firefox/terrain","set":"held-out","match":false,"pixels":256000,"counted":134225,"checkoutCounted":134225,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered 2×/faint regression/firefox/map","set":"held-out","match":false,"pixels":256000,"counted":17010,"checkoutCounted":17010,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered 2×/faint regression/firefox/viewer","set":"held-out","match":false,"pixels":256000,"counted":26677,"checkoutCounted":26677,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered 2×/line removed/firefox/chart","set":"held-out","match":false,"pixels":256000,"counted":502,"checkoutCounted":502,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered 2×/line removed/firefox/map","set":"held-out","match":false,"pixels":256000,"counted":3563,"checkoutCounted":3563,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered 2×/colour/webkit/effects","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered 2×/colour/webkit/image","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered 2×/colour/webkit/terrain","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
@@ -261,6 +271,8 @@
    {"id":"rendered 2×/faint regression/webkit/terrain","set":"held-out","match":false,"pixels":256000,"counted":134325,"checkoutCounted":134325,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered 2×/faint regression/webkit/map","set":"held-out","match":false,"pixels":256000,"counted":16921,"checkoutCounted":16921,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered 2×/faint regression/webkit/viewer","set":"held-out","match":false,"pixels":256000,"counted":24755,"checkoutCounted":24755,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered 2×/line removed/webkit/chart","set":"held-out","match":false,"pixels":256000,"counted":497,"checkoutCounted":497,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"rendered 2×/line removed/webkit/map","set":"held-out","match":false,"pixels":256000,"counted":3360,"checkoutCounted":3360,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"rendered 2×/software vs GPU/chromium/text","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered 2×/software vs GPU/chromium/svg","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"rendered 2×/software vs GPU/chromium/effects","set":"held-out","match":true,"pixels":256000,"counted":85,"checkoutCounted":85,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
@@ -276,6 +288,14 @@
    {"id":"synthetic/3/terrain, snapped vertices","set":"synthetic","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"synthetic/3/geofence, snapped vertices","set":"synthetic","match":true,"pixels":64000,"counted":31,"checkoutCounted":31,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
    {"id":"synthetic/4/bilinear in half precision","set":"synthetic","match":true,"pixels":4096,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"synthetic/cases/overlay outline removed, on whole pixels","set":"synthetic","match":false,"pixels":64000,"counted":575,"checkoutCounted":575,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/overlay outline removed, across two pixels","set":"synthetic","match":false,"pixels":64000,"counted":1186,"checkoutCounted":1186,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/grid line removed","set":"synthetic","match":false,"pixels":64000,"counted":120,"checkoutCounted":120,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/dark theme, divider removed","set":"synthetic","match":false,"pixels":64000,"counted":304,"checkoutCounted":304,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/text, subpixel to greyscale anti-aliasing","set":"synthetic","match":false,"pixels":64000,"counted":633,"checkoutCounted":633,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/text, hinted to unhinted","set":"synthetic","match":false,"pixels":64000,"counted":492,"checkoutCounted":492,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/dark theme, text dimmed","set":"synthetic","match":false,"pixels":64000,"counted":1350,"checkoutCounted":1350,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/dark theme, background a shade lighter","set":"synthetic","match":false,"pixels":64000,"counted":62215,"checkoutCounted":62215,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"synthetic/judge/textured drift of 1–3 levels","set":"synthetic","match":false,"pixels":1102374,"counted":740228,"checkoutCounted":740228,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"synthetic/judge/fine texture moved 0.3, 0.2 px","set":"synthetic","match":true,"pixels":1102374,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
    {"id":"synthetic/judge/textured ground beside an edge, three levels darker","set":"synthetic","match":false,"pixels":88,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
@@ -373,50 +393,7 @@
   "limit": 1,
   "checkoutLimit": 1
  },
- "speed": {
-  "runs": 5,
-  "builds": {
-   "0.1.0": {
-    "bench 1280×720 0%": 4.5,
-    "bench 1280×720 1%": 11.4,
-    "bench 1280×720 10%": 89.6,
-    "bench 1280×720 100%": 887.4,
-    "bench 1920×1080 0%": 9.7,
-    "bench 1920×1080 1%": 24,
-    "bench 1920×1080 10%": 172.7,
-    "bench 1920×1080 100%": 1728.3,
-    "bench 3200×2000 0%": 31,
-    "bench 3200×2000 1%": 68.7,
-    "bench 3200×2000 10%": 470.6,
-    "bench 3200×2000 100%": 5035.6,
-    "textured drift of 1–3 levels, 1346×819": 593,
-    "film grain of ±1 level, 1346×819": 437.9
-   },
-   "checkout": {
-    "bench 1280×720 0%": 4.2,
-    "bench 1280×720 1%": 14,
-    "bench 1280×720 10%": 49.8,
-    "bench 1280×720 100%": 378.7,
-    "bench 1920×1080 0%": 10.5,
-    "bench 1920×1080 1%": 24.5,
-    "bench 1920×1080 10%": 93.1,
-    "bench 1920×1080 100%": 806.2,
-    "bench 3200×2000 0%": 28.6,
-    "bench 3200×2000 1%": 52.1,
-    "bench 3200×2000 10%": 289.2,
-    "bench 3200×2000 100%": 2314.7,
-    "textured drift of 1–3 levels, 1346×819": 264.5,
-    "film grain of ±1 level, 1346×819": 22.5
-   }
-  },
-  "ratios": {
-   "bench 1280×720 100%": 0.43,
-   "bench 1920×1080 100%": 0.47,
-   "bench 3200×2000 100%": 0.46,
-   "textured drift of 1–3 levels, 1346×819": 0.45,
-   "film grain of ±1 level, 1346×819": 0.05
-  }
- },
+ "speed": null,
  "size": {
   "candidate": {
    "image": {
@@ -459,9 +436,9 @@
    "sliverImproved": false
   },
   "3": {
-   "pass": true,
-   "worstRatio": 0.47,
-   "slower": []
+   "pass": null,
+   "worstRatio": null,
+   "slower": null
   },
   "4": {
    "pass": false,
