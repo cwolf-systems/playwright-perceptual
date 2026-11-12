@@ -16,6 +16,8 @@
   ctx.translate(shift, 0);
   ctx.strokeStyle = '#d5dbe3';
   for (let y = 40; y <= 180; y += 35) {
+    // line-removed leaves out the middle grid line, one pixel high.
+    if (variant === 'line-removed' && y === 110) continue;
     ctx.beginPath();
     ctx.moveTo(20, y + 0.5);
     ctx.lineTo(300, y + 0.5);
