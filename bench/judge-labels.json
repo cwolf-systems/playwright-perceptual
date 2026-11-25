@@ -7,7 +7,8 @@
     "synthetic also holds the judge's own textured drift and its control, and two changes beside an edge (added 2026-10-23), generated in bench/judge.mjs.",
     "real: captures from a downstream renderer, not in this repository, keyed by the first 16 hex digits of the SHA-256 of each PNG (expected-actual), so a label applies only to the exact bytes it was given for. golden: pairs of captures of identical input.",
     "Added 2026-11-12, one pull request of their own: the rendered line-removed pairs (a grid line one pixel high, an overlay outline 1.5 px wide, removed) and bench/cases.mjs's should-fail cases, keyed synthetic/cases/<name>.",
-    "Added 2026-11-25, one pull request of their own: the self-noise pairs of WebKit's map at 1×, every pair of ten renders of the unchanged page, keyed self-noise 1×/webkit/map/<i>v<j>. One render in ten differed in the self-noise set."
+    "Added 2026-11-25, one pull request of their own: the self-noise pairs of WebKit's map at 1×, every pair of ten renders of the unchanged page, keyed self-noise 1×/webkit/map/<i>v<j>. One render in ten differed in the self-noise set.",
+    "Added 2026-11-25, one pull request of their own: a second held-out set, the rendered pairs at 1.5× device scale, keyed rendered 1.5×/<category>/<browser>/<page>, with the labels of the same pairs at 1×. Labelled and committed before any code of the 0.3.0 plan's item (iii) ran on it."
   ],
   "benchmark": {
     "playwright/should-match/crbug-919955/example-1": {
@@ -1009,6 +1010,374 @@
     "self-noise 1×/webkit/map/8v9": {
       "match": true,
       "why": "WebKit's map at 1×, render 8 against render 9 of the same page with nothing changed: should match."
+    },
+    "rendered 1.5×/colour/chromium/effects": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/chromium/image": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/chromium/terrain": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/chromium/map": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/chromium/viewer": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/chromium/text": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/chromium/svg": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/chromium/chart": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/chromium/map": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/chromium/viewer": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/regression/chromium/text": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/chromium/svg": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/chromium/effects": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/chromium/image": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/chromium/chart": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/chromium/terrain": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/chromium/map": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/chromium/viewer": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/chromium/text": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/chromium/svg": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/chromium/effects": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/chromium/image": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/chromium/chart": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/chromium/terrain": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/chromium/map": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/chromium/viewer": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/colour/firefox/effects": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/firefox/image": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/firefox/terrain": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/firefox/map": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/firefox/viewer": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/firefox/text": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/firefox/svg": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/firefox/chart": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/firefox/map": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/firefox/viewer": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/regression/firefox/text": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/firefox/svg": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/firefox/effects": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/firefox/image": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/firefox/chart": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/firefox/terrain": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/firefox/map": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/firefox/viewer": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/firefox/text": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/firefox/svg": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/firefox/effects": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/firefox/image": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/firefox/chart": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/firefox/terrain": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/firefox/map": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/firefox/viewer": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/colour/webkit/effects": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/webkit/image": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/webkit/terrain": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/webkit/map": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/colour/webkit/viewer": {
+      "match": true,
+      "why": "A colour change too small to see (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/webkit/text": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/webkit/svg": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/webkit/chart": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/webkit/map": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/sub-pixel shift/webkit/viewer": {
+      "match": true,
+      "why": "The page moved 0.25–0.3 CSS px, invisible (the benchmark's label): should match."
+    },
+    "rendered 1.5×/regression/webkit/text": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/webkit/svg": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/webkit/effects": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/webkit/image": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/webkit/chart": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/webkit/terrain": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/webkit/map": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/regression/webkit/viewer": {
+      "match": false,
+      "why": "A large regression: a word, icon or element changed or gone (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/webkit/text": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/webkit/svg": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/webkit/effects": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/webkit/image": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/webkit/chart": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/webkit/terrain": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/webkit/map": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/faint regression/webkit/viewer": {
+      "match": false,
+      "why": "A visible but small change, ΔE00 3 to 11 (the benchmark's label): should not match."
+    },
+    "rendered 1.5×/software vs GPU/chromium/text": {
+      "match": true,
+      "why": "The same page through Chromium's software rasteriser and through the GPU (the benchmark's label): should match."
+    },
+    "rendered 1.5×/software vs GPU/chromium/svg": {
+      "match": true,
+      "why": "The same page through Chromium's software rasteriser and through the GPU (the benchmark's label): should match."
+    },
+    "rendered 1.5×/software vs GPU/chromium/effects": {
+      "match": true,
+      "why": "The same page through Chromium's software rasteriser and through the GPU (the benchmark's label): should match."
+    },
+    "rendered 1.5×/software vs GPU/chromium/image": {
+      "match": true,
+      "why": "The same page through Chromium's software rasteriser and through the GPU (the benchmark's label): should match."
+    },
+    "rendered 1.5×/software vs GPU/chromium/chart": {
+      "match": true,
+      "why": "The same page through Chromium's software rasteriser and through the GPU (the benchmark's label): should match."
+    },
+    "rendered 1.5×/software vs GPU/chromium/terrain": {
+      "match": true,
+      "why": "The same page through Chromium's software rasteriser and through the GPU (the benchmark's label): should match."
+    },
+    "rendered 1.5×/software vs GPU/chromium/map": {
+      "match": true,
+      "why": "The same page through Chromium's software rasteriser and through the GPU (the benchmark's label): should match."
+    },
+    "rendered 1.5×/software vs GPU/chromium/viewer": {
+      "match": true,
+      "why": "The same page through Chromium's software rasteriser and through the GPU (the benchmark's label): should match."
+    },
+    "rendered 1.5×/line removed/chromium/chart": {
+      "match": false,
+      "why": "The chart page with its middle grid line, one pixel high, left out: a line a user reads values against is gone: should not match."
+    },
+    "rendered 1.5×/line removed/chromium/map": {
+      "match": false,
+      "why": "The 2D map with the blue zone's outline, 1.5 px wide, left out and its fill kept: an overlay boundary a user reads is gone: should not match."
+    },
+    "rendered 1.5×/line removed/firefox/chart": {
+      "match": false,
+      "why": "The chart page with its middle grid line, one pixel high, left out: a line a user reads values against is gone: should not match."
+    },
+    "rendered 1.5×/line removed/firefox/map": {
+      "match": false,
+      "why": "The 2D map with the blue zone's outline, 1.5 px wide, left out and its fill kept: an overlay boundary a user reads is gone: should not match."
+    },
+    "rendered 1.5×/line removed/webkit/chart": {
+      "match": false,
+      "why": "The chart page with its middle grid line, one pixel high, left out: a line a user reads values against is gone: should not match."
+    },
+    "rendered 1.5×/line removed/webkit/map": {
+      "match": false,
+      "why": "The 2D map with the blue zone's outline, 1.5 px wide, left out and its fill kept: an overlay boundary a user reads is gone: should not match."
     }
   },
   "synthetic": {
