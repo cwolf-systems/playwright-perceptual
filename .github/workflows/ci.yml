@@ -120,9 +120,15 @@ jobs:
       - run: npx playwright test --project=chromium
 
   judge:
-    name: Judge accuracy
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    name: Judge accuracy (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      # Pinned images rather than -latest: rendered pairs are checked against a baseline made by CI
+      # on the same image, bench/results/judge-baseline-0.3.0-<platform>.json.
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -138,20 +144,46 @@ jobs:
         with:
           path: bench/data/playwright-v1.60.0
           key: playwright-fixtures-v1.60.0
+      # Built here rather than by the judge, which runs npm without a shell and so cannot on Windows.
+      - run: npm run build
       # The judge's accuracy section only: the benchmark and synthetic sets. The real captures
       # aren't in the repository, and speed on a shared runner says little.
-      - run: node bench/judge.mjs --skip-speed --name ci --out "$RUNNER_TEMP/judge.json"
+      - name: Judge
+        shell: bash
+        run: node bench/judge.mjs --no-build --skip-speed --name ci --out "$RUNNER_TEMP/judge.json"
+      - name: Accuracy table
+        shell: bash
+        run: node bench/tables.mjs "$RUNNER_TEMP/judge.json" | tee -a "$GITHUB_STEP_SUMMARY"
       # Fails if a verdict the 0.2.0 baseline got right is now wrong. Rendered pairs are compared
       # only on a machine like the one the baseline was made on; check-baseline.mjs says why.
       - name: No verdict lost against 0.2.0
         shell: bash
         run: node bench/check-baseline.mjs "$RUNNER_TEMP/judge.json" | tee -a "$GITHUB_STEP_SUMMARY"
+      # Whether Chromium, launched with the flags the benchmark's GPU pairs use, finds a GPU here.
+      - name: GPU seen by Chromium
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          node --input-type=module --eval "
+            import { chromium } from '@playwright/test';
+            const browser = await chromium.launch({ args: ['--use-angle=metal', '--enable-gpu'] });
+            const page = await browser.newPage();
+            const renderer = await page.evaluate(() => {
+              const gl = document.createElement('canvas').getContext('webgl');
+              const info = gl?.getExtension('WEBGL_debug_renderer_info');
+              return info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : 'no WebGL';
+            });
+            console.log('WebGL renderer with the GPU flags: ' + renderer);
+            await browser.close();
+          " | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: judge-result
+          # Attempts apart: a re-run of the same commit on another day is how reproducibility is
+          # measured (docs/benchmarks/accuracy.md).
+          name: judge-${{ matrix.os }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/judge.json
-          retention-days: 7
+          retention-days: 30
 
   frozen:
     name: Frozen labels and baselines

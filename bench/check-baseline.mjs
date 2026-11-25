@@ -11,7 +11,9 @@
 //   that the result lacks are skipped.
 // - Rendered pairs are screenshots taken by the judge on the machine it runs on, so their bytes
 //   depend on the operating system, its fonts and its GPU. They are compared only when the result
-//   and the baseline come from the same platform and CPU, or with --rendered. Playwright's fixtures
+//   and the baseline come from the same platform and CPU, or from the same GitHub-hosted runner
+//   image (bench/results/judge-baseline-0.3.0-<platform>.json, made by CI), or with --rendered.
+//   Where both carry the hashes of the rendered PNGs, the pairs whose bytes differ are listed. Playwright's fixtures
 //   and the synthetic set are the same bytes everywhere and are always compared.
 //   Rendered pairs a machine cannot render (the GPU pairs off macOS, WebGL pages without WebGL)
 //   are left out by the judge, and skipped here, except on a machine like the baseline's: there a
@@ -57,6 +59,8 @@ function readResult(file) {
 const isRendered = (id) => id.startsWith('rendered');
 const isReal = (set) => set.startsWith('real');
 const correct = (pair, tolerance) => pair.pass[tolerance] === pair.match;
+// The runner image's name without its weekly version, e.g. "ubuntu24".
+const imageName = (machine) => machine?.image?.split(' ')[0];
 
 function check(result, baseline, compareRendered, sameMachine) {
   const now = new Map(result.accuracy.pairs.map((p) => [p.id, p]));
@@ -68,6 +72,8 @@ function check(result, baseline, compareRendered, sameMachine) {
     skippedRendered: 0,
     notRendered: 0,
     compared: 0,
+    hashed: 0,
+    moved: [],
   };
   for (const before of baseline.accuracy.pairs) {
     if (isRendered(before.id) && !compareRendered) {
@@ -84,6 +90,10 @@ function check(result, baseline, compareRendered, sameMachine) {
       continue;
     }
     out.compared++;
+    if (before.sha256 && after.sha256) {
+      out.hashed++;
+      if (before.sha256.join() !== after.sha256.join()) out.moved.push(before.id);
+    }
     for (const tolerance of Object.keys(TOLERANCES)) {
       const wasCorrect = correct(before, tolerance);
       const isCorrect = correct(after, tolerance);
@@ -116,10 +126,13 @@ function main() {
 
   // Rendered bytes depend on the machine, not only its operating system: they are compared on a
   // machine like the baseline's, or with --rendered. There, a rendered pair that is missing was
-  // lost, not left out.
+  // lost, not left out. A runner image runs on more than one CPU model, so in CI the image counts.
+  const sameImage =
+    imageName(result.machine) !== undefined &&
+    imageName(result.machine) === imageName(baseline.machine);
   const sameMachine =
     result.machine?.platform === baseline.machine?.platform &&
-    result.machine?.cpu === baseline.machine?.cpu;
+    (result.machine?.cpu === baseline.machine?.cpu || sameImage);
   const r = check(result, baseline, args.rendered || sameMachine, sameMachine);
 
   const name = (file) => file.split(/[\\/]/).pop();
@@ -139,6 +152,12 @@ function main() {
     console.log(`- Rendered pairs this machine could not render: ${r.notRendered}`);
   }
   if (r.skippedReal) console.log(`- Real captures not available here: ${r.skippedReal}`);
+  if (r.hashed) {
+    console.log(
+      `- Rendered pairs with the baseline's bytes: ${r.hashed - r.moved.length} of ${r.hashed}`,
+    );
+    for (const id of r.moved) console.log(`  - ${id}: different bytes`);
+  }
   console.log(`- Verdicts gained: ${r.gained.length}`);
   console.log(`- Verdicts lost: ${r.lost.length}`);
   for (const p of r.lost) {
