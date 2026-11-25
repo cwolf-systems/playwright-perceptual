@@ -60,9 +60,9 @@ function readResult(file) {
   return result;
 }
 
-// The judge's ids for its rendered pairs start with the corpus name: "rendered/…" at 1× and
-// "rendered 2×/…" at 2×.
-export const isRendered = (id) => id.startsWith('rendered');
+// The judge's ids for its rendered pairs start with the corpus name: "rendered/…" at 1×,
+// "rendered 2×/…" at 2×, and "self-noise 1×/…" for repeated renders of one page.
+export const isRendered = (id) => id.startsWith('rendered') || id.startsWith('self-noise');
 const isReal = (set) => set.startsWith('real');
 const correct = (pair, tolerance) => pair.pass[tolerance] === pair.match;
 // The runner image's name without its weekly version, e.g. "ubuntu24".
