@@ -29,6 +29,8 @@
 
 ### Docs
 
+- Global sub-pixel registration: an estimator built and stopped at the 0.3.0 plan's component
+  checks, with the figures ([design log](docs/design/registration.md)).
 - Issue #2: a move fitted over each window and larger windows, judged by the 0.3.0 plan's rules,
   and why neither is kept ([design log](docs/design/shift-tolerance.md#issue-2-judged-for-030)).
 - Generic wording for the benchmark's map scenes, fixture comments and test names: overlay

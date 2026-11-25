@@ -123,6 +123,12 @@ image by the estimate, compare, and report the shift found, so a test can also f
 above a set limit. Optical flow (Lucas and Kanade, 1981) would extend this to parts that move on
 their own, such as labels, at more cost.
 
+Tried for 0.3.0 and stopped at the plan's second component check, before any verdict: the
+estimate is exact to 0.01 px on the terrain panned 0.1 to 0.9 px, but gives 0.022 to 0.064 px on
+should-fail pairs in which nothing moved, against a bound of 0.02, including the text rendering
+cases (0.06 px), and pixels to tens of pixels on the terrain's lighting changes. See
+[the design log](design/registration.md).
+
 ### A visibility model
 
 Visible difference predictors model contrast sensitivity, masking by nearby texture, and
