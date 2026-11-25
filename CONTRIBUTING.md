@@ -52,7 +52,7 @@ node bench/check-baseline.mjs bench/results/judge-local.json
 ```
 
 The second command fails if a pair that `bench/results/judge-baseline-0.2.0.json` judged correctly
-is now judged wrongly, or if a pair in the baseline is missing from your run. That baseline's 184
+is now judged wrongly, or if a pair in the baseline is missing from your run. That baseline's 229
 rendered pairs are screenshots whose pixels depend on the machine, so they are compared only on a
 machine like the one it was made on (macOS, Apple M4), where the maintainer checks them before
 each release; elsewhere it enforces Playwright's 21 fixture pairs and the 19 synthetic pairs.
@@ -61,7 +61,7 @@ CI runs the judge on every pull request on Linux, macOS and Windows, each on a p
 On each it checks the result against the 0.2.0 baseline, and its rendered pairs against the
 baseline CI made on that image, `bench/results/judge-baseline-0.3.0-<platform>.json`, listing any
 whose bytes changed. Each run's accuracy table (`bench/tables.mjs`) is in its job summary, and its
-result file is an artifact. Linux and Windows render 154 of the 184 pairs: the GPU pairs need
+result file is an artifact. Linux and Windows render 199 of the 229 pairs: the GPU pairs need
 macOS, and Firefox has no WebGL there for the terrain and viewer pages.
 
 The judge renders the fixture pages once into `bench/data` and reuses them: add `--render` after
