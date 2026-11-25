@@ -150,6 +150,9 @@ jobs:
       # aren't in the repository, and speed on a shared runner says little.
       - name: Judge
         shell: bash
+        env:
+          # For the API request that lists Playwright's fixtures when the cache misses.
+          GITHUB_TOKEN: ${{ github.token }}
         run: node bench/judge.mjs --no-build --skip-speed --name ci --out "$RUNNER_TEMP/judge.json"
       - name: Accuracy table
         shell: bash
