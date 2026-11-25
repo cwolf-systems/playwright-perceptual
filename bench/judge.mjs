@@ -9,7 +9,8 @@
 //
 // 1. Accuracy: each pair's verdict against its expected verdict in bench/judge-labels.json, with
 //    no changed pixels allowed and with 0.1% of the image, for the accuracy benchmark's 205 pairs,
-//    the synthetic set and real captures. The current checkout's verdicts (this repository's own
+//    the self-noise pairs of the pages whose renders differ (bench/corpus.mjs's NOISY_PAGES), the
+//    synthetic set and real captures. The current checkout's verdicts (this repository's own
 //    dist/) are taken on the same bytes in the same run, so any pair the checkout gets right and
 //    the candidate gets wrong is listed by name. Without --candidate, the candidate is the
 //    checkout itself, judged against the labels alone. Each rendered pair carries the SHA-256 of
@@ -76,7 +77,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { PNG } from 'pngjs';
 import ts from 'typescript';
 import { CASE_PAIRS } from './cases.mjs';
-import { playwrightPairs, renderedPairs } from './corpus.mjs';
+import {
+  NOISY_PAGES,
+  playwrightPairs,
+  renderedPairs,
+  repeatedRenders,
+  selfNoisePairs,
+} from './corpus.mjs';
 import { rateCell } from './stats.mjs';
 import { SYNTHETIC_PAIRS, surfaceOpacity } from './synthetic.mjs';
 
@@ -179,7 +186,7 @@ function captureConfig(notices) {
  * judged on the same bytes. `--render` renders them again.
  */
 async function renderWorker() {
-  const pairs = [...(await renderedPairs(1)), ...(await renderedPairs(2))];
+  const pairs = [...(await renderedPairs(1)), ...(await renderedPairs(2)), ...(await noisyPairs())];
   const staging = `${RENDERS}.${process.pid}`;
   mkdirSync(staging, { recursive: true });
   const manifest = pairs.map((p, n) => {
@@ -187,7 +194,7 @@ async function renderWorker() {
     writeFileSync(join(staging, `${n}-actual.png`), p.actualPng);
     return {
       id: p.id,
-      set: p.corpus === 'rendered' ? 'design' : 'held-out',
+      set: RENDERED_SETS[p.corpus] ?? 'self-noise',
       n,
       sha256: [sha256(p.expectedPng), sha256(p.actualPng)],
     };
@@ -196,6 +203,22 @@ async function renderWorker() {
   rmSync(RENDERS, { recursive: true, force: true });
   renameSync(staging, RENDERS);
   process.stdout.write('{}');
+}
+
+/** The judge's set for each corpus of rendered pairs; the self-noise pairs are a set of their own. */
+const RENDERED_SETS = { rendered: 'design', 'rendered 2×': 'held-out' };
+
+/** Every pair of repeated renders of the pages whose renders differed in the self-noise set. */
+async function noisyPairs() {
+  const pairs = [];
+  for (const scale of new Set(NOISY_PAGES.map((p) => p.deviceScaleFactor))) {
+    const noisy = (browserName, page) =>
+      NOISY_PAGES.some(
+        (p) => p.deviceScaleFactor === scale && p.browserName === browserName && p.page === page,
+      );
+    for (const render of await repeatedRenders(scale, noisy)) pairs.push(...selfNoisePairs(render));
+  }
+  return pairs;
 }
 
 /** The SHA-256 of each rendered pair's two PNGs, by pair id, as the render worker wrote them. */
@@ -406,7 +429,7 @@ const counted = (x) => (x === null ? Number.POSITIVE_INFINITY : x);
 // 1. Accuracy
 
 const allowed = (pixels) => Math.floor(ALLOWANCE * pixels);
-const SETS = ['design', 'held-out', 'synthetic', 'real golden', 'real findings'];
+const SETS = ['design', 'held-out', 'self-noise', 'synthetic', 'real golden', 'real findings'];
 
 function accuracy(candidatePairs, checkoutPairs, labels, hashes, notices) {
   const rows = [];
@@ -433,7 +456,7 @@ function accuracy(candidatePairs, checkoutPairs, labels, hashes, notices) {
       sha256: hashes.get(id),
     });
   }
-  const benchmarkPrefixes = ['playwright/', 'rendered'];
+  const benchmarkPrefixes = ['playwright/', 'rendered', 'self-noise'];
   const notRun = Object.keys(labels).filter(
     (key) => benchmarkPrefixes.some((prefix) => key.startsWith(prefix)) && !seen.has(key),
   );
