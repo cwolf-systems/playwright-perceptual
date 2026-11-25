@@ -175,17 +175,24 @@ export async function renderedPairs(deviceScaleFactor) {
 export const SELF_NOISE_RENDERS = 10;
 
 /**
+ * Pages whose renders differed in the self-noise set (docs/benchmarks/accuracy.md). The judge
+ * renders them repeatedly too, and their pairs of renders are labelled should-match.
+ */
+export const NOISY_PAGES = [{ browserName: 'webkit', page: 'map', deviceScaleFactor: 1 }];
+
+/**
  * Each page rendered SELF_NOISE_RENDERS times in one browser, each time in a fresh page, at a
  * device scale: what a page differs from itself by when nothing changed. Pages a machine cannot
- * render (WebGL unavailable) are left out.
+ * render (WebGL unavailable) are left out, and so are those `include(browserName, page)` refuses.
  */
-export async function repeatedRenders(deviceScaleFactor) {
+export async function repeatedRenders(deviceScaleFactor, include = () => true) {
   const { chromium, firefox, webkit } = await import('@playwright/test');
   const types = { chromium, firefox, webkit };
   const renders = [];
   for (const browserName of BROWSERS) {
+    if (!ALL.some((name) => include(browserName, name))) continue;
     const browser = await types[browserName].launch();
-    for (const name of ALL) {
+    for (const name of ALL.filter((page) => include(browserName, page))) {
       const shots = [];
       for (let i = 0; i < SELF_NOISE_RENDERS; i++) {
         const page = await browser.newPage({ viewport: VIEWPORT, deviceScaleFactor });
