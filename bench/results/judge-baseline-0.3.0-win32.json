@@ -1,11 +1,11 @@
 {
  "judge": {
-  "labels": "abe0c1237e9ca32c",
-  "commit": "3e60f62f10f022d9eeb97574a4510ece426df713"
+  "labels": "71239f3ff0d4b572",
+  "commit": "bfd0f39bb010ca95e2661a47782ccbf05e484dd5"
  },
  "candidate": {
   "name": "ci",
-  "commit": "3e60f62f10f022d9eeb97574a4510ece426df713",
+  "commit": "bfd0f39bb010ca95e2661a47782ccbf05e484dd5",
   "dirty": false
  },
  "machine": {
@@ -48,6 +48,21 @@
      "checkoutWrong": 9,
      "failing": 59,
      "checkoutFailing": 59
+    }
+   },
+   "self-noise": {
+    "pairs": 45,
+    "none": {
+     "wrong": 0,
+     "checkoutWrong": 0,
+     "failing": 0,
+     "checkoutFailing": 0
+    },
+    "allowance": {
+     "wrong": 0,
+     "checkoutWrong": 0,
+     "failing": 0,
+     "checkoutFailing": 0
     }
    },
    "synthetic": {
@@ -253,6 +268,51 @@
    {"id":"rendered 2×/faint regression/webkit/viewer","set":"held-out","match":false,"pixels":256000,"counted":26985,"checkoutCounted":26985,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["66cfb522c084fdf52c1664a6b3193f03f49639f25ab8ddb1577f1ac840c59441","c3f5eefa21977cf9e62d7c3090a720efbd821c7b78a20344b3f8daddafe9a5b9"]},
    {"id":"rendered 2×/line removed/webkit/chart","set":"held-out","match":false,"pixels":256000,"counted":500,"checkoutCounted":500,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["96b85a3a9e50381f4d37a659b1dcefe3d85789862390c10f958a92cf06237c07","055443cde89e6c04856e7681e828f7f8e303a696f37b30926d939a24fd3854dd"]},
    {"id":"rendered 2×/line removed/webkit/map","set":"held-out","match":false,"pixels":256000,"counted":3693,"checkoutCounted":3693,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["40dfa8c9a5cdaee9df248dfe86d463617b8c8b3e30ae8d2d74830d58bcb50cd2","ec4cb30a4926d38e6bcb0322dede676516402dfe3019455b206849d219ee71bd"]},
+   {"id":"self-noise 1×/webkit/map/0v1","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/0v2","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/0v3","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/0v4","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/0v5","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/0v6","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/0v7","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/0v8","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/0v9","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/1v2","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/1v3","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/1v4","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/1v5","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/1v6","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/1v7","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/1v8","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/1v9","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/2v3","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/2v4","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/2v5","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/2v6","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/2v7","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/2v8","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/2v9","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/3v4","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/3v5","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/3v6","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/3v7","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/3v8","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/3v9","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/4v5","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/4v6","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/4v7","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/4v8","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/4v9","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/5v6","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/5v7","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/5v8","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/5v9","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/6v7","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/6v8","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/6v9","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/7v8","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/7v9","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
+   {"id":"self-noise 1×/webkit/map/8v9","set":"self-noise","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8","f605fda468895a932c0d7d6609bb055297e8c7f903dfcc0fed9f8de6af5d21f8"]},
    {"id":"synthetic/1/surface opacity 35% → 30%","set":"synthetic","match":false,"pixels":64000,"counted":21348,"checkoutCounted":21348,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
    {"id":"synthetic/1/surface panned 0.3 px","set":"synthetic","match":true,"pixels":64000,"counted":10,"checkoutCounted":10,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
    {"id":"synthetic/2/label moved a pixel","set":"synthetic","match":true,"pixels":64000,"counted":2,"checkoutCounted":2,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
@@ -275,7 +335,7 @@
   ]
  },
  "margin": {
-  "pairs": 52,
+  "pairs": 97,
   "worst": {
    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-pixel",
    "counted": 1,

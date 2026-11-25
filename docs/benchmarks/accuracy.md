@@ -296,8 +296,11 @@ On this machine the set ran eight times at 1× and seven at 2×: twice in the fu
 times alone, and once at 1× alone while it was written. In that first run WebKit's map at 1×
 differed: one render of the ten, so 9 of its 45 pairs. In the seven runs since, it rendered the
 same bytes every time, as did every other page in every run. So the hypothesis holds for 47 of the
-48 pages and is rejected for WebKit's map at 1×. Which comparators fail that difference was not
-measured: the first run compared bytes only, and the difference has not recurred.
+48 pages and is rejected for WebKit's map at 1×. Its 45 pairs are therefore in the judge's
+benchmark as should-match, a self-noise set of their own (`bench/judge.mjs`). In the judge's render
+for the committed 0.2.0 baseline it differed again, one render of ten, and this package at its
+defaults counts no pixel on any of its pairs: that is the floor beside the page's other pairs.
+Which other comparators fail it was not measured.
 
 Pages failed, out of 48, in the last full run:
 
@@ -352,7 +355,8 @@ it is labelled as and is dropped, not relabelled. All 20 meet it on this machine
 This package at its defaults, judged by `bench/judge.mjs` on each of CI's pinned runner images.
 The tables are `node bench/tables.mjs` on the baselines CI made there,
 `bench/results/judge-baseline-0.3.0-<platform>.json`; every CI run prints its own to the job
-summary. The sets are the judge's: the synthetic set includes the cases.
+summary. The sets are the judge's: the synthetic set includes the cases, and the self-noise set
+holds the 45 pairs of ten renders of WebKit's map at 1×.
 
 On Linux and Windows, 30 labelled pairs are not rendered: the 16 GPU pairs, which the benchmark
 renders only on macOS, and the 14 pairs of the WebGL pages in Firefox, which has no WebGL there.
@@ -386,33 +390,36 @@ Linux and Windows held across a week of image updates as well as three days.
 
 ### Linux, runner image ubuntu24 20261116.376.1 (AMD EPYC 7763 64-Core Processor)
 
-ci at 3e60f62, Node v22.23.5; 154 rendered pairs. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson).
+ci at bfd0f39, Node v22.23.5; 154 rendered pairs. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson).
 
-| Set       | Pairs | Should match: failed, none allowed | Should fail: passed, none allowed | Should match: failed, 0.1% allowed | Should fail: passed, 0.1% allowed |
-| --------- | ----- | ---------------------------------- | --------------------------------- | ---------------------------------- | --------------------------------- |
-| design    | 98    | 15 (38%, 25–54%)                   | 0 (0%, 0–6%)                      | 12 (31%, 19–46%)                   | 2 (3%, 1–12%)                     |
-| held-out  | 77    | 14 (52%, 34–69%)                   | 0 (0%, 0–7%)                      | 9 (33%, 19–52%)                    | 0 (0%, 0–7%)                      |
-| synthetic | 19    | 4 (57%, 25–84%)                    | 1 (8%, 1–35%)                     | 0 (0%, 0–35%)                      | 1 (8%, 1–35%)                     |
+| Set        | Pairs | Should match: failed, none allowed | Should fail: passed, none allowed | Should match: failed, 0.1% allowed | Should fail: passed, 0.1% allowed |
+| ---------- | ----- | ---------------------------------- | --------------------------------- | ---------------------------------- | --------------------------------- |
+| design     | 98    | 15 (38%, 25–54%)                   | 0 (0%, 0–6%)                      | 12 (31%, 19–46%)                   | 2 (3%, 1–12%)                     |
+| held-out   | 77    | 14 (52%, 34–69%)                   | 0 (0%, 0–7%)                      | 9 (33%, 19–52%)                    | 0 (0%, 0–7%)                      |
+| self-noise | 45    | 0 (0%, 0–8%)                       | 0                                 | 0 (0%, 0–8%)                       | 0                                 |
+| synthetic  | 19    | 4 (57%, 25–84%)                    | 1 (8%, 1–35%)                     | 0 (0%, 0–35%)                      | 1 (8%, 1–35%)                     |
 
 ### macOS, runner image macos15 20261118.0550.1 (Apple M1 (Virtual))
 
-ci at 3e60f62, Node v22.23.5; 184 rendered pairs. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson).
+ci at bfd0f39, Node v22.23.5; 184 rendered pairs. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson).
 
-| Set       | Pairs | Should match: failed, none allowed | Should fail: passed, none allowed | Should match: failed, 0.1% allowed | Should fail: passed, 0.1% allowed |
-| --------- | ----- | ---------------------------------- | --------------------------------- | ---------------------------------- | --------------------------------- |
-| design    | 113   | 20 (40%, 28–54%)                   | 0 (0%, 0–6%)                      | 14 (28%, 17–42%)                   | 2 (3%, 1–11%)                     |
-| held-out  | 92    | 18 (47%, 32–63%)                   | 0 (0%, 0–7%)                      | 10 (26%, 15–42%)                   | 0 (0%, 0–7%)                      |
-| synthetic | 19    | 4 (57%, 25–84%)                    | 1 (8%, 1–35%)                     | 0 (0%, 0–35%)                      | 1 (8%, 1–35%)                     |
+| Set        | Pairs | Should match: failed, none allowed | Should fail: passed, none allowed | Should match: failed, 0.1% allowed | Should fail: passed, 0.1% allowed |
+| ---------- | ----- | ---------------------------------- | --------------------------------- | ---------------------------------- | --------------------------------- |
+| design     | 113   | 20 (40%, 28–54%)                   | 0 (0%, 0–6%)                      | 14 (28%, 17–42%)                   | 2 (3%, 1–11%)                     |
+| held-out   | 92    | 18 (47%, 32–63%)                   | 0 (0%, 0–7%)                      | 10 (26%, 15–42%)                   | 0 (0%, 0–7%)                      |
+| self-noise | 45    | 0 (0%, 0–8%)                       | 0                                 | 0 (0%, 0–8%)                       | 0                                 |
+| synthetic  | 19    | 4 (57%, 25–84%)                    | 1 (8%, 1–35%)                     | 0 (0%, 0–35%)                      | 1 (8%, 1–35%)                     |
 
 ### Windows, runner image win25-vs2026 20261116.315.1 (AMD EPYC 7763 64-Core Processor)
 
-ci at 3e60f62, Node v22.23.5; 154 rendered pairs. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson).
+ci at bfd0f39, Node v22.23.5; 154 rendered pairs. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson).
 
-| Set       | Pairs | Should match: failed, none allowed | Should fail: passed, none allowed | Should match: failed, 0.1% allowed | Should fail: passed, 0.1% allowed |
-| --------- | ----- | ---------------------------------- | --------------------------------- | ---------------------------------- | --------------------------------- |
-| design    | 98    | 15 (38%, 25–54%)                   | 0 (0%, 0–6%)                      | 12 (31%, 19–46%)                   | 2 (3%, 1–12%)                     |
-| held-out  | 77    | 14 (52%, 34–69%)                   | 0 (0%, 0–7%)                      | 9 (33%, 19–52%)                    | 0 (0%, 0–7%)                      |
-| synthetic | 19    | 4 (57%, 25–84%)                    | 1 (8%, 1–35%)                     | 0 (0%, 0–35%)                      | 1 (8%, 1–35%)                     |
+| Set        | Pairs | Should match: failed, none allowed | Should fail: passed, none allowed | Should match: failed, 0.1% allowed | Should fail: passed, 0.1% allowed |
+| ---------- | ----- | ---------------------------------- | --------------------------------- | ---------------------------------- | --------------------------------- |
+| design     | 98    | 15 (38%, 25–54%)                   | 0 (0%, 0–6%)                      | 12 (31%, 19–46%)                   | 2 (3%, 1–12%)                     |
+| held-out   | 77    | 14 (52%, 34–69%)                   | 0 (0%, 0–7%)                      | 9 (33%, 19–52%)                    | 0 (0%, 0–7%)                      |
+| self-noise | 45    | 0 (0%, 0–8%)                       | 0                                 | 0 (0%, 0–8%)                       | 0                                 |
+| synthetic  | 19    | 4 (57%, 25–84%)                    | 1 (8%, 1–35%)                     | 0 (0%, 0–35%)                      | 1 (8%, 1–35%)                     |
 
 ## Reading the results
 

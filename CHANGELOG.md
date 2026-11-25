@@ -7,6 +7,8 @@
 - A self-noise set: each page rendered ten times in each browser at 1× and 2×, every pair of renders
   compared (`npm run bench:accuracy -- --self-noise` runs it alone). On the maintainer's machine 47
   of the 48 pages render the same bytes every time; WebKit's map at 1× differed once in eight runs.
+  Its 45 pairs are labelled should-match and judged as a self-noise set; 0.2.0 counts no pixel on
+  them.
 - The judge runs in CI on Linux, macOS and Windows, on pinned runner images, and checks rendered
   pairs against a baseline CI made on each (`bench/results/judge-baseline-0.3.0-<platform>.json`).
   Each run publishes its accuracy table to the job summary; the accuracy page has one section per
