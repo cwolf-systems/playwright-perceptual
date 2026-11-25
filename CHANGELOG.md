@@ -26,6 +26,8 @@
 
 ### Docs
 
+- Issue #2: a move fitted over each window and larger windows, judged by the 0.3.0 plan's rules,
+  and why neither is kept ([design log](docs/design/shift-tolerance.md#issue-2-judged-for-030)).
 - Generic wording for the benchmark's map scenes, fixture comments and test names: overlay
   outlines, tracks and markers, a 3D terrain view. Rendered pixels and pair ids are unchanged.
 
