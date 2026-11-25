@@ -23,7 +23,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import looksSame from 'looks-same';
 import pixelmatch from 'pixelmatch';
-import { decodePng, PerceptualComparator } from '../dist/index.js';
+import { compareImages, decodePng, PerceptualComparator } from '../dist/index.js';
+import { MIN_CHANGED, MIN_DELTA_E } from './cases.mjs';
 import { casePairs, playwrightPairs, renderedPairs, syntheticPairs } from './corpus.mjs';
 import { structural } from './experiments/detectors.mjs';
 import { rateCell } from './stats.mjs';
@@ -188,11 +189,36 @@ function reportPairs(rows) {
   console.log('');
 }
 
+/** Every noise class counted, as test/compare/cases.test.ts measures the cases set. */
+const STRICT = { ignoreAntialiasing: false, ignoreShifts: false, ignoreRounding: false };
+
+/**
+ * Whether each removed-line and case pair is the change it is labelled as: the pixels past ΔE00 1
+ * with nothing set aside, and the largest ΔE00. A pair with fewer than MIN_CHANGED such pixels, or
+ * none reaching MIN_DELTA_E, does not belong in the benchmark as should-fail.
+ */
+function reportChanges(rows) {
+  console.log(`## Should-fail pairs: the change each makes\n`);
+  console.log(
+    `| Pair | Past ΔE00 1, nothing set aside | Largest ΔE00 | At least ${MIN_CHANGED}, some ΔE00 ${MIN_DELTA_E} or more |`,
+  );
+  console.log('|---|---|---|---|');
+  for (const r of rows) {
+    const { differing, deltaE } = compareImages(r.expected, r.actual, STRICT);
+    const meets = differing >= MIN_CHANGED && deltaE.max >= MIN_DELTA_E;
+    console.log(
+      `| ${r.id} | ${differing} | ${deltaE.max.toFixed(1)} | ${meets ? 'yes' : '**no**'} |`,
+    );
+  }
+  console.log('');
+}
+
 for (const set of Object.keys(SETS)) {
   const rows = results.filter((r) => r.set === set);
   report(set, rows);
   if (set === 'synthetic set' || set === 'cases set') reportPairs(rows);
 }
+reportChanges(results.filter((r) => r.category === 'line removed' || r.set === 'cases set'));
 
 const resultsDir = join(ROOT, 'bench', 'results');
 mkdirSync(resultsDir, { recursive: true });

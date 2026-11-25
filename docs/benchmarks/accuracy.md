@@ -47,7 +47,8 @@ Labelled pairs from five sources.
 - **Cases** (`bench/cases.mjs`): should-fail pairs the pages lack, generated from scratch so that
   the same bytes reach the comparator on every platform, since browsers switch subpixel text and
   hinting differently on each, and most platforms have neither. Labelled by construction; a unit
-  test checks that each changes at least 20 pixels and some by ΔE00 3 or more:
+  test checks that each changes at least 20 pixels and some by ΔE00 3 or more, and the benchmark
+  measures the same for the rendered line-removed pairs (the table at the end of the results):
   - **line removed:** an overlay outline one pixel wide over textured ground, on whole pixels and
     anti-aliased across two; a grid line one pixel high on a chart panel; a divider on a dark
     panel;
@@ -282,6 +283,35 @@ only whether two images differ).
 | perceptual ΔE00 1.5, shifts counted                    | 575                                             | 1186                                              | 120                      | 304                                | 1196                                             | 593                             | 1332                           | 62215                                         |
 | perceptual ΔE00 1.5, structural for edges (experiment) | 576                                             | 1188                                              | 120                      | 304                                | 663                                              | 1002                            | **0**                          | 61363                                         |
 | perceptual ΔE00 1.5, structural only (experiment)      | 576                                             | 1188                                              | 120                      | 304                                | 2638                                             | 2155                            | **0**                          | 61363                                         |
+
+### Should-fail pairs: the change each makes
+
+Each removed-line and case pair with every noise class counted: the pixels past ΔE00 1 and the
+largest ΔE00. A pair with fewer than 20 such pixels, or none at ΔE00 3 or more, is not the change
+it is labelled as and is dropped, not relabelled. All 20 meet it on this machine.
+
+| Pair                                                       | Past ΔE00 1, nothing set aside | Largest ΔE00 | At least 20, some ΔE00 3 or more |
+| ---------------------------------------------------------- | ------------------------------ | ------------ | -------------------------------- |
+| rendered/line removed/chromium/chart                       | 128                            | 9.0          | yes                              |
+| rendered/line removed/chromium/map                         | 713                            | 69.2         | yes                              |
+| rendered/line removed/firefox/chart                        | 128                            | 9.0          | yes                              |
+| rendered/line removed/firefox/map                          | 713                            | 69.5         | yes                              |
+| rendered/line removed/webkit/chart                         | 128                            | 8.9          | yes                              |
+| rendered/line removed/webkit/map                           | 677                            | 70.0         | yes                              |
+| rendered 2×/line removed/chromium/chart                    | 1041                           | 7.1          | yes                              |
+| rendered 2×/line removed/chromium/map                      | 3936                           | 62.5         | yes                              |
+| rendered 2×/line removed/firefox/chart                     | 1041                           | 7.1          | yes                              |
+| rendered 2×/line removed/firefox/map                       | 3939                           | 62.8         | yes                              |
+| rendered 2×/line removed/webkit/chart                      | 1008                           | 8.0          | yes                              |
+| rendered 2×/line removed/webkit/map                        | 3701                           | 66.8         | yes                              |
+| synthetic/cases/overlay outline removed, on whole pixels   | 576                            | 28.0         | yes                              |
+| synthetic/cases/overlay outline removed, across two pixels | 1188                           | 39.2         | yes                              |
+| synthetic/cases/grid line removed                          | 130                            | 8.9          | yes                              |
+| synthetic/cases/dark theme, divider removed                | 304                            | 10.6         | yes                              |
+| synthetic/cases/text, subpixel to greyscale anti-aliasing  | 2765                           | 28.1         | yes                              |
+| synthetic/cases/text, hinted to unhinted                   | 2159                           | 63.1         | yes                              |
+| synthetic/cases/dark theme, text dimmed                    | 3004                           | 4.2          | yes                              |
+| synthetic/cases/dark theme, background a shade lighter     | 62363                          | 3.5          | yes                              |
 
 ## Reading the results
 
