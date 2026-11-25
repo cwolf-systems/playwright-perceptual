@@ -5,7 +5,8 @@
 // - Playwright's own image-comparison fixtures (tests/image_tools/fixtures at v1.60.0), downloaded
 //   on first use into bench/data. They are Playwright's files and are not redistributed here.
 // - This repository's fixture pages, rendered now in each browser, with labelled variants, at 1×
-//   (with the Playwright fixtures, the design set) and at 2× (the held-out set).
+//   (with the Playwright fixtures, the design set), at 2× (the held-out set) and at 1.5× (a second
+//   held-out set, which only the judge renders).
 // - Synthetic pairs that reproduce findings from a renderer's test suite (bench/synthetic.mjs).
 // - Synthetic should-fail cases the rendered pages lack (bench/cases.mjs).
 // - Self-noise: each page rendered repeatedly in one browser, every pair of renders should match.
