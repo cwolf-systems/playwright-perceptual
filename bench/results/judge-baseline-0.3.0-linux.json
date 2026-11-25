@@ -1,0 +1,420 @@
+{
+ "judge": {
+  "labels": "abe0c1237e9ca32c",
+  "commit": "3e60f62f10f022d9eeb97574a4510ece426df713"
+ },
+ "candidate": {
+  "name": "ci",
+  "commit": "3e60f62f10f022d9eeb97574a4510ece426df713",
+  "dirty": false
+ },
+ "machine": {
+  "cpu": "AMD EPYC 7763 64-Core Processor",
+  "node": "v22.23.5",
+  "platform": "linux",
+  "image": "ubuntu24 20261116.376.1"
+ },
+ "notices": [
+  "No capture config (PP_JUDGE_CONFIG): real captures and 0.1.0 are skipped.",
+  "30 labelled benchmark pairs not run here."
+ ],
+ "accuracy": {
+  "summary": {
+   "design": {
+    "pairs": 98,
+    "none": {
+     "wrong": 15,
+     "checkoutWrong": 15,
+     "failing": 74,
+     "checkoutFailing": 74
+    },
+    "allowance": {
+     "wrong": 14,
+     "checkoutWrong": 14,
+     "failing": 69,
+     "checkoutFailing": 69
+    }
+   },
+   "held-out": {
+    "pairs": 77,
+    "none": {
+     "wrong": 14,
+     "checkoutWrong": 14,
+     "failing": 64,
+     "checkoutFailing": 64
+    },
+    "allowance": {
+     "wrong": 9,
+     "checkoutWrong": 9,
+     "failing": 59,
+     "checkoutFailing": 59
+    }
+   },
+   "synthetic": {
+    "pairs": 19,
+    "none": {
+     "wrong": 5,
+     "checkoutWrong": 5,
+     "failing": 15,
+     "checkoutFailing": 15
+    },
+    "allowance": {
+     "wrong": 1,
+     "checkoutWrong": 1,
+     "failing": 11,
+     "checkoutFailing": 11
+    }
+   }
+  },
+  "changes": {
+   "none": {
+    "regressions": [],
+    "fixes": []
+   },
+   "allowance": {
+    "regressions": [],
+    "fixes": []
+   }
+  },
+  "notRun": 30,
+  "pairs": [
+   {"id":"playwright/should-match/crbug-919955/example-1","set":"design","match":true,"pixels":147200,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"playwright/should-match/crbug-919955/example-2","set":"design","match":true,"pixels":484,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"playwright/should-match/looks-same-tests/antialiasing","set":"design","match":true,"pixels":180,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"playwright/should-match/looks-same-tests/antialiasing-tolerance-1","set":"design","match":true,"pixels":918,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"playwright/should-match/looks-same-tests/antialiasing-tolerance-2","set":"design","match":true,"pixels":432,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"playwright/should-match/tiny-antialiasing-sample/tiny","set":"design","match":true,"pixels":100,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"playwright/should-match/trivial/black","set":"design","match":true,"pixels":400,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"playwright/should-match/trivial/white","set":"design","match":true,"pixels":400,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"playwright/should-match/webkit-rendering-artifacts/webkit-corner-2x","set":"design","match":true,"pixels":10404,"counted":4,"checkoutCounted":4,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
+   {"id":"playwright/should-match/webkit-rendering-artifacts/webkit-corner-pixel","set":"design","match":true,"pixels":2500,"counted":1,"checkoutCounted":1,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
+   {"id":"playwright/should-match/webkit-rendering-artifacts/webkit-four-pixels","set":"design","match":true,"pixels":1575,"counted":4,"checkoutCounted":4,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"playwright/should-match/webkit-rendering-artifacts/webkit-pixel","set":"design","match":true,"pixels":1575,"counted":1,"checkoutCounted":1,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
+   {"id":"playwright/should-fail/julia-ssim-trap/1","set":"design","match":false,"pixels":400,"counted":400,"checkoutCounted":400,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"playwright/should-fail/looks-same-tests/blue","set":"design","match":false,"pixels":2500,"counted":1300,"checkoutCounted":1300,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"playwright/should-fail/looks-same-tests/green","set":"design","match":false,"pixels":2500,"counted":1300,"checkoutCounted":1300,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"playwright/should-fail/looks-same-tests/no-caret","set":"design","match":false,"pixels":4576,"counted":1,"checkoutCounted":1,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
+   {"id":"playwright/should-fail/looks-same-tests/red","set":"design","match":false,"pixels":2500,"counted":1300,"checkoutCounted":1300,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"playwright/should-fail/original-ssim-trap/sample","set":"design","match":false,"pixels":10000,"counted":10000,"checkoutCounted":10000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"playwright/should-fail/trivial/equal-luma","set":"design","match":false,"pixels":10000,"counted":10000,"checkoutCounted":10000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"playwright/should-fail/trivial/opposite","set":"design","match":false,"pixels":400,"counted":400,"checkoutCounted":400,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"playwright/should-fail/trivial/single-red-pixel","set":"design","match":false,"pixels":503424,"counted":1,"checkoutCounted":1,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
+   {"id":"rendered/colour/chromium/effects","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["5941f2fd28afd150f79a44ae25b05e78526991e9c008a371a9907de1b0a75ccb","2eb9971f06b124cae06978a068dbc599a10a23f1d8842fefcaa03a8a06b406bd"]},
+   {"id":"rendered/colour/chromium/image","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["3bf16ef09a2307fe817cd50765644f64a4cf8f74c94bb8939709ed5e94729eb9","61471ca4ffdea15a6a6d1060a26520566e0e4ae800fd11a9a8d1c49749356d21"]},
+   {"id":"rendered/colour/chromium/terrain","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["a6f0533755d27e23ef958805ed7b7ee6b7cf7ee9f32af27f8b826f4a52c514e6","a2e7ca75ef6a2cd1517084357f9e65de218178dd6c50cca63f108e3487d4ec81"]},
+   {"id":"rendered/colour/chromium/map","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["003d07b5d96d88453192575719b464cb3026f1dd483d14bc3b04dc4fcfde0897","eaf815d539fa01fc1b3b1b0f537a1e0032902587fe1ff357b4a30e85157a7d6d"]},
+   {"id":"rendered/colour/chromium/viewer","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["68a3ac441e31ebd72c1a9d79c891bb6db775815e30982af5b58576336d417b78","dcf1eeb93bf8f262ce4b33e4bf5af9c027afeadabce5380df8b0260390b525d7"]},
+   {"id":"rendered/sub-pixel shift/chromium/text","set":"design","match":true,"pixels":64000,"counted":1333,"checkoutCounted":1333,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["b23047045b9d03b3f044e05fd87655962ee3098ae394c03758a9d9a17f3e96e1","e67d17d13c6d391dc0fec77f35f4101255781cd373328243841f4c6f4dff308f"]},
+   {"id":"rendered/sub-pixel shift/chromium/svg","set":"design","match":true,"pixels":64000,"counted":226,"checkoutCounted":226,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["9c3fa3036d0bbbe515fe5a42a5011b3711ea102e64fddcfbfd22075af2d4c294","70c3994296bba352698df5ecd8f5c333dff2905e1a0964cbaed565448df2a575"]},
+   {"id":"rendered/sub-pixel shift/chromium/chart","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["7900e1f8cab58e045f181410ae120989c152ef281452511c253eb9a713e43638","35c96c62a8211a00b04430664757c84592fe4e7b9c903e0a98eba9cf44868023"]},
+   {"id":"rendered/sub-pixel shift/chromium/map","set":"design","match":true,"pixels":64000,"counted":401,"checkoutCounted":401,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["003d07b5d96d88453192575719b464cb3026f1dd483d14bc3b04dc4fcfde0897","9e4feee91f4804d48a11d3b97819ba5f97bac04dc41d9d5aecec89c020a0e7a3"]},
+   {"id":"rendered/sub-pixel shift/chromium/viewer","set":"design","match":true,"pixels":64000,"counted":161,"checkoutCounted":161,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["68a3ac441e31ebd72c1a9d79c891bb6db775815e30982af5b58576336d417b78","aa2a00d577166c1f23cfd775066c551a1d69128bf84b099abad839c62568d302"]},
+   {"id":"rendered/regression/chromium/text","set":"design","match":false,"pixels":64000,"counted":892,"checkoutCounted":892,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["b23047045b9d03b3f044e05fd87655962ee3098ae394c03758a9d9a17f3e96e1","e6076287ff8a6fb211ec2d4ee8d1800b7dcc3333c7c835e1c8ca59d1cb5534cf"]},
+   {"id":"rendered/regression/chromium/svg","set":"design","match":false,"pixels":64000,"counted":145,"checkoutCounted":145,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["9c3fa3036d0bbbe515fe5a42a5011b3711ea102e64fddcfbfd22075af2d4c294","0ad54d4adfb73d59ccafa212fef56b189d57a061f2461ce1b1922c4849f70081"]},
+   {"id":"rendered/regression/chromium/effects","set":"design","match":false,"pixels":64000,"counted":15527,"checkoutCounted":15527,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["5941f2fd28afd150f79a44ae25b05e78526991e9c008a371a9907de1b0a75ccb","10db33cd4f6f712c2afa09815f2d8fc3237a49fd14dafdd2c98bf24e7ce45e4c"]},
+   {"id":"rendered/regression/chromium/image","set":"design","match":false,"pixels":64000,"counted":64000,"checkoutCounted":64000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["3bf16ef09a2307fe817cd50765644f64a4cf8f74c94bb8939709ed5e94729eb9","518a5e403b8b6c302819d335eff34d532200b1623dbe43505145851a579b2d8e"]},
+   {"id":"rendered/regression/chromium/chart","set":"design","match":false,"pixels":64000,"counted":759,"checkoutCounted":759,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["7900e1f8cab58e045f181410ae120989c152ef281452511c253eb9a713e43638","4b197fef016024a9c3b7a4f55caa7652fdc88a2865458fbfc9dcf8de66b23614"]},
+   {"id":"rendered/regression/chromium/terrain","set":"design","match":false,"pixels":64000,"counted":60003,"checkoutCounted":60003,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a6f0533755d27e23ef958805ed7b7ee6b7cf7ee9f32af27f8b826f4a52c514e6","87ee6395138713458b93ceabe1b3010634df3ea55256fdd27fa5083775c62003"]},
+   {"id":"rendered/regression/chromium/map","set":"design","match":false,"pixels":64000,"counted":4582,"checkoutCounted":4582,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["003d07b5d96d88453192575719b464cb3026f1dd483d14bc3b04dc4fcfde0897","631a60fe416f2a7a8b1dafe85e95fa231d20bcc8c23fa42990d7bb2ba18efe30"]},
+   {"id":"rendered/regression/chromium/viewer","set":"design","match":false,"pixels":64000,"counted":191,"checkoutCounted":191,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["68a3ac441e31ebd72c1a9d79c891bb6db775815e30982af5b58576336d417b78","7d37878e6a4f6e915fe80fa2ef8e582ea5e1068b6f402cb073cb5c3f77c7f317"]},
+   {"id":"rendered/faint regression/chromium/text","set":"design","match":false,"pixels":64000,"counted":3192,"checkoutCounted":3192,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["b23047045b9d03b3f044e05fd87655962ee3098ae394c03758a9d9a17f3e96e1","9133cbf3cacc67023eba0248846a68fbdb1360381069f120261bcec98282c8ea"]},
+   {"id":"rendered/faint regression/chromium/svg","set":"design","match":false,"pixels":64000,"counted":738,"checkoutCounted":738,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["9c3fa3036d0bbbe515fe5a42a5011b3711ea102e64fddcfbfd22075af2d4c294","edf578af01912eae3d8c306d5f42715d816fcd358a2d7364cf7832d054b46136"]},
+   {"id":"rendered/faint regression/chromium/effects","set":"design","match":false,"pixels":64000,"counted":7530,"checkoutCounted":7530,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["5941f2fd28afd150f79a44ae25b05e78526991e9c008a371a9907de1b0a75ccb","27118e5a94baa688844fc2f9f89c92da5eab0c010e2a59f550cd991b796c45c6"]},
+   {"id":"rendered/faint regression/chromium/image","set":"design","match":false,"pixels":64000,"counted":64000,"checkoutCounted":64000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["3bf16ef09a2307fe817cd50765644f64a4cf8f74c94bb8939709ed5e94729eb9","31e5cd05321dda8acbdb829f58c66b5fd69b506238354cad7cc264947be98202"]},
+   {"id":"rendered/faint regression/chromium/chart","set":"design","match":false,"pixels":64000,"counted":18285,"checkoutCounted":18285,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["7900e1f8cab58e045f181410ae120989c152ef281452511c253eb9a713e43638","4e2028765aecfadd1e5aad69ca91177a16de8e96f138cacc11a4ec0aae46a458"]},
+   {"id":"rendered/faint regression/chromium/terrain","set":"design","match":false,"pixels":64000,"counted":33664,"checkoutCounted":33664,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a6f0533755d27e23ef958805ed7b7ee6b7cf7ee9f32af27f8b826f4a52c514e6","ad54b31b852b5a814d0ddfc07b8d81820ed714d1155964a5aa2a51043d084d15"]},
+   {"id":"rendered/faint regression/chromium/map","set":"design","match":false,"pixels":64000,"counted":4221,"checkoutCounted":4221,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["003d07b5d96d88453192575719b464cb3026f1dd483d14bc3b04dc4fcfde0897","5d17857a0f1f0ab395d0e13c14f057f0911f78f8eb08314635b7eb841c680a8b"]},
+   {"id":"rendered/faint regression/chromium/viewer","set":"design","match":false,"pixels":64000,"counted":5683,"checkoutCounted":5683,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["68a3ac441e31ebd72c1a9d79c891bb6db775815e30982af5b58576336d417b78","0b1df9defefb9573cd677aa3608f5a2c764955205ccc2d713e0251e962e51650"]},
+   {"id":"rendered/line removed/chromium/chart","set":"design","match":false,"pixels":64000,"counted":113,"checkoutCounted":113,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["7900e1f8cab58e045f181410ae120989c152ef281452511c253eb9a713e43638","3d5b7825730b0caba53053aad7c479d63852d028df3da8684d2ab5996f955ba5"]},
+   {"id":"rendered/line removed/chromium/map","set":"design","match":false,"pixels":64000,"counted":594,"checkoutCounted":594,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["003d07b5d96d88453192575719b464cb3026f1dd483d14bc3b04dc4fcfde0897","a922cee9c9fed79f5587b8589f78cf918c790533c862f71179f3de42366c9998"]},
+   {"id":"rendered/colour/firefox/effects","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["6fad04b6dfe7d9fb6c9be9abe2f838cf5ee17b206b238f4af84c1b0acf27b0d3","4688a3dc30993a32d4ca5ea6c6dd3f926872b2f4b7a1d8a68c195e6a1f5c1e7c"]},
+   {"id":"rendered/colour/firefox/image","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["c06fdbbf2280b4d217044bd3300f0022e6d0f4cb43ea73fd11765459352a53ee","ac3c86c1273861b44a267a0c6101110632f13052c4fe64373d19ea2501e27b1a"]},
+   {"id":"rendered/colour/firefox/map","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["8bf3b6e2e24c02e449b4506c6dfbbad7705ec1950f4acf9babb64a303a99c009","72c21945e0cd4cacf28e9cd0da98aedb9207f67f20859a2f8f14967fd812d9fe"]},
+   {"id":"rendered/sub-pixel shift/firefox/text","set":"design","match":true,"pixels":64000,"counted":528,"checkoutCounted":528,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8278e9541bb62383538dc1576c3098815970e4cc6c60bd02ad1a39afc13ad847","1b54583f0a25e1b059cc87dbbf2ed70532b12cd9eefecac81866fc174061f83a"]},
+   {"id":"rendered/sub-pixel shift/firefox/svg","set":"design","match":true,"pixels":64000,"counted":233,"checkoutCounted":233,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["625f8b4aea6d9c84f09913441c3ad92389de27ebd9e568c317d6aa819deb230d","90acf8af3882ada0b5c94deb67781220ae6ca196208f9086fe243ebfbf891822"]},
+   {"id":"rendered/sub-pixel shift/firefox/chart","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["eee02ac2d97c5b5275af7b9b9e2e5fef92314703e52dcd76af45b031e55dc447","8a95354bf7584d1cd75dd940b0d2c963fc73a2002ec40bb287c12cb1676aef37"]},
+   {"id":"rendered/sub-pixel shift/firefox/map","set":"design","match":true,"pixels":64000,"counted":500,"checkoutCounted":500,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8bf3b6e2e24c02e449b4506c6dfbbad7705ec1950f4acf9babb64a303a99c009","fd9944e19865dc731181609b4e4c5afc1535d51fc570a7b177e8c8d2e0424fa3"]},
+   {"id":"rendered/regression/firefox/text","set":"design","match":false,"pixels":64000,"counted":463,"checkoutCounted":463,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8278e9541bb62383538dc1576c3098815970e4cc6c60bd02ad1a39afc13ad847","ce47eded2f350d613960ba7eecf4471813d4f317d20f037961fede0b7ce9cc64"]},
+   {"id":"rendered/regression/firefox/svg","set":"design","match":false,"pixels":64000,"counted":147,"checkoutCounted":147,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["625f8b4aea6d9c84f09913441c3ad92389de27ebd9e568c317d6aa819deb230d","80921b152e68a7d133c681a13b1973901031be927c0b50ea10da17f15afebb1b"]},
+   {"id":"rendered/regression/firefox/effects","set":"design","match":false,"pixels":64000,"counted":14568,"checkoutCounted":14568,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["6fad04b6dfe7d9fb6c9be9abe2f838cf5ee17b206b238f4af84c1b0acf27b0d3","e5217bb564dd12e6a8dd2cce26d370ebb9c7d16f4f6165e4eadf1849352036ce"]},
+   {"id":"rendered/regression/firefox/image","set":"design","match":false,"pixels":64000,"counted":64000,"checkoutCounted":64000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["c06fdbbf2280b4d217044bd3300f0022e6d0f4cb43ea73fd11765459352a53ee","755ceebed6f6335529f684635d564181cef8020942ad73cdb526f52a9e2ab7df"]},
+   {"id":"rendered/regression/firefox/chart","set":"design","match":false,"pixels":64000,"counted":759,"checkoutCounted":759,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["eee02ac2d97c5b5275af7b9b9e2e5fef92314703e52dcd76af45b031e55dc447","3e7aa8275df85a046ef1e92268d7b624ba01eb0beda12885f938007804016b5f"]},
+   {"id":"rendered/regression/firefox/map","set":"design","match":false,"pixels":64000,"counted":4577,"checkoutCounted":4577,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8bf3b6e2e24c02e449b4506c6dfbbad7705ec1950f4acf9babb64a303a99c009","a3a99b6595faacf365670da60f292682abb208c12404b9c727516544cc4ff7d0"]},
+   {"id":"rendered/faint regression/firefox/text","set":"design","match":false,"pixels":64000,"counted":1624,"checkoutCounted":1624,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8278e9541bb62383538dc1576c3098815970e4cc6c60bd02ad1a39afc13ad847","89a0e3fad9ddc7718aca632a829dfeeee7c41586729b040a598cb07cea931e83"]},
+   {"id":"rendered/faint regression/firefox/svg","set":"design","match":false,"pixels":64000,"counted":740,"checkoutCounted":740,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["625f8b4aea6d9c84f09913441c3ad92389de27ebd9e568c317d6aa819deb230d","d93bf2ec33d6cd278cdecdb9e02f083ca4f58208f5aa35c9f5e6034185a3f125"]},
+   {"id":"rendered/faint regression/firefox/effects","set":"design","match":false,"pixels":64000,"counted":7299,"checkoutCounted":7299,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["6fad04b6dfe7d9fb6c9be9abe2f838cf5ee17b206b238f4af84c1b0acf27b0d3","147f155793849959c3a6a6c8d2ccdb06175e476d97435353b65ec625ca710b5b"]},
+   {"id":"rendered/faint regression/firefox/image","set":"design","match":false,"pixels":64000,"counted":64000,"checkoutCounted":64000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["c06fdbbf2280b4d217044bd3300f0022e6d0f4cb43ea73fd11765459352a53ee","ae39cacdfe1b6dfe8d01f83b80092041dd0f8aeff50b40a6a6e9e8d8a55e9075"]},
+   {"id":"rendered/faint regression/firefox/chart","set":"design","match":false,"pixels":64000,"counted":18285,"checkoutCounted":18285,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["eee02ac2d97c5b5275af7b9b9e2e5fef92314703e52dcd76af45b031e55dc447","6b5ea4f792c9a798daed7a019ca62784c244b779877ab742ca2f5c5b20162e36"]},
+   {"id":"rendered/faint regression/firefox/map","set":"design","match":false,"pixels":64000,"counted":4224,"checkoutCounted":4224,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8bf3b6e2e24c02e449b4506c6dfbbad7705ec1950f4acf9babb64a303a99c009","3c570d7b993c721396eb2e87ac00a38263a2ac6aef3320982b59290320150667"]},
+   {"id":"rendered/line removed/firefox/chart","set":"design","match":false,"pixels":64000,"counted":113,"checkoutCounted":113,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["eee02ac2d97c5b5275af7b9b9e2e5fef92314703e52dcd76af45b031e55dc447","d70e223c36dbfc5efcde865ea787770d20fe0ee2859ccc34b34c84ee0ac33808"]},
+   {"id":"rendered/line removed/firefox/map","set":"design","match":false,"pixels":64000,"counted":564,"checkoutCounted":564,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8bf3b6e2e24c02e449b4506c6dfbbad7705ec1950f4acf9babb64a303a99c009","3e1174f736104dbcb21c473c8bb4478caf4df9f09880ef4fccc48050da924f69"]},
+   {"id":"rendered/colour/webkit/effects","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["de1ecd2e3203873224a8bfe6962092184031b050e9d04120921856992bfc56d3","951827bc00eaa2bab3ebea552fd15cf425f6d8f247b5365e210128492f04a7c4"]},
+   {"id":"rendered/colour/webkit/image","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["33094ec3414ba0d7d7b4e52c9750168cefde2bb39ccf1e6f98e2d31ee1b4bebd","ab805bc559ad5a3f4ae48adaeae5d95dc7cedae5cffff7d8400204a107892874"]},
+   {"id":"rendered/colour/webkit/terrain","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["68cca806c7069669487d3b8767694b985fe197ef8a3942907b01b9401b58242f","f5cbd68c5c01ffb92830ca64bc8018ad98ba4db4ba0dd5ed891c88e923c11661"]},
+   {"id":"rendered/colour/webkit/map","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["5a9b6edc0b27d29b5a7978ec5baf7fcfdd47dd6344c2b2d85720a5ea8f8c2a4d","14b5f65a8392f2ade9e5c77516294611626fc58689f36b143da97d5d4198fb65"]},
+   {"id":"rendered/colour/webkit/viewer","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["a73e313aa323ecc01aa561471fae6038255703b38e4ebb9247aa3f3f5e1cc875","431b221b045911a3c29c599d910987f192df9a054caac5b5046e56dabcbe7b59"]},
+   {"id":"rendered/sub-pixel shift/webkit/text","set":"design","match":true,"pixels":64000,"counted":536,"checkoutCounted":536,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["ffa9da666ca54cd0c9e5a42d274e353bcd9ec2829bb2a4561f5f53b7dc781507","d22e71a2f40d3281d30cb365117537d9f2c4986903bb366fe66270e796cd532a"]},
+   {"id":"rendered/sub-pixel shift/webkit/svg","set":"design","match":true,"pixels":64000,"counted":235,"checkoutCounted":235,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["0d27fb64c37e2f3d63662322ce2ecb0f37fceabcd01e473eb5708bb1c56cf2d9","2426440c627b6b6603a122722e679abe4f86462bf8cc3669f1c2a9f725eda821"]},
+   {"id":"rendered/sub-pixel shift/webkit/chart","set":"design","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["4a38fb4e4bd190c833d8c6236a2265a99f32816afde6ddba3594e31a0681f3f1","722979ffabca1bc42c6a73aaa94bb4aa426b8684d7f4f5b76b7aeafb80d52d7e"]},
+   {"id":"rendered/sub-pixel shift/webkit/map","set":"design","match":true,"pixels":64000,"counted":444,"checkoutCounted":444,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["5a9b6edc0b27d29b5a7978ec5baf7fcfdd47dd6344c2b2d85720a5ea8f8c2a4d","def3679c1de45894f6d6e244829941dd6eaf4b9d8c15b8a89319f6dd92bc4683"]},
+   {"id":"rendered/sub-pixel shift/webkit/viewer","set":"design","match":true,"pixels":64000,"counted":165,"checkoutCounted":165,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a73e313aa323ecc01aa561471fae6038255703b38e4ebb9247aa3f3f5e1cc875","009352bdd3da585b948a2de0f748e27a1b56e3eddc2be2249d602767bfeab8ea"]},
+   {"id":"rendered/regression/webkit/text","set":"design","match":false,"pixels":64000,"counted":470,"checkoutCounted":470,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["ffa9da666ca54cd0c9e5a42d274e353bcd9ec2829bb2a4561f5f53b7dc781507","c79ae354e9aa5b42fb0ff33e6bd6bee9cf047eef28c5df001b7faee39447c693"]},
+   {"id":"rendered/regression/webkit/svg","set":"design","match":false,"pixels":64000,"counted":145,"checkoutCounted":145,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["0d27fb64c37e2f3d63662322ce2ecb0f37fceabcd01e473eb5708bb1c56cf2d9","90adbd8415b932d7bc94f0a142e027ca9b8a1b892e2d022d9e4802613f1596bb"]},
+   {"id":"rendered/regression/webkit/effects","set":"design","match":false,"pixels":64000,"counted":14767,"checkoutCounted":14767,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["de1ecd2e3203873224a8bfe6962092184031b050e9d04120921856992bfc56d3","cd922932e0a7e61ba5d00d2639ed7567465e27afad1e2a85cbece8a8f8cc95ad"]},
+   {"id":"rendered/regression/webkit/image","set":"design","match":false,"pixels":64000,"counted":64000,"checkoutCounted":64000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["33094ec3414ba0d7d7b4e52c9750168cefde2bb39ccf1e6f98e2d31ee1b4bebd","c274a1ccfe1cde1ff4ae6595d7cf8d902c165999dfae7e0e494a86b80ee2f197"]},
+   {"id":"rendered/regression/webkit/chart","set":"design","match":false,"pixels":64000,"counted":784,"checkoutCounted":784,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["4a38fb4e4bd190c833d8c6236a2265a99f32816afde6ddba3594e31a0681f3f1","151bb1d08e46d3529bc117b0560932d411fd847e9c0c9ebbbafd5a22541ab2a7"]},
+   {"id":"rendered/regression/webkit/terrain","set":"design","match":false,"pixels":64000,"counted":60085,"checkoutCounted":60085,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["68cca806c7069669487d3b8767694b985fe197ef8a3942907b01b9401b58242f","5b9c871780e395f71ae892659622b24907c20cb98bda58a3480e28eb206cb701"]},
+   {"id":"rendered/regression/webkit/map","set":"design","match":false,"pixels":64000,"counted":4543,"checkoutCounted":4543,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["5a9b6edc0b27d29b5a7978ec5baf7fcfdd47dd6344c2b2d85720a5ea8f8c2a4d","dd218215f0d6bc10300fc9cdaaded27e24dad7569a64f3b87d970ae28c70a368"]},
+   {"id":"rendered/regression/webkit/viewer","set":"design","match":false,"pixels":64000,"counted":191,"checkoutCounted":191,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a73e313aa323ecc01aa561471fae6038255703b38e4ebb9247aa3f3f5e1cc875","bfd7778591d709631772aa3a83eaa5ac634d6177363ac0fc5fd6c26bc82e45fc"]},
+   {"id":"rendered/faint regression/webkit/text","set":"design","match":false,"pixels":64000,"counted":1628,"checkoutCounted":1628,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["ffa9da666ca54cd0c9e5a42d274e353bcd9ec2829bb2a4561f5f53b7dc781507","d4b9426d7febfb5ae6f13b3dbfca2a0a9db2d8e2fd64d4fc54c464c8fd0b0145"]},
+   {"id":"rendered/faint regression/webkit/svg","set":"design","match":false,"pixels":64000,"counted":738,"checkoutCounted":738,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["0d27fb64c37e2f3d63662322ce2ecb0f37fceabcd01e473eb5708bb1c56cf2d9","833080bc5b85e8baf54360b19a46d1f56bccd77b2abe22f42b8fe4e46eff142b"]},
+   {"id":"rendered/faint regression/webkit/effects","set":"design","match":false,"pixels":64000,"counted":8056,"checkoutCounted":8056,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["de1ecd2e3203873224a8bfe6962092184031b050e9d04120921856992bfc56d3","4b8dd2f33d557a299e708d97aa6d5e21de8998bdf48a2b28ee61d54addc64aad"]},
+   {"id":"rendered/faint regression/webkit/image","set":"design","match":false,"pixels":64000,"counted":64000,"checkoutCounted":64000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["33094ec3414ba0d7d7b4e52c9750168cefde2bb39ccf1e6f98e2d31ee1b4bebd","65b0892af6dc0b1a54bbbb21a34da5fedb87c495ae731ce9bf264702ccb0328a"]},
+   {"id":"rendered/faint regression/webkit/chart","set":"design","match":false,"pixels":64000,"counted":18296,"checkoutCounted":18296,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["4a38fb4e4bd190c833d8c6236a2265a99f32816afde6ddba3594e31a0681f3f1","09b67b0997ae009d37b6358ea419a20c6b826ac536ff3c4ef080f31e5f05598a"]},
+   {"id":"rendered/faint regression/webkit/terrain","set":"design","match":false,"pixels":64000,"counted":33643,"checkoutCounted":33643,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["68cca806c7069669487d3b8767694b985fe197ef8a3942907b01b9401b58242f","79135d40c188d74c0dee4aed442050eeb99cd8f3e9d23875c5234bb742949780"]},
+   {"id":"rendered/faint regression/webkit/map","set":"design","match":false,"pixels":64000,"counted":4227,"checkoutCounted":4227,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["5a9b6edc0b27d29b5a7978ec5baf7fcfdd47dd6344c2b2d85720a5ea8f8c2a4d","52c7e68d8cec995e714d99f9128f7eb2ec6fb41bf35015acd14b99d37e882727"]},
+   {"id":"rendered/faint regression/webkit/viewer","set":"design","match":false,"pixels":64000,"counted":5704,"checkoutCounted":5704,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a73e313aa323ecc01aa561471fae6038255703b38e4ebb9247aa3f3f5e1cc875","ef55b46e1724b61e64a42b44d8c07f5e99bcc0e046798cbfc165d1868af939bb"]},
+   {"id":"rendered/line removed/webkit/chart","set":"design","match":false,"pixels":64000,"counted":113,"checkoutCounted":113,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["4a38fb4e4bd190c833d8c6236a2265a99f32816afde6ddba3594e31a0681f3f1","4caf804415e3324889bce3e0ffff0a57bb2782c69b316767c9458a6b5d1ab9fa"]},
+   {"id":"rendered/line removed/webkit/map","set":"design","match":false,"pixels":64000,"counted":504,"checkoutCounted":504,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["5a9b6edc0b27d29b5a7978ec5baf7fcfdd47dd6344c2b2d85720a5ea8f8c2a4d","aa890d00de41c36adc891d0959c9b592aa26fde7cde1947df38bec77ea80420d"]},
+   {"id":"rendered 2×/colour/chromium/effects","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["a41afa94b164f89519d963f5f77f00e11f268b2716678f3cbb575b1642ede56e","7acf40a923213c1a5dde1067e429a981eaccafe44fdcc33ea0f493f764e01aa3"]},
+   {"id":"rendered 2×/colour/chromium/image","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["a19aa73335674669be6def5ed2944d98a16c6aed27aca3549225fb3287b1e435","c7094a89a464186c47638b735644e51e7f8e0a3f43b8b06a56997c47b1581adf"]},
+   {"id":"rendered 2×/colour/chromium/terrain","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["a344a02045f6dfd31b13e9491725ecfe15de32d845ad3bfb5e2f2a8df3810cc6","2d0f8cb521512f0a20ad631bf8605b89ddbfa65b135df146c05b3d1fa4a46cd0"]},
+   {"id":"rendered 2×/colour/chromium/map","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["c7d6c65d084fdd91b934868f52a97147947b74357903272ae63faa01ec4e3ca4","99c7446b3c1881a5bb6c69d032c8cf2e7dfad8ad2454741117c83ae9dbb93327"]},
+   {"id":"rendered 2×/colour/chromium/viewer","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["d39374d2c98cc9c6c7201fa8653ad3a69456bbda2789433723e9537c72a46e27","b4c8535f9a2908c4cc715ff7c6bf87db90618d3d60e0c2ddc1af870d0f43ab4a"]},
+   {"id":"rendered 2×/sub-pixel shift/chromium/text","set":"held-out","match":true,"pixels":256000,"counted":279,"checkoutCounted":279,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["efb37a4e7460c577b1052e4133a43fcd725f7a94aa51470306ff983cb6262d44","f1ac003b20ac6c6a77df487ede8844d6c98bfffb998b28aab9ea9d8d8c7cc961"]},
+   {"id":"rendered 2×/sub-pixel shift/chromium/svg","set":"held-out","match":true,"pixels":256000,"counted":1,"checkoutCounted":1,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true},"sha256":["297dc2a2b22d7f5e93a3d04d2652fcf572bb4e8af96b75891dd5931e7a5774cf","d26a22844855939ebe22da06a909499147e9eaedeecd0fd85dae760604e99af6"]},
+   {"id":"rendered 2×/sub-pixel shift/chromium/chart","set":"held-out","match":true,"pixels":256000,"counted":2428,"checkoutCounted":2428,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["2bba2b355a5a9aa381f626d4d04b8f63390f5c4ece719e81cb7b7034b8d1e0d0","e92facf092ca8be7527a9f19bdb6e465cc34faf1b51d116108567371dacfb12a"]},
+   {"id":"rendered 2×/sub-pixel shift/chromium/map","set":"held-out","match":true,"pixels":256000,"counted":1268,"checkoutCounted":1268,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["c7d6c65d084fdd91b934868f52a97147947b74357903272ae63faa01ec4e3ca4","d010d80a21744a2302b1df3b247eb25d3ae4ad988367185448101b5c2870bbd0"]},
+   {"id":"rendered 2×/sub-pixel shift/chromium/viewer","set":"held-out","match":true,"pixels":256000,"counted":596,"checkoutCounted":596,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["d39374d2c98cc9c6c7201fa8653ad3a69456bbda2789433723e9537c72a46e27","d1a6a741bc4a3a0d12dd49f43cb051692bfa96cbbfd9017523ac9aa9ff929360"]},
+   {"id":"rendered 2×/regression/chromium/text","set":"held-out","match":false,"pixels":256000,"counted":3744,"checkoutCounted":3744,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["efb37a4e7460c577b1052e4133a43fcd725f7a94aa51470306ff983cb6262d44","02ca738f0da8acfe3ef1d82c494cd7c3707da663f648ba401477632dbf143e58"]},
+   {"id":"rendered 2×/regression/chromium/svg","set":"held-out","match":false,"pixels":256000,"counted":797,"checkoutCounted":797,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["297dc2a2b22d7f5e93a3d04d2652fcf572bb4e8af96b75891dd5931e7a5774cf","748c668a07dcba5b2d96cc79b0876362cd12b216c81f747825ba1dbf6a160528"]},
+   {"id":"rendered 2×/regression/chromium/effects","set":"held-out","match":false,"pixels":256000,"counted":62340,"checkoutCounted":62340,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a41afa94b164f89519d963f5f77f00e11f268b2716678f3cbb575b1642ede56e","b0ad61ae2ef54ec9a459c4bf49e9d5abd47bc1cc263e23443c907145142b9d4e"]},
+   {"id":"rendered 2×/regression/chromium/image","set":"held-out","match":false,"pixels":256000,"counted":256000,"checkoutCounted":256000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a19aa73335674669be6def5ed2944d98a16c6aed27aca3549225fb3287b1e435","af87c61000d048d6babb9afb066529264fbe222fe18ad674b133aa8dedddb476"]},
+   {"id":"rendered 2×/regression/chromium/chart","set":"held-out","match":false,"pixels":256000,"counted":4794,"checkoutCounted":4794,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["2bba2b355a5a9aa381f626d4d04b8f63390f5c4ece719e81cb7b7034b8d1e0d0","b11821329939e4e119dfd54ce06351577762ddef7f84b78cddd33d60bc08c1e9"]},
+   {"id":"rendered 2×/regression/chromium/terrain","set":"held-out","match":false,"pixels":256000,"counted":240651,"checkoutCounted":240651,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a344a02045f6dfd31b13e9491725ecfe15de32d845ad3bfb5e2f2a8df3810cc6","06386cf179efc122af424d6913c6ca1906a4bfe219d986a06434ba6265abd02d"]},
+   {"id":"rendered 2×/regression/chromium/map","set":"held-out","match":false,"pixels":256000,"counted":19023,"checkoutCounted":19023,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["c7d6c65d084fdd91b934868f52a97147947b74357903272ae63faa01ec4e3ca4","b88e1f6b2d6a2440f35981ac08954c2511355698b906a5dbb41b7feeb043fefb"]},
+   {"id":"rendered 2×/regression/chromium/viewer","set":"held-out","match":false,"pixels":256000,"counted":992,"checkoutCounted":992,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["d39374d2c98cc9c6c7201fa8653ad3a69456bbda2789433723e9537c72a46e27","0e26100f6c214643aa772e72fc16828d2fb149ed53b7c2926aaf1a356d36d9da"]},
+   {"id":"rendered 2×/faint regression/chromium/text","set":"held-out","match":false,"pixels":256000,"counted":8968,"checkoutCounted":8968,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["efb37a4e7460c577b1052e4133a43fcd725f7a94aa51470306ff983cb6262d44","c00253805a7e59b2a4d783b07c66eb74c5a2cfa5010af5cca10b4c2fca479f34"]},
+   {"id":"rendered 2×/faint regression/chromium/svg","set":"held-out","match":false,"pixels":256000,"counted":3253,"checkoutCounted":3253,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["297dc2a2b22d7f5e93a3d04d2652fcf572bb4e8af96b75891dd5931e7a5774cf","b86cfc68e4c99c59838377164614efec9dad12a3377c00f61453f9a5154af1e9"]},
+   {"id":"rendered 2×/faint regression/chromium/effects","set":"held-out","match":false,"pixels":256000,"counted":29967,"checkoutCounted":29967,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a41afa94b164f89519d963f5f77f00e11f268b2716678f3cbb575b1642ede56e","37edde5e1580cf87cca63623edb03bcf7ed1d7a14dd0c9d3d0785dd716b440f9"]},
+   {"id":"rendered 2×/faint regression/chromium/image","set":"held-out","match":false,"pixels":256000,"counted":256000,"checkoutCounted":256000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a19aa73335674669be6def5ed2944d98a16c6aed27aca3549225fb3287b1e435","a8dc40fbee0e64732504fa2442982987d3e8fe67847b80d0bac0ca9b7caa6413"]},
+   {"id":"rendered 2×/faint regression/chromium/chart","set":"held-out","match":false,"pixels":256000,"counted":73730,"checkoutCounted":73730,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["2bba2b355a5a9aa381f626d4d04b8f63390f5c4ece719e81cb7b7034b8d1e0d0","c843225f0d394a9cc0f23c7a41b9ab7719f0125b55fe6571e94aa5b9e106e2d6"]},
+   {"id":"rendered 2×/faint regression/chromium/terrain","set":"held-out","match":false,"pixels":256000,"counted":133786,"checkoutCounted":133786,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["a344a02045f6dfd31b13e9491725ecfe15de32d845ad3bfb5e2f2a8df3810cc6","95fdcc06af8f6469c672eb7740a730b43f35c52ae1681f53a51c1f2164b24332"]},
+   {"id":"rendered 2×/faint regression/chromium/map","set":"held-out","match":false,"pixels":256000,"counted":17012,"checkoutCounted":17012,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["c7d6c65d084fdd91b934868f52a97147947b74357903272ae63faa01ec4e3ca4","60571eed04ea93729083905baf7e1a67328b558c5f8e9e6992e608f83aa59d85"]},
+   {"id":"rendered 2×/faint regression/chromium/viewer","set":"held-out","match":false,"pixels":256000,"counted":26688,"checkoutCounted":26688,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["d39374d2c98cc9c6c7201fa8653ad3a69456bbda2789433723e9537c72a46e27","ada5124766fcfa7a1cec5c2e77bc9a5c0200edba547481bb8299f5836d3d9d63"]},
+   {"id":"rendered 2×/line removed/chromium/chart","set":"held-out","match":false,"pixels":256000,"counted":502,"checkoutCounted":502,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["2bba2b355a5a9aa381f626d4d04b8f63390f5c4ece719e81cb7b7034b8d1e0d0","b1346b76a73d2c1caa8594e58a96d12b150a003ad94fdebccc34bb5d932b12e5"]},
+   {"id":"rendered 2×/line removed/chromium/map","set":"held-out","match":false,"pixels":256000,"counted":3575,"checkoutCounted":3575,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["c7d6c65d084fdd91b934868f52a97147947b74357903272ae63faa01ec4e3ca4","6565c7df3cb664a787e177bb54ad0e0accc8e5ce04a401b52d107b5517933889"]},
+   {"id":"rendered 2×/colour/firefox/effects","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["1ec24b7ef97c5755c152ad894e82ef43a19050e4f54d0f727b85a3a499efc886","57273d5376e909784f2fdf873e659373211c0c0c4ed59e4f7343993596fd2914"]},
+   {"id":"rendered 2×/colour/firefox/image","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["b60389bedaebd9a0429bd9e25bbba1c0994f93be50e601aa4c5120d43228c014","d83e50edda8757c0a5e0d9c7eaf5a4d1b9f7b47116720fb8ca548b4d6e570e9e"]},
+   {"id":"rendered 2×/colour/firefox/map","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["2a195a9c6debd7936688ad314b7b9719bc6da551879317c5c59218d44a39687f","f775088bb755d8fa5f5a6143168a190b81b72ca5240d74c99907500d568ffef6"]},
+   {"id":"rendered 2×/sub-pixel shift/firefox/text","set":"held-out","match":true,"pixels":256000,"counted":6,"checkoutCounted":6,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true},"sha256":["f7a86d1ec25d7fabf35b4f585ad4ced81434eb4319355b9f2ff6b846af7fde61","7cdf3303a3f3da37fbf9d633663d9c391645438242499bde1c305ca7ea4cb453"]},
+   {"id":"rendered 2×/sub-pixel shift/firefox/svg","set":"held-out","match":true,"pixels":256000,"counted":1,"checkoutCounted":1,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true},"sha256":["92f5b067613288cfc7b2b89d5be9de5cebd4950407f94debc1b58a966983747f","a2a0bacda4dfe379ab853cac3daef6256d863fdb0610b537ed42b9b1a1af97b1"]},
+   {"id":"rendered 2×/sub-pixel shift/firefox/chart","set":"held-out","match":true,"pixels":256000,"counted":2428,"checkoutCounted":2428,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["e0641e8d5d637b02d365ba63d69d72653672c6ac0c051dbc3a2bf06ff05b21bf","43ac2b372bd33f27ae67a7967a77b8a951a96e363070d42ff31cde1e3241b64d"]},
+   {"id":"rendered 2×/sub-pixel shift/firefox/map","set":"held-out","match":true,"pixels":256000,"counted":2289,"checkoutCounted":2289,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["2a195a9c6debd7936688ad314b7b9719bc6da551879317c5c59218d44a39687f","aaff6bd55a611c572de39d8edc8771c3a8cb94eff2f6959001a46fca4ff97969"]},
+   {"id":"rendered 2×/regression/firefox/text","set":"held-out","match":false,"pixels":256000,"counted":2781,"checkoutCounted":2781,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["f7a86d1ec25d7fabf35b4f585ad4ced81434eb4319355b9f2ff6b846af7fde61","09c32ddb4fd552b53624778c9529e47d6451d4d77ab6ced403f5836dc64071a0"]},
+   {"id":"rendered 2×/regression/firefox/svg","set":"held-out","match":false,"pixels":256000,"counted":797,"checkoutCounted":797,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["92f5b067613288cfc7b2b89d5be9de5cebd4950407f94debc1b58a966983747f","973ec0934dfa2a0dba7d5b7ae8a4d477c1a3dae71514b230e1a2d1cb7972adf5"]},
+   {"id":"rendered 2×/regression/firefox/effects","set":"held-out","match":false,"pixels":256000,"counted":59738,"checkoutCounted":59738,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["1ec24b7ef97c5755c152ad894e82ef43a19050e4f54d0f727b85a3a499efc886","146b48d0c3190869cb59ce1e84676ccf4baab55dc1de383416825dec38cc2349"]},
+   {"id":"rendered 2×/regression/firefox/image","set":"held-out","match":false,"pixels":256000,"counted":256000,"checkoutCounted":256000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["b60389bedaebd9a0429bd9e25bbba1c0994f93be50e601aa4c5120d43228c014","356a1d6bf4a4a6a2782848a50d3074715f68a0ace88c45dd1e9662c5c6fa5f74"]},
+   {"id":"rendered 2×/regression/firefox/chart","set":"held-out","match":false,"pixels":256000,"counted":4794,"checkoutCounted":4794,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["e0641e8d5d637b02d365ba63d69d72653672c6ac0c051dbc3a2bf06ff05b21bf","14772615e8226d16a06673c130f2cb06fa88fcd86466476e0fdfba202affe2d0"]},
+   {"id":"rendered 2×/regression/firefox/map","set":"held-out","match":false,"pixels":256000,"counted":18986,"checkoutCounted":18986,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["2a195a9c6debd7936688ad314b7b9719bc6da551879317c5c59218d44a39687f","4e8e284c2cab15e37e10d8de928ad123f40fd53c5f48934428aad977b953a51f"]},
+   {"id":"rendered 2×/faint regression/firefox/text","set":"held-out","match":false,"pixels":256000,"counted":6782,"checkoutCounted":6782,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["f7a86d1ec25d7fabf35b4f585ad4ced81434eb4319355b9f2ff6b846af7fde61","fd0d9a6f092aa2bd092be13584ca32fe972613551a1a75bf22c114c8fd8bc956"]},
+   {"id":"rendered 2×/faint regression/firefox/svg","set":"held-out","match":false,"pixels":256000,"counted":3244,"checkoutCounted":3244,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["92f5b067613288cfc7b2b89d5be9de5cebd4950407f94debc1b58a966983747f","87e998acc1f970e6bad80c0e42ec12ed48f92024a25c2312e909fe7cbc14b3d9"]},
+   {"id":"rendered 2×/faint regression/firefox/effects","set":"held-out","match":false,"pixels":256000,"counted":28957,"checkoutCounted":28957,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["1ec24b7ef97c5755c152ad894e82ef43a19050e4f54d0f727b85a3a499efc886","be7c140b8af0066e3f4375ced7704e68b66353f518db4d00394f7b816f4eee22"]},
+   {"id":"rendered 2×/faint regression/firefox/image","set":"held-out","match":false,"pixels":256000,"counted":256000,"checkoutCounted":256000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["b60389bedaebd9a0429bd9e25bbba1c0994f93be50e601aa4c5120d43228c014","8ed3c4883ef18358022e27e1e313eb44d8b3efd49ffc6b6d48f31f4a4ddbca71"]},
+   {"id":"rendered 2×/faint regression/firefox/chart","set":"held-out","match":false,"pixels":256000,"counted":73728,"checkoutCounted":73728,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["e0641e8d5d637b02d365ba63d69d72653672c6ac0c051dbc3a2bf06ff05b21bf","7335b0e3d6fef5cd5fb01763ea0605b5541332273b3cb17cfb57dba1487ac8b0"]},
+   {"id":"rendered 2×/faint regression/firefox/map","set":"held-out","match":false,"pixels":256000,"counted":17010,"checkoutCounted":17010,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["2a195a9c6debd7936688ad314b7b9719bc6da551879317c5c59218d44a39687f","c5c009b801ecba5e5aef3fc85d1a863fe2b54b43b51e037c80eca3150e7b40e9"]},
+   {"id":"rendered 2×/line removed/firefox/chart","set":"held-out","match":false,"pixels":256000,"counted":502,"checkoutCounted":502,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["e0641e8d5d637b02d365ba63d69d72653672c6ac0c051dbc3a2bf06ff05b21bf","a91c93ed84e0c01181e566a833f824aa17aa837bb42656a77749e23082f8625c"]},
+   {"id":"rendered 2×/line removed/firefox/map","set":"held-out","match":false,"pixels":256000,"counted":3563,"checkoutCounted":3563,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["2a195a9c6debd7936688ad314b7b9719bc6da551879317c5c59218d44a39687f","443b48d18019c0b5d9619f5ba44d31bf2a2abf9526b426671777b17307dfb539"]},
+   {"id":"rendered 2×/colour/webkit/effects","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["813bfeb57cd7044c7b82e7b2120009ac1d07d5e18ab811123d6851b8fe476028","e6fdc39800aa307880da3244db82d556fbebe53e519761dfcdc2e72686e19625"]},
+   {"id":"rendered 2×/colour/webkit/image","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["c1ab7c51de52adc233ebd99715d640b91feaf1be87d39db441f84f8abaf78b25","0111f79f28f9d4048735d1418ec39a1b0a6a55fdca5cf6c20404475501b2e59e"]},
+   {"id":"rendered 2×/colour/webkit/terrain","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["cba9fe48a49b615b0179f5cef0b3faf7d5e6d201d53bdb43d0120355cfbd3df8","b2ee778bf0e8a20b4a9967ada294bd1637ee39e68b4094a13b253b7cb2d27699"]},
+   {"id":"rendered 2×/colour/webkit/map","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["8f0a9e9eee3f95c1a31350fac607df0faf777ef6f4081614ec7f2dcbc73c505f","d2fef2628d0baf715da49369f8cc480af31bf632a1c752b925acb01699be04d3"]},
+   {"id":"rendered 2×/colour/webkit/viewer","set":"held-out","match":true,"pixels":256000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true},"sha256":["d4b57b03360ccc0d3644ffe6b8ca964b1043ea3238b434a4c27b784f05a53096","83307aa463a4e801be03f19d0fc989cb89514e0fbf5d813ac89077bb6012d10e"]},
+   {"id":"rendered 2×/sub-pixel shift/webkit/text","set":"held-out","match":true,"pixels":256000,"counted":6,"checkoutCounted":6,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true},"sha256":["f175b7df26c3d9459cc84ca569d364929eb11f7acbf1ebdaed5fc5ef609997cb","718ef6b988ffd5e9d3a8a8ee5cd5eb3e67070c34faac828d692dffd1576d296a"]},
+   {"id":"rendered 2×/sub-pixel shift/webkit/svg","set":"held-out","match":true,"pixels":256000,"counted":1,"checkoutCounted":1,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true},"sha256":["351e15f21984b49406957bcb0af9f907bb7bbd891757b10cfb573dca5cac9763","dcaee25cb1dd6f1e409d5234ac3aa4ad15c03a0b8aa0ed6c5fa64935b7ac3cfe"]},
+   {"id":"rendered 2×/sub-pixel shift/webkit/chart","set":"held-out","match":true,"pixels":256000,"counted":2486,"checkoutCounted":2486,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["f82d6c161b99677257ac47b48c863d0a499709e8a656b2c12d1c7c7a30a2c4f2","8544673d27b3e92acc03a1a33eb21eac059eae8d425eba6efa7216f37efc7b0b"]},
+   {"id":"rendered 2×/sub-pixel shift/webkit/map","set":"held-out","match":true,"pixels":256000,"counted":3702,"checkoutCounted":3702,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8f0a9e9eee3f95c1a31350fac607df0faf777ef6f4081614ec7f2dcbc73c505f","d8fefa841064748a058d4e8afbbad94a5ca6b27c2007eb79e54274aa038e3b78"]},
+   {"id":"rendered 2×/sub-pixel shift/webkit/viewer","set":"held-out","match":true,"pixels":256000,"counted":605,"checkoutCounted":605,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["d4b57b03360ccc0d3644ffe6b8ca964b1043ea3238b434a4c27b784f05a53096","b2a1f0614160f1bdc8889066b7b64c171d0aea9657a9106ae78a0f9b6a823d27"]},
+   {"id":"rendered 2×/regression/webkit/text","set":"held-out","match":false,"pixels":256000,"counted":2790,"checkoutCounted":2790,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["f175b7df26c3d9459cc84ca569d364929eb11f7acbf1ebdaed5fc5ef609997cb","2475c696f246bdc50395262ce5db4be628cc32ef96ac799bd691f0e71f4bbb42"]},
+   {"id":"rendered 2×/regression/webkit/svg","set":"held-out","match":false,"pixels":256000,"counted":797,"checkoutCounted":797,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["351e15f21984b49406957bcb0af9f907bb7bbd891757b10cfb573dca5cac9763","4f2c30f5152dc410f753a054e6a5206d775a362d622f0bc891b1433749b7d91b"]},
+   {"id":"rendered 2×/regression/webkit/effects","set":"held-out","match":false,"pixels":256000,"counted":59980,"checkoutCounted":59980,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["813bfeb57cd7044c7b82e7b2120009ac1d07d5e18ab811123d6851b8fe476028","a94bb55f02ad7dc70ec40695a8d7689b7b9a5fe3450475dc0d88b77a860b6721"]},
+   {"id":"rendered 2×/regression/webkit/image","set":"held-out","match":false,"pixels":256000,"counted":256000,"checkoutCounted":256000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["c1ab7c51de52adc233ebd99715d640b91feaf1be87d39db441f84f8abaf78b25","76f059d580b2834faf39028d7e4015154b080d29f1e13e43baaf51c433c5d316"]},
+   {"id":"rendered 2×/regression/webkit/chart","set":"held-out","match":false,"pixels":256000,"counted":4443,"checkoutCounted":4443,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["f82d6c161b99677257ac47b48c863d0a499709e8a656b2c12d1c7c7a30a2c4f2","11b4de535e45b3120cf0da3c10f002ffeac93f9ee8daac60219d82db5ef00cc1"]},
+   {"id":"rendered 2×/regression/webkit/terrain","set":"held-out","match":false,"pixels":256000,"counted":240527,"checkoutCounted":240527,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["cba9fe48a49b615b0179f5cef0b3faf7d5e6d201d53bdb43d0120355cfbd3df8","e7f1e6d5de82f7ac70452281c1f42f131717a98e966035a0f9f5bbe081803d25"]},
+   {"id":"rendered 2×/regression/webkit/map","set":"held-out","match":false,"pixels":256000,"counted":18964,"checkoutCounted":18964,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8f0a9e9eee3f95c1a31350fac607df0faf777ef6f4081614ec7f2dcbc73c505f","5fa8d82cb7ec37caf299e82abb355d07fc514d5a7aca0e077da4e0847c7de261"]},
+   {"id":"rendered 2×/regression/webkit/viewer","set":"held-out","match":false,"pixels":256000,"counted":999,"checkoutCounted":999,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["d4b57b03360ccc0d3644ffe6b8ca964b1043ea3238b434a4c27b784f05a53096","5d375f62f77f38223eb7283dc09083a4b5e4d079f8f50af25c89cd9e50ce2db6"]},
+   {"id":"rendered 2×/faint regression/webkit/text","set":"held-out","match":false,"pixels":256000,"counted":6758,"checkoutCounted":6758,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["f175b7df26c3d9459cc84ca569d364929eb11f7acbf1ebdaed5fc5ef609997cb","7845ce6598c720909b253a3e4910d7119891ed975e5d1d644126feda14477047"]},
+   {"id":"rendered 2×/faint regression/webkit/svg","set":"held-out","match":false,"pixels":256000,"counted":3245,"checkoutCounted":3245,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["351e15f21984b49406957bcb0af9f907bb7bbd891757b10cfb573dca5cac9763","c3f795068e1ef96862a08633b30a0cbd9ecb1bdffc5173a4a9b66c4630431428"]},
+   {"id":"rendered 2×/faint regression/webkit/effects","set":"held-out","match":false,"pixels":256000,"counted":36389,"checkoutCounted":36389,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["813bfeb57cd7044c7b82e7b2120009ac1d07d5e18ab811123d6851b8fe476028","b2eb2e46ed6c64c484b470db74a378010e9fd275e1ccaa83d2c244654d8b5064"]},
+   {"id":"rendered 2×/faint regression/webkit/image","set":"held-out","match":false,"pixels":256000,"counted":256000,"checkoutCounted":256000,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["c1ab7c51de52adc233ebd99715d640b91feaf1be87d39db441f84f8abaf78b25","f4e6a15212e5551b5d97c7c01c2be3dfa1b1101635822215e5d4752153b44806"]},
+   {"id":"rendered 2×/faint regression/webkit/chart","set":"held-out","match":false,"pixels":256000,"counted":74062,"checkoutCounted":74062,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["f82d6c161b99677257ac47b48c863d0a499709e8a656b2c12d1c7c7a30a2c4f2","d0b986b4bfc32fc1ed227ba51e7c8f0b2e31d5f97d0094fdfb5daa214ab575e3"]},
+   {"id":"rendered 2×/faint regression/webkit/terrain","set":"held-out","match":false,"pixels":256000,"counted":135125,"checkoutCounted":135125,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["cba9fe48a49b615b0179f5cef0b3faf7d5e6d201d53bdb43d0120355cfbd3df8","6e487146ba51f0b5ace8195cc5e300d1a403a012af4169732094fcaca5945321"]},
+   {"id":"rendered 2×/faint regression/webkit/map","set":"held-out","match":false,"pixels":256000,"counted":17008,"checkoutCounted":17008,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8f0a9e9eee3f95c1a31350fac607df0faf777ef6f4081614ec7f2dcbc73c505f","4beb97d5e5afd0b8fe50713cc50c8b12c82a35cfff9308a6eae87a3d40c2969c"]},
+   {"id":"rendered 2×/faint regression/webkit/viewer","set":"held-out","match":false,"pixels":256000,"counted":26980,"checkoutCounted":26980,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["d4b57b03360ccc0d3644ffe6b8ca964b1043ea3238b434a4c27b784f05a53096","6dcd2fc8e5feab6b8f4a6ca07882b124a17e49dce9b8cabef67dde7073b0cabe"]},
+   {"id":"rendered 2×/line removed/webkit/chart","set":"held-out","match":false,"pixels":256000,"counted":498,"checkoutCounted":498,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["f82d6c161b99677257ac47b48c863d0a499709e8a656b2c12d1c7c7a30a2c4f2","db42eeeecefeac69131930026cf3f16aae54b21a6dd8a5d07c75e7254a3a4a8a"]},
+   {"id":"rendered 2×/line removed/webkit/map","set":"held-out","match":false,"pixels":256000,"counted":3484,"checkoutCounted":3484,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false},"sha256":["8f0a9e9eee3f95c1a31350fac607df0faf777ef6f4081614ec7f2dcbc73c505f","32b0f9e19671c33791bd52a3740cbaab06e735e40f4fd6da9da85bdbb00c8554"]},
+   {"id":"synthetic/1/surface opacity 35% → 30%","set":"synthetic","match":false,"pixels":64000,"counted":21348,"checkoutCounted":21348,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/1/surface panned 0.3 px","set":"synthetic","match":true,"pixels":64000,"counted":10,"checkoutCounted":10,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
+   {"id":"synthetic/2/label moved a pixel","set":"synthetic","match":true,"pixels":64000,"counted":2,"checkoutCounted":2,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
+   {"id":"synthetic/2/label box one row taller","set":"synthetic","match":true,"pixels":64000,"counted":5,"checkoutCounted":5,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
+   {"id":"synthetic/3/terrain, snapped vertices","set":"synthetic","match":true,"pixels":64000,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"synthetic/3/geofence, snapped vertices","set":"synthetic","match":true,"pixels":64000,"counted":31,"checkoutCounted":31,"pass":{"none":false,"allowance":true},"checkoutPass":{"none":false,"allowance":true}},
+   {"id":"synthetic/4/bilinear in half precision","set":"synthetic","match":true,"pixels":4096,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"synthetic/cases/overlay outline removed, on whole pixels","set":"synthetic","match":false,"pixels":64000,"counted":575,"checkoutCounted":575,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/overlay outline removed, across two pixels","set":"synthetic","match":false,"pixels":64000,"counted":1186,"checkoutCounted":1186,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/grid line removed","set":"synthetic","match":false,"pixels":64000,"counted":120,"checkoutCounted":120,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/dark theme, divider removed","set":"synthetic","match":false,"pixels":64000,"counted":304,"checkoutCounted":304,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/text, subpixel to greyscale anti-aliasing","set":"synthetic","match":false,"pixels":64000,"counted":633,"checkoutCounted":633,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/text, hinted to unhinted","set":"synthetic","match":false,"pixels":64000,"counted":492,"checkoutCounted":492,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/dark theme, text dimmed","set":"synthetic","match":false,"pixels":64000,"counted":1350,"checkoutCounted":1350,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/cases/dark theme, background a shade lighter","set":"synthetic","match":false,"pixels":64000,"counted":62215,"checkoutCounted":62215,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/judge/textured drift of 1–3 levels","set":"synthetic","match":false,"pixels":1102374,"counted":740228,"checkoutCounted":740228,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}},
+   {"id":"synthetic/judge/fine texture moved 0.3, 0.2 px","set":"synthetic","match":true,"pixels":1102374,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"synthetic/judge/textured ground beside an edge, three levels darker","set":"synthetic","match":false,"pixels":88,"counted":0,"checkoutCounted":0,"pass":{"none":true,"allowance":true},"checkoutPass":{"none":true,"allowance":true}},
+   {"id":"synthetic/judge/edge pixel whose sides changed colour too","set":"synthetic","match":false,"pixels":81,"counted":9,"checkoutCounted":9,"pass":{"none":false,"allowance":false},"checkoutPass":{"none":false,"allowance":false}}
+  ]
+ },
+ "margin": {
+  "pairs": 52,
+  "worst": {
+   "id": "playwright/should-match/webkit-rendering-artifacts/webkit-pixel",
+   "counted": 1,
+   "allowed": 1,
+   "share": 1
+  },
+  "median": 0,
+  "worstLarge": {
+   "id": "synthetic/3/geofence, snapped vertices",
+   "counted": 31,
+   "allowed": 64,
+   "share": 0.484
+  },
+  "closest": [
+   {
+    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-pixel",
+    "counted": 1,
+    "allowed": 1,
+    "share": 1
+   },
+   {
+    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-corner-pixel",
+    "counted": 1,
+    "allowed": 2,
+    "share": 0.5
+   },
+   {
+    "id": "synthetic/3/geofence, snapped vertices",
+    "counted": 31,
+    "allowed": 64,
+    "share": 0.484
+   },
+   {
+    "id": "playwright/should-match/webkit-rendering-artifacts/webkit-corner-2x",
+    "counted": 4,
+    "allowed": 10,
+    "share": 0.4
+   },
+   {
+    "id": "synthetic/1/surface panned 0.3 px",
+    "counted": 10,
+    "allowed": 64,
+    "share": 0.156
+   }
+  ]
+ },
+ "residual": {
+  "synthetic surfaceOpacity": {
+   "past": 22810,
+   "counted": 21348,
+   "share": 0.935905304690925,
+   "checkoutCounted": 21348,
+   "checkoutShare": 0.935905304690925
+  },
+  "synthetic textured drift": {
+   "past": 740228,
+   "counted": 740228,
+   "share": 1,
+   "checkoutCounted": 740228,
+   "checkoutShare": 1
+  }
+ },
+ "slivers": {
+  "sizes": [
+   {
+    "width": 200,
+    "height": 2,
+    "pixels": 400,
+    "candidate": 400,
+    "checkout": 400
+   },
+   {
+    "width": 1,
+    "height": 50,
+    "pixels": 50,
+    "candidate": 50,
+    "checkout": 50
+   },
+   {
+    "width": 2,
+    "height": 2,
+    "pixels": 4,
+    "candidate": 4,
+    "checkout": 4
+   }
+  ],
+  "limit": 1,
+  "checkoutLimit": 1
+ },
+ "speed": null,
+ "size": {
+  "candidate": {
+   "image": {
+    "files": 5,
+    "code": 204,
+    "types": 23,
+    "comments": 103
+   },
+   "src": {
+    "files": 27,
+    "code": 1043,
+    "types": 252,
+    "comments": 294
+   }
+  },
+  "checkout": {
+   "image": {
+    "files": 5,
+    "code": 204,
+    "types": 23,
+    "comments": 103
+   },
+   "src": {
+    "files": 27,
+    "code": 1043,
+    "types": 252,
+    "comments": 294
+   }
+  }
+ },
+ "conditions": {
+  "1": {
+   "pass": true,
+   "regressions": 0
+  },
+  "2": {
+   "pass": false,
+   "residualImproved": false,
+   "driftImproved": false,
+   "sliverImproved": false
+  },
+  "3": {
+   "pass": null,
+   "worstRatio": null,
+   "slower": null
+  },
+  "4": {
+   "pass": false,
+   "code": 204
+  }
+ }
+}

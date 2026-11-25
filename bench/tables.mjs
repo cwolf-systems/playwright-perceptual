@@ -15,7 +15,8 @@ const TOLERANCES = { none: 'none allowed', allowance: '0.1% allowed' };
 /** Where a result was made: the runner image in CI, otherwise the CPU. */
 function machine({ platform, cpu, image }) {
   const name = PLATFORMS[platform] ?? platform;
-  return image ? `${name}, runner image ${image} (${cpu})` : `${name} (${cpu})`;
+  const model = cpu.trim();
+  return image ? `${name}, runner image ${image} (${model})` : `${name} (${model})`;
 }
 
 /** Wrong verdicts by set and by expected verdict, at both tolerances, each with its interval. */

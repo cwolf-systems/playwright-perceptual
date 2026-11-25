@@ -159,6 +159,12 @@ jobs:
       - name: No verdict lost against 0.2.0
         shell: bash
         run: node bench/check-baseline.mjs "$RUNNER_TEMP/judge.json" | tee -a "$GITHUB_STEP_SUMMARY"
+      # Rendered pairs against the baseline CI made on this image, with any whose bytes changed.
+      - name: No verdict lost against this platform's baseline
+        shell: bash
+        run: |
+          baseline="bench/results/judge-baseline-0.3.0-$(node -p process.platform).json"
+          node bench/check-baseline.mjs "$RUNNER_TEMP/judge.json" --baseline "$baseline" | tee -a "$GITHUB_STEP_SUMMARY"
       # Whether Chromium, launched with the flags the benchmark's GPU pairs use, finds a GPU here.
       - name: GPU seen by Chromium
         if: runner.os == 'macOS'
