@@ -8,7 +8,7 @@
 // API (`compareImages`), then reports five sections:
 //
 // 1. Accuracy: each pair's verdict against its expected verdict in bench/judge-labels.json, with
-//    no changed pixels allowed and with 0.1% of the image, for the accuracy benchmark's 193 pairs,
+//    no changed pixels allowed and with 0.1% of the image, for the accuracy benchmark's 205 pairs,
 //    the synthetic set and real captures. The current checkout's verdicts (this repository's own
 //    dist/) are taken on the same bytes in the same run, so any pair the checkout gets right and
 //    the candidate gets wrong is listed by name. Without --candidate, the candidate is the
@@ -73,6 +73,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { PNG } from 'pngjs';
 import ts from 'typescript';
+import { CASE_PAIRS } from './cases.mjs';
 import { playwrightPairs, renderedPairs } from './corpus.mjs';
 import { rateCell } from './stats.mjs';
 import { SYNTHETIC_PAIRS, surfaceOpacity } from './synthetic.mjs';
@@ -214,8 +215,8 @@ const GROUND_BESIDE_EDGE = 'synthetic/judge/textured ground beside an edge, thre
 const EDGE_SIDES_CHANGED = 'synthetic/judge/edge pixel whose sides changed colour too';
 
 /**
- * bench/synthetic.mjs's pairs, the judge's own textured drift and its control, and two changes
- * beside an edge.
+ * bench/synthetic.mjs's pairs, bench/cases.mjs's should-fail cases, the judge's own textured drift
+ * and its control, and two changes beside an edge.
  */
 const syntheticSet = () => [
   ...SYNTHETIC_PAIRS.map((p) => ({
@@ -223,6 +224,7 @@ const syntheticSet = () => [
     set: 'synthetic',
     load: p.make,
   })),
+  ...CASE_PAIRS.map((p) => ({ id: `synthetic/cases/${p.name}`, set: 'synthetic', load: p.make })),
   { id: TEXTURED_DRIFT, set: 'synthetic', load: texturedDrift },
   { id: TEXTURE_MOVED, set: 'synthetic', load: textureMoved },
   { id: GROUND_BESIDE_EDGE, set: 'synthetic', load: groundBesideEdge },

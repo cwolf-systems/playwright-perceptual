@@ -7,12 +7,14 @@
 // - This repository's fixture pages, rendered now in each browser, with labelled variants, at 1×
 //   (with the Playwright fixtures, the design set) and at 2× (the held-out set).
 // - Synthetic pairs that reproduce findings from a renderer's test suite (bench/synthetic.mjs).
+// - Synthetic should-fail cases the rendered pages lack (bench/cases.mjs).
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { platform } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { PNG } from 'pngjs';
+import { CASE_PAIRS } from './cases.mjs';
 import { SYNTHETIC_PAIRS } from './synthetic.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -81,6 +83,8 @@ export async function playwrightPairs() {
 const COLOUR = ['effects', 'image', 'terrain', 'map', 'viewer'];
 const SHIFTED = ['text', 'svg', 'chart', 'map', 'viewer'];
 const ALL = ['text', 'svg', 'effects', 'image', 'chart', 'terrain', 'map', 'viewer'];
+// Pages with a line-removed variant: a grid line one pixel high, an overlay outline 1.5 px wide.
+const LINE_REMOVED = ['chart', 'map'];
 const WEBGL = ['terrain', 'viewer'];
 const VIEWPORT = { width: 320, height: 200 };
 const BROWSERS = ['chromium', 'firefox', 'webkit'];
@@ -105,6 +109,7 @@ export function renderedPlan(deviceScaleFactor) {
     for (const name of SHIFTED) add(browserName, 'sub-pixel shift', name, 'shifted', true);
     for (const name of ALL) add(browserName, 'regression', name, 'regression', false);
     for (const name of ALL) add(browserName, 'faint regression', name, 'faint', false);
+    for (const name of LINE_REMOVED) add(browserName, 'line removed', name, 'line-removed', false);
   }
   // The same page through Chromium's software rasteriser and through the GPU: the case this
   // package is built for. Only where there is a GPU to compare against.
@@ -180,6 +185,22 @@ export function syntheticPairs() {
       category,
       `${finding}: ${name}`,
       shouldMatch,
+      encodePng(expected),
+      encodePng(actual),
+    );
+  });
+}
+
+/** bench/cases.mjs's pairs: should-fail cases drawn from scratch. */
+export function casePairs() {
+  return CASE_PAIRS.map(({ name, category, make }) => {
+    const { expected, actual } = make();
+    return pair(
+      `synthetic/cases/${name}`,
+      'cases',
+      category,
+      name,
+      false,
       encodePng(expected),
       encodePng(actual),
     );

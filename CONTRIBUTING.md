@@ -53,8 +53,8 @@ node bench/check-baseline.mjs bench/results/judge-local.json
 
 The second command fails if a pair that `bench/results/judge-baseline-0.2.0.json` judged correctly
 is now judged wrongly, or if a pair in the baseline is missing from your run. CI runs both on
-every pull request and enforces 32 pairs: Playwright's 21 fixture pairs and the 11 synthetic
-pairs. The other 172 are screenshots the judge renders, whose pixels depend on the machine; CI
+every pull request and enforces 40 pairs: Playwright's 21 fixture pairs and the 19 synthetic
+pairs. The other 184 are screenshots the judge renders, whose pixels depend on the machine; CI
 reports them as not compared. They are compared only on a machine like the one the baseline was
 made on (macOS, Apple M4), where the maintainer checks them before each release. A Linux
 baseline, so that CI can check them too, is future work.

@@ -15,7 +15,8 @@
   // them, with a road, overlay outlines, tracks and labelled markers drawn over the top.
   //
   // Variants: subtle moves the water's blue one level; shifted pans the map 0.3 px; regression
-  // drops the red zone; faint makes its fill a little stronger.
+  // drops the red zone; faint makes its fill a little stronger; line-removed leaves out the blue
+  // zone's outline, 1.5 px wide, and keeps its fill.
   const variant = new URLSearchParams(location.search).get('variant');
 
   const TILE = 128;
@@ -116,6 +117,7 @@
     ctx.closePath();
     ctx.fillStyle = fill;
     ctx.fill();
+    if (stroke === null) return;
     ctx.setLineDash(dash);
     ctx.strokeStyle = stroke;
     ctx.lineWidth = 1.5;
@@ -176,7 +178,7 @@
       [204, 80],
     ],
     'rgba(41, 98, 255, 0.08)',
-    '#2962ff',
+    variant === 'line-removed' ? null : '#2962ff',
     [],
   );
   if (variant !== 'regression') {

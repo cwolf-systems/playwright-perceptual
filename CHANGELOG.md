@@ -4,6 +4,12 @@
 
 ### Benchmark
 
+- Should-fail pairs the benchmark lacked, with frozen labels: a removed line (the chart's grid line
+  one pixel high and the map's overlay outline, rendered in all three browsers at 1× and 2×), and
+  a cases set drawn from scratch (`bench/cases.mjs`): overlay outlines, a grid line and a dark
+  divider removed, text changed from subpixel to greyscale anti-aliasing and from hinted to
+  unhinted, and a dark theme's text dimmed and background lightened. 0.2.0 fails all of them at
+  both tolerances; Playwright's default passes 11 of the 20.
 - Every rate in the accuracy tables, and in the judge's accuracy summary, carries its 95% Wilson
   interval (`bench/stats.mjs`, checked against Newcombe's published values). The counts are
   unchanged: `npm run bench:accuracy` on the machine the tables came from reproduces every one.
