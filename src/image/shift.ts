@@ -178,6 +178,119 @@ export function conserved(image: Pixels, other: Pixels, x: number, y: number): b
   return BOXES.every((box) => moved(before, after, box, x, y) || moved(after, before, box, x, y));
 }
 
+/**
+ * The window over which one move is fitted, and the residual each of its pixels may keep: rounding,
+ * plus a share of the pixel's contrast with its neighbours, since a rasteriser moves an edge by its
+ * coverage of each pixel and not by resampling, which differs most where the contrast is high.
+ */
+export const FIT = { side: 5, rounding: 1.25, contrast: 0.25, steps: 32, bias: 1.25, spread: 2 };
+
+/** The largest difference in each channel between (x, y) and its four neighbours. */
+function contrast(image: Pixels, x: number, y: number, c: number): number {
+  const level = LEVELS[c]!;
+  const here = level(image.rgbAt(x, y));
+  let most = 0;
+  for (const [dx, dy] of [
+    [-1, 0],
+    [1, 0],
+    [0, -1],
+    [0, 1],
+  ] as const) {
+    const nx = x + dx;
+    const ny = y + dy;
+    if (nx < 0 || ny < 0 || nx >= image.width || ny >= image.height) continue;
+    most = Math.max(most, Math.abs(level(image.rgbAt(nx, ny)) - here));
+  }
+  return most;
+}
+
+const clamp = (v: number, size: number) => Math.max(0, Math.min(size - 1, v));
+
+/**
+ * Whether one move of `from` by under a pixel, the same for every pixel and channel of the window
+ * around (x, y), leaves `to` within the residual FIT allows, in the mean. A move of (tx, ty)
+ * towards (sx, sy), resampled bilinearly, changes a pixel by tx·a + ty·b + tx·ty·e, where a and b
+ * are its differences with the pixels across and down, and e their cross term; the fit is least
+ * squares over tx in FIT.steps steps, each with its best ty in closed form.
+ */
+function fits(from: Pixels, to: Pixels, x: number, y: number): boolean {
+  const { width, height } = from;
+  const half = FIT.side >> 1;
+  const n = FIT.side * FIT.side * CHANNELS;
+  const d = new Float64Array(n);
+  const a = new Float64Array(n);
+  const b = new Float64Array(n);
+  const e = new Float64Array(n);
+  const w = new Float64Array(n);
+  for (const sx of SIGNS) {
+    for (const sy of SIGNS) {
+      let k = 0;
+      for (let qy = y - half; qy <= y + half; qy++) {
+        for (let qx = x - half; qx <= x + half; qx++) {
+          const px = clamp(qx, width);
+          const py = clamp(qy, height);
+          const here = from.rgbAt(px, py);
+          const across = from.rgbAt(clamp(px + sx, width), py);
+          const down = from.rgbAt(px, clamp(py + sy, height));
+          const both = from.rgbAt(clamp(px + sx, width), clamp(py + sy, height));
+          const now = to.rgbAt(px, py);
+          for (let c = 0; c < CHANNELS; c++) {
+            const level = LEVELS[c]!;
+            const h = level(here);
+            d[k] = level(now) - h;
+            a[k] = level(across) - h;
+            b[k] = level(down) - h;
+            e[k] = level(both) - level(across) - level(down) + h;
+            const tolerance = FIT.rounding + FIT.contrast * contrast(from, px, py, c);
+            w[k] = 1 / (tolerance * tolerance);
+            k++;
+          }
+        }
+      }
+      // The best move, then what it leaves in each channel over the window, on average.
+      let best = Infinity;
+      let bestX = 0;
+      let bestY = 0;
+      for (let step = 0; step <= FIT.steps; step++) {
+        const tx = step / FIT.steps;
+        let gg = 0;
+        let gr = 0;
+        for (let i = 0; i < n; i++) {
+          const g = b[i]! + tx * e[i]!;
+          gg += w[i]! * g * g;
+          gr += w[i]! * g * (d[i]! - tx * a[i]!);
+        }
+        const ty = gg > 0 ? Math.max(0, Math.min(1, gr / gg)) : 0;
+        let sum = 0;
+        for (let i = 0; i < n; i++) {
+          const r = d[i]! - tx * a[i]! - ty * (b[i]! + tx * e[i]!);
+          sum += w[i]! * r * r;
+        }
+        if (sum < best) {
+          best = sum;
+          bestX = tx;
+          bestY = ty;
+        }
+      }
+      // What the best move leaves on the values that changed, weighted as in the fit: on average
+      // a move leaves nothing, a uniform change leaves itself.
+      const left = [0, 0, 0];
+      const weight = [0, 0, 0];
+      for (let i = 0; i < n; i++) {
+        if (d[i] === 0) continue;
+        left[i % CHANNELS]! += w[i]! * (d[i]! - bestX * a[i]! - bestY * (b[i]! + bestX * e[i]!));
+        weight[i % CHANNELS]! += w[i]!;
+      }
+      // A bias over a few values of high contrast says little, so the bound also grows with the
+      // square root of the weight, as the spread of a weighted sum of noise does.
+      const within = (r: number, c: number) =>
+        Math.abs(r) <= FIT.bias * weight[c]! + FIT.spread * Math.sqrt(weight[c]!);
+      if (left.every(within)) return true;
+    }
+  }
+  return false;
+}
+
 /** Whether pixel (x, y) differs only because content moved by less than a pixel. */
 export function isShifted(image: Pixels, other: Pixels, x: number, y: number): boolean {
   const before = tile(image, x, y);
@@ -187,6 +300,7 @@ export function isShifted(image: Pixels, other: Pixels, x: number, y: number): b
   return (
     conserved(image, other, x, y) &&
     moved(before, after, PIXEL, x, y) &&
-    moved(after, before, PIXEL, x, y)
+    moved(after, before, PIXEL, x, y) &&
+    (fits(image, other, x, y) || fits(other, image, x, y))
   );
 }

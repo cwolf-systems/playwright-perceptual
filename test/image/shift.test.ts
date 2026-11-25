@@ -404,15 +404,15 @@ describe('isShifted, beside an edge', () => {
     for (let y = 0; y < 9; y++) expect(isShifted(before, after, 5, y)).toBe(false);
   });
 
-  it('passes a faint change over textured ground beside an edge that did not move: a limit', () => {
+  it('counts a faint change over textured ground beside an edge that did not move', () => {
     // Three levels darker over ground four columns wide, every pixel within reach of the edge. A
     // move of the edge by a small part of a pixel carries as much colour across each box's border
-    // as the change took away, and the colour beside the edge is too faint to tell. 0.1.0 passes
-    // it too.
+    // as the change took away, but no one move explains the window: the best leaves the ground
+    // three levels darker on average.
     const ground = (offset: number) =>
       greys(8, 11, (x, y) => (x >= 4 ? 200 : 100 + ((x * 3 + y * 5) % 7) + offset));
     const [before, after] = [ground(0), ground(-3)];
-    for (let x = 0; x < 4; x++) expect(isShifted(before, after, x, 5)).toBe(true);
+    for (let x = 0; x < 4; x++) expect(isShifted(before, after, x, 5)).toBe(false);
   });
 });
 
