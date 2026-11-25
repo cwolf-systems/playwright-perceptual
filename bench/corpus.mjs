@@ -8,6 +8,7 @@
 //   (with the Playwright fixtures, the design set) and at 2× (the held-out set).
 // - Synthetic pairs that reproduce findings from a renderer's test suite (bench/synthetic.mjs).
 // - Synthetic should-fail cases the rendered pages lack (bench/cases.mjs).
+// - Self-noise: each page rendered repeatedly in one browser, every pair of renders should match.
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { platform } from 'node:os';
@@ -166,6 +167,51 @@ export async function renderedPairs(deviceScaleFactor) {
     }
     await software.close();
     await gpu.close();
+  }
+  return pairs;
+}
+
+/** How many times each page is rendered for the self-noise set. */
+export const SELF_NOISE_RENDERS = 10;
+
+/**
+ * Each page rendered SELF_NOISE_RENDERS times in one browser, each time in a fresh page, at a
+ * device scale: what a page differs from itself by when nothing changed. Pages a machine cannot
+ * render (WebGL unavailable) are left out.
+ */
+export async function repeatedRenders(deviceScaleFactor) {
+  const { chromium, firefox, webkit } = await import('@playwright/test');
+  const types = { chromium, firefox, webkit };
+  const renders = [];
+  for (const browserName of BROWSERS) {
+    const browser = await types[browserName].launch();
+    for (const name of ALL) {
+      const shots = [];
+      for (let i = 0; i < SELF_NOISE_RENDERS; i++) {
+        const page = await browser.newPage({ viewport: VIEWPORT, deviceScaleFactor });
+        const shot = await screenshot(page, name);
+        await page.close();
+        if (shot === null) break;
+        shots.push(shot);
+      }
+      if (shots.length === SELF_NOISE_RENDERS) {
+        renders.push({ browserName, page: name, deviceScaleFactor, shots });
+      }
+    }
+    await browser.close();
+  }
+  return renders;
+}
+
+/** Every pair of one page's repeated renders: 45 for ten renders, all of which should match. */
+export function selfNoisePairs({ browserName, page, deviceScaleFactor, shots }) {
+  const corpus = `self-noise ${deviceScaleFactor}×`;
+  const pairs = [];
+  for (let i = 0; i < shots.length; i++) {
+    for (let j = i + 1; j < shots.length; j++) {
+      const name = `${browserName}/${page}/${i}v${j}`;
+      pairs.push(pair(`${corpus}/${name}`, corpus, 'self-noise', name, true, shots[i], shots[j]));
+    }
   }
   return pairs;
 }

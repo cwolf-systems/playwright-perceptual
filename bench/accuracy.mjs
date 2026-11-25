@@ -12,6 +12,9 @@
 // - Synthetic should-fail cases the pages lack (bench/cases.mjs): a removed one-pixel line, text
 //   anti-aliasing and hinting changes, dark themes. Reported separately, pair by pair.
 //
+// Then self-noise: each page rendered ten times in each browser at 1× and 2×, every pair of
+// renders compared, reported by page. `npm run bench:accuracy -- --self-noise` runs it alone.
+//
 // Comparators: exact bytes, pixelmatch at its default threshold and at Playwright's, Playwright's
 // experimental ssim-cie94 (loaded from Playwright's own bundle, as its tests do), looks-same, and
 // this package. Each is judged at two tolerances: no changed pixels, and 0.1% of the image.
@@ -25,7 +28,15 @@ import looksSame from 'looks-same';
 import pixelmatch from 'pixelmatch';
 import { compareImages, decodePng, PerceptualComparator } from '../dist/index.js';
 import { MIN_CHANGED, MIN_DELTA_E } from './cases.mjs';
-import { casePairs, playwrightPairs, renderedPairs, syntheticPairs } from './corpus.mjs';
+import {
+  casePairs,
+  playwrightPairs,
+  renderedPairs,
+  repeatedRenders,
+  SELF_NOISE_RENDERS,
+  selfNoisePairs,
+  syntheticPairs,
+} from './corpus.mjs';
 import { structural } from './experiments/detectors.mjs';
 import { rateCell } from './stats.mjs';
 
@@ -121,12 +132,18 @@ const VERDICT = {
   'sub-pixel shift': 'false failures',
 };
 
-const SETS = {
-  'design set': decoded([...(await playwrightPairs()), ...(await renderedPairs(1))]),
-  'held-out set': decoded(await renderedPairs(2)),
-  'synthetic set': decoded(syntheticPairs()),
-  'cases set': decoded(casePairs()),
-};
+// `--self-noise` runs the self-noise set alone. It is quick, and a render that differs only now
+// and then shows only over repeated runs.
+const SELF_NOISE_ONLY = process.argv.includes('--self-noise');
+
+const SETS = SELF_NOISE_ONLY
+  ? {}
+  : {
+      'design set': decoded([...(await playwrightPairs()), ...(await renderedPairs(1))]),
+      'held-out set': decoded(await renderedPairs(2)),
+      'synthetic set': decoded(syntheticPairs()),
+      'cases set': decoded(casePairs()),
+    };
 
 const results = [];
 for (const [set, pairs] of Object.entries(SETS)) {
@@ -218,22 +235,89 @@ for (const set of Object.keys(SETS)) {
   report(set, rows);
   if (set === 'synthetic set' || set === 'cases set') reportPairs(rows);
 }
-reportChanges(results.filter((r) => r.category === 'line removed' || r.set === 'cases set'));
+if (!SELF_NOISE_ONLY) {
+  reportChanges(results.filter((r) => r.category === 'line removed' || r.set === 'cases set'));
+}
+
+/**
+ * Each page rendered SELF_NOISE_RENDERS times in one browser, every pair of renders compared. The
+ * pairs of one page are not independent, so rates are over pages: a page renders identically if
+ * every pair of its renders has the same bytes, and a comparator fails a page if it fails any pair.
+ */
+async function selfNoise() {
+  const pages = [];
+  for (const scale of [1, 2]) {
+    for (const render of await repeatedRenders(scale)) {
+      const pairs = decoded(selfNoisePairs(render));
+      const differing = pairs.filter((p) => !p.expectedPng.equals(p.actualPng));
+      // Pairs with the same bytes pass every comparator, so only the others are compared.
+      const failed = {};
+      for (const [name, compare] of Object.entries(COMPARATORS)) {
+        failed[name] = Object.fromEntries(TOLERANCES.map((t) => [t, 0]));
+        for (const p of differing) {
+          const count = await compare(p);
+          for (const t of TOLERANCES) {
+            if (count > t * p.expected.width * p.expected.height) failed[name][t]++;
+          }
+        }
+      }
+      const name = `${scale}× ${render.browserName}/${render.page}`;
+      pages.push({ name, pairs: pairs.length, differing: differing.length, failed });
+    }
+  }
+  return pages;
+}
+
+function reportSelfNoise(pages) {
+  const identical = pages.filter((p) => p.differing === 0).length;
+  console.log(`## Self-noise: each page rendered ${SELF_NOISE_RENDERS} times on ${platform()}\n`);
+  console.log(
+    `Pages, by browser and scale, whose renders all have the same bytes, out of ` +
+      `${pages.length}: ${rateCell(identical, pages.length)}.\n`,
+  );
+  console.log('### Pages failed, out of all pages (any pair failed)\n');
+  console.log(`| Comparator | ${TOLERANCES.map((t) => `${t * 100}% allowed`).join(' | ')} |`);
+  console.log(`|---|${TOLERANCES.map(() => '---').join('|')}|`);
+  for (const name of Object.keys(COMPARATORS)) {
+    const cells = TOLERANCES.map((t) =>
+      rateCell(pages.filter((p) => p.failed[name][t] > 0).length, pages.length),
+    );
+    console.log(`| ${name} | ${cells.join(' | ')} |`);
+  }
+  console.log('');
+  const moved = pages.filter((p) => p.differing > 0);
+  if (moved.length === 0) return;
+  console.log('### Pages whose renders differ: pairs failed, none allowed and 0.1% allowed\n');
+  console.log(`| Comparator | ${moved.map((p) => p.name).join(' | ')} |`);
+  console.log(`|---|${moved.map(() => '---').join('|')}|`);
+  console.log(
+    `| pairs not byte-identical | ${moved.map((p) => `${p.differing} of ${p.pairs}`).join(' | ')} |`,
+  );
+  for (const name of Object.keys(COMPARATORS)) {
+    const cells = moved.map((p) => TOLERANCES.map((t) => p.failed[name][t]).join(', '));
+    console.log(`| ${name} | ${cells.join(' | ')} |`);
+  }
+  console.log('');
+}
+
+reportSelfNoise(await selfNoise());
 
 const resultsDir = join(ROOT, 'bench', 'results');
 mkdirSync(resultsDir, { recursive: true });
-writeFileSync(
-  join(resultsDir, `accuracy-${platform()}.json`),
-  JSON.stringify(
-    results.map(({ set, corpus, category, name, shouldMatch, counts }) => ({
-      set,
-      corpus,
-      category,
-      name,
-      shouldMatch,
-      counts,
-    })),
-    null,
-    2,
-  ),
-);
+if (!SELF_NOISE_ONLY) {
+  writeFileSync(
+    join(resultsDir, `accuracy-${platform()}.json`),
+    JSON.stringify(
+      results.map(({ set, corpus, category, name, shouldMatch, counts }) => ({
+        set,
+        corpus,
+        category,
+        name,
+        shouldMatch,
+        counts,
+      })),
+      null,
+      2,
+    ),
+  );
+}
