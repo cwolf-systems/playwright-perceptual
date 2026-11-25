@@ -18,7 +18,7 @@ import type { Pixels } from './types.js';
 // - 65×65: over texture, a drift of a level or two is what a move up the local slope would do to
 //   a small box, but over a box this large the texture rises and falls, a move carries as much
 //   colour in as out, and the drift remains.
-// - 5×5: a real change smaller than the large box, such as a faint stroke, survives this one.
+// - 7×7: a real change smaller than the large box, such as a faint stroke, survives this one.
 //
 // And over the pixel alone, where the rule says the pixel's colour lies within the colours next to
 // it in the other image, both ways round, so a colour that appears or goes away is not a move.
@@ -41,7 +41,7 @@ import type { Pixels } from './types.js';
  */
 const BOXES = [
   { side: 65, slack: 0.75 },
-  { side: 5, slack: ROUNDING_LEVELS + 0.25 },
+  { side: 7, slack: ROUNDING_LEVELS + 0.25 },
 ] as const;
 
 /**
