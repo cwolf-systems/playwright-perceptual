@@ -129,3 +129,68 @@ next to it, as a colour that went away does, and the full test refuses most such
   costs 150 to 190 lines and loses verdicts at most settings.
 - The constants were set on the benchmark the evaluation scores, held-out set included, so it is no
   longer unseen for them.
+
+## Issue #2, judged for 0.3.0
+
+[Issue #2](https://github.com/cwolf-systems/playwright-perceptual/issues/2) is limit 1 above, on
+the synthetic opacity pair (`surfaceOpacity()` in `bench/synthetic.mjs`): of its 22,810 pixels past
+ΔE00 1, 0.2.0 sets aside 1,095 as shifts. The [0.3.0 plan](../releases/0.3.0.md) rejects a
+candidate that loses a verdict against 0.2.0 on any set at either tolerance, sets aside more than
+228 of those pixels as shifts, still passes the textured ground beside an edge three levels darker
+with no allowance, raises the worst margin at 10 pixels allowed or more by more than 10 points, or
+makes whole-frame comparison more than 5% slower than 0.1.0. Two of the issue's three directions
+were built, each on its own branch, and judged on macOS (Apple M4, Playwright 1.63) by
+`bench/judge.mjs` unchanged, with the should-fail and self-noise pairs of 0.3.0. The third,
+registration first, is the plan's item (iii). Pixels set aside as shifts come from
+`compareImages(expected, actual).shifted` on the opacity pair with each build.
+
+- **A fitted move** (branch `issue-2/fitted-move`). A pixel the box and pixel rules set aside must
+  also be explained by one move, the same for every pixel and channel of the 5×5 window, fitted by
+  least squares on the bilinear model, each value weighted by a tolerance of 1.25 levels plus a
+  quarter of its contrast with its neighbours. Bounding the fit's mean squared residual instead, in
+  a first version not kept on the branch, left 570 set aside even with no allowance for contrast
+  (measured the same way, on that version): the change is two levels in green and blue, about
+  what rounding and the GPU leave. What a uniform change leaves that a move does not is a bias, so
+  the candidate bounds the weighted mean of what the move leaves on the values that changed, then
+  adds a term growing with the square root of their weight ("spread"), so that a few values of
+  high contrast, along an edge moved by a rasteriser, decide nothing.
+- **Larger windows** (branch `issue-2/larger-windows`): the 5×5 box made 7×7 or 9×9.
+
+| Candidate                  | Bias, spread | Lost (none / 0.1%) | Set aside as shifts | Ground beside an edge: counted | Worst margin |
+| -------------------------- | ------------ | ------------------ | ------------------: | -----------------------------: | -----------: |
+| 0.2.0                      |              | –                  |               1,095 |                              0 |        48.4% |
+| Fitted move, bias          | 1.25         | 8 / 6              |                 119 |                             35 |        85.9% |
+| Fitted move, bias          | 1.5          | 8 / 5              |                 435 |                             35 |        83.2% |
+| Fitted move, bias          | 1.75         | 7 / 4              |                 794 |                             34 |        89.8% |
+| Fitted move, bias          | 2            | 7 / 4              |               1,037 |                             33 |        51.6% |
+| Fitted move, bias + spread | 1, 1         | 5 / 1              |                 310 |                             35 |        90.6% |
+| Fitted move, bias + spread | 1.25, 0.5    | 6 / 2              |                 377 |                             35 |        82.0% |
+| Fitted move, bias + spread | 1.25, 1      | 4 / 1              |                 640 |                             34 |        90.6% |
+| Fitted move, bias + spread | 1.25, 2      | 0 / 0              |               1,030 |                             32 |        68.8% |
+| Fitted move, bias + spread | 1.5, 2       | 0 / 0              |               1,075 |                             28 |        62.5% |
+| Fitted move, bias + spread | 1.25, 3      | 0 / 0              |               1,082 |                             16 |        48.4% |
+| Fitted move, bias + spread | 1.5, 3       | 0 / 0              |               1,091 |                              1 |        48.4% |
+| 7×7 small box              |              | 0 / 0              |               1,141 |                              0 |        57.8% |
+| 9×9 small box              |              | 0 / 0              |               1,236 |                              0 |        51.6% |
+
+The ground beside an edge has 44 changed pixels. The worst margin is over pairs that should match
+and are allowed 10 pixels or more. Speed was not measured: every candidate fails another rule
+first. The rows the branches do not hold are those branches with one constant changed in
+`src/image/shift.ts`: `FIT.bias` and `FIT.spread` (0 for the rows with bias alone) for the fitted
+move, and the small box's `side` in `BOXES` for the 9×9 box.
+
+Neither direction is kept. The fitted move catches the ground beside an edge at every setting, but
+wherever it sets aside 640 pixels or fewer of the opacity pair it also fails pairs that should
+match. At a bias of 1.25 with no spread these are sub-pixel moves of the chart in all three browsers
+and of WebKit's SVG at 2×, Chromium's GPU against its software rasteriser on four pages, two of
+Playwright's anti-aliasing fixtures, and, with 0.1% allowed, the synthetic snapped vertices. It
+loses no verdict only where it sets aside 1,030 or more, nearly as much as 0.2.0. The likely reason
+is that a rasteriser's edges and the GPU's lighter areas leave a bias of a level or so too, and the
+opacity change, two levels in two channels, is not far enough from it for one bound to separate
+them. Larger windows set aside more, not less, presumably because a larger box takes in more edges,
+each widening the range a move allows. Issue #2 stays open, and limit 1 with it.
+
+A later candidate should be judged on the pixels counted as well as those set aside as shifts. The
+plan's bar counts shifts only, so a candidate that moved pixels from shifts into rounding or
+anti-aliasing would meet it without counting more of the change. None of those judged here comes
+near the bar, so the outcome does not depend on it.
