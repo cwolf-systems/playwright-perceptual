@@ -135,8 +135,8 @@ for (const [set, pairs] of Object.entries(SETS)) {
 
 /**
  * Wrong verdicts by comparator, in a markdown table per tolerance. Each cell gives the count, its
- * share of the group and the share's 95% interval (Wilson), since a group of 15 to 35 pairs moves 3
- * to 7 points with each pair.
+ * share of the group and the share's 95% interval (Wilson), since a group of the design or held-out
+ * set, 15 to 35 pairs, moves 3 to 7 points with each pair.
  */
 function report(set, rows) {
   const sizes = Object.fromEntries(

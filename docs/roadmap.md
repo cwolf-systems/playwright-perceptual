@@ -80,9 +80,9 @@ Items 1 and 2 are the same problem: detail too fine for anyone to see, judged pi
 - **Our own pages.** Apart from Playwright's fixtures, every pair comes from pages written for this
   benchmark. Pairs from other projects' test suites (looks-same, pixelmatch) and labelled
   screenshots of real applications would show whether the results carry over.
-- **Small counts.** With 15 to 35 pairs per group, one pair moves a rate by 3 to 7 points. The
-  tables give each rate's 95% interval (Wilson, 1927): 10 to 45 points wide on the design and
-  held-out sets. Only more pairs per group would narrow them.
+- **Small counts.** With 15 to 35 pairs per group of the design and held-out sets, one pair moves
+  a rate by 3 to 7 points. The tables give each rate's 95% interval (Wilson, 1927): 10 to 45 points
+  wide on those sets. Only more pairs per group would narrow them.
 - **Missing cases.** No pair removes a one-pixel line, such as an overlay outline or a grid line.
   Spatial filtering, below, could hide exactly that, so the case has to exist before filtering is
   tried. Also missing: text anti-aliasing changes (subpixel to greyscale), font hinting changes,

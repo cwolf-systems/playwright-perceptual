@@ -1,5 +1,5 @@
-// Intervals for the rates the benchmark reports. With 15 to 35 pairs in a group, one pair moves a
-// rate by 3 to 7 points, so each rate is printed with its 95% interval and a difference of a pair
+// Intervals for the rates the benchmark reports. With 15 to 35 pairs in a group of the design and
+// held-out sets, one pair moves a rate by 3 to 7 points, so each rate is printed with its 95% interval and a difference of a pair
 // or two is not read as real.
 
 /** The normal quantile for a two-sided 95% interval. */
