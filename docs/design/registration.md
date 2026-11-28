@@ -34,8 +34,9 @@ the version kept on the branch.
    the estimate must lie within 0.05 px of the truth, root mean square. **Met:** every estimate is
    exact to its 0.01 px grid.
 2. **The should-fail pairs in which nothing moved** must give an estimate under 0.02 px. **Missed.**
-   Of the 117 should-fail pairs (the design set, the 2× held-out set, the cases and the synthetic
-   set), 45 give 0.02 px or more. That count includes pairs in which something did move; the check
+   Of the 117 should-fail pairs the script reads (the rendered pairs at 1× and 2×, the cases and
+   `bench/synthetic.mjs`'s pairs; not Playwright's fixtures or the judge's own synthetic pairs),
+   45 give 0.02 px or more. That count includes pairs in which something did move; the check
    is over those in which nothing moved, and each of these misses it:
 
    | Pair                                                   | Estimate (x, y) | Length   |
