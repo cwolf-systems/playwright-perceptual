@@ -147,8 +147,9 @@ registration first, is the plan's item (iii). Pixels set aside as shifts come fr
 - **A fitted move** (branch `issue-2/fitted-move`). A pixel the box and pixel rules set aside must
   also be explained by one move, the same for every pixel and channel of the 5×5 window, fitted by
   least squares on the bilinear model, each value weighted by a tolerance of 1.25 levels plus a
-  quarter of its contrast with its neighbours. Bounding the fit's mean squared residual leaves 570
-  set aside even with no allowance for contrast: the change is two levels in green and blue, about
+  quarter of its contrast with its neighbours. Bounding the fit's mean squared residual instead, in
+  a first version not kept on the branch, left 570 set aside even with no allowance for contrast
+  (measured the same way, on that version): the change is two levels in green and blue, about
   what rounding and the GPU leave. What a uniform change leaves that a move does not is a bias, so
   the candidate bounds the weighted mean of what the move leaves on the values that changed, then
   adds a term growing with the square root of their weight ("spread"), so that a few values of
