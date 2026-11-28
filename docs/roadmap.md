@@ -34,8 +34,8 @@ settings with 0.1% of the image allowed.
    Registration, below, would tell the two apart by finding the move first; see
    [the design log](design/shift-tolerance.md). Judged for 0.3.0, a move fitted over each window
    and larger windows were not kept: on the synthetic opacity pair 0.2.0 sets aside 1,095 pixels
-   as shifts, and the fitted move sets aside 1,030 where it loses no verdict and 119 to 640 where it
-   loses 4 to 8; a 7×7 or 9×9 box sets aside 1,141 or 1,236.
+   as shifts, and the fitted move sets aside 1,030 or more where it loses no verdict and 119 to 640
+   where it loses 4 to 8; a 7×7 or 9×9 box sets aside 1,141 or 1,236.
 7. The same scene can land on different pixels between page loads or rasterisers. A label whose
    projected anchor falls either side of a pixel boundary moves by a whole pixel; an aliased
    overlay edge within 1/32 px of a row of pixel centres covers the row in a rasteriser that

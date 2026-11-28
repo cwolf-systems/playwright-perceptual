@@ -174,7 +174,9 @@ registration first, is the plan's item (iii). Pixels set aside as shifts come fr
 
 The ground beside an edge has 44 changed pixels. The worst margin is over pairs that should match
 and are allowed 10 pixels or more. Speed was not measured: every candidate fails another rule
-first.
+first. The rows the branches do not hold are those branches with one constant changed in
+`src/image/shift.ts`: `FIT.bias` and `FIT.spread` (0 for the rows with bias alone) for the fitted
+move, and the small box's `side` in `BOXES` for the 9×9 box.
 
 Neither direction is kept. The fitted move catches the ground beside an edge at every setting, but
 wherever it sets aside 640 pixels or fewer of the opacity pair it also fails pairs that should
@@ -186,3 +188,8 @@ is that a rasteriser's edges and the GPU's lighter areas leave a bias of a level
 opacity change, two levels in two channels, is not far enough from it for one bound to separate
 them. Larger windows set aside more, not less, presumably because a larger box takes in more edges,
 each widening the range a move allows. Issue #2 stays open, and limit 1 with it.
+
+A later candidate should be judged on the pixels counted as well as those set aside as shifts. The
+plan's bar counts shifts only, so a candidate that moved pixels from shifts into rounding or
+anti-aliasing would meet it without counting more of the change. None of those judged here comes
+near the bar, so the outcome does not depend on it.
