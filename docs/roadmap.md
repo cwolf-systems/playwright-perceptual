@@ -163,9 +163,10 @@ Here, a fingerprint could be the set of changed pixels coarsened to a grid, with
 binned, kept in a small file beside the baseline with a count and the date last seen. A
 difference matching an approved fingerprint would be reported as known, not passed silently.
 The risk is the same as an allowance's: a real change that lands on a known fingerprint's cells
-is hidden. Measure it on the self-noise renders (Gaps in the benchmark) before adopting it, and
-count how many of the design and held-out set's should-fail pairs a fingerprint learned from
-should-match pairs would let through; that number has to be zero.
+is hidden. Measure it on the benchmark's self-noise renders before adopting it, and count how many
+of the design and held-out sets' should-fail pairs a fingerprint learned from should-match pairs
+would let through; that number has to be zero. The [0.3.0 plan](releases/0.3.0.md) leaves it for
+after that release.
 
 ### Speed
 
