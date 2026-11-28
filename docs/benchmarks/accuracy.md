@@ -284,6 +284,40 @@ only whether two images differ).
 | perceptual ΔE00 1.5, structural for edges (experiment) | 576                                             | 1188                                              | 120                      | 304                                | 663                                              | 1002                            | **0**                          | 61363                                         |
 | perceptual ΔE00 1.5, structural only (experiment)      | 576                                             | 1188                                              | 120                      | 304                                | 2638                                             | 2155                            | **0**                          | 61363                                         |
 
+### Self-noise: each page rendered ten times
+
+Each page, in each browser at 1× and at 2×, 48 in all, rendered ten times in one browser, each
+time in a fresh page, and all 45 pairs of renders compared by every comparator.
+`npm run bench:accuracy -- --self-noise` runs this set alone. Pairs of one page are not
+independent, so rates are over pages. The hypothesis, stated before the data: every page renders
+the same bytes ten times. Any of a page's 45 pairs that differs rejects it for that page.
+
+On this machine the set ran eight times at 1× and seven at 2×: twice in the full benchmark, five
+times alone, and once at 1× alone while it was written. In that first run WebKit's map at 1×
+differed: one render of the ten, so 9 of its 45 pairs. In the seven runs since, it rendered the
+same bytes every time, as did every other page in every run. So the hypothesis holds for 47 of the
+48 pages and is rejected for WebKit's map at 1×. Which comparators fail that difference was not
+measured: the first run compared bytes only, and the difference has not recurred.
+
+Pages failed, out of 48, in the last full run:
+
+| Comparator                                             | 0% allowed   | 0.1% allowed |
+| ------------------------------------------------------ | ------------ | ------------ |
+| exact bytes                                            | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| pixelmatch 0.05                                        | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| pixelmatch 0.1 (its default)                           | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| pixelmatch 0.2 (Playwright default)                    | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| ssim-cie94 (Playwright, experimental)                  | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| looks-same (ΔE00 2.3)                                  | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| perceptual ΔE00 1                                      | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| perceptual ΔE00 1.5                                    | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| perceptual ΔE00 2                                      | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| perceptual ΔE00 2.3                                    | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| perceptual ΔE00 3                                      | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| perceptual ΔE00 1.5, shifts counted                    | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| perceptual ΔE00 1.5, structural for edges (experiment) | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+| perceptual ΔE00 1.5, structural only (experiment)      | 0 (0%, 0–7%) | 0 (0%, 0–7%) |
+
 ### Should-fail pairs: the change each makes
 
 Each removed-line and case pair with every noise class counted: the pixels past ΔE00 1 and the
