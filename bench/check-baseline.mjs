@@ -60,9 +60,12 @@ function readResult(file) {
   return result;
 }
 
-// The judge's ids for its rendered pairs start with the corpus name: "rendered/…" at 1× and
-// "rendered 2×/…" at 2×.
-export const isRendered = (id) => id.startsWith('rendered');
+// The judge's ids for its rendered pairs start with the corpus name: "rendered/…" at 1×,
+// "rendered 2×/…" at 2×, and "self-noise 1×/…" for repeated renders of one page.
+export const isRendered = (id) => id.startsWith('rendered') || id.startsWith('self-noise');
+// Repeated renders of an unchanged page: their bytes may differ from one run to the next by design,
+// so they are counted apart from the pairs whose bytes say whether a platform is reproducible.
+const isSelfNoise = (id) => id.startsWith('self-noise');
 const isReal = (set) => set.startsWith('real');
 const correct = (pair, tolerance) => pair.pass[tolerance] === pair.match;
 // The runner image's name without its weekly version, e.g. "ubuntu24".
@@ -93,6 +96,8 @@ export function check(result, baseline, compareRendered, sameMachine) {
     compared: 0,
     hashed: 0,
     moved: [],
+    noiseHashed: 0,
+    noiseMoved: [],
   };
   for (const before of baseline.accuracy.pairs) {
     if (isRendered(before.id) && !compareRendered) {
@@ -110,8 +115,14 @@ export function check(result, baseline, compareRendered, sameMachine) {
     }
     out.compared++;
     if (before.sha256 && after.sha256) {
-      out.hashed++;
-      if (before.sha256.join() !== after.sha256.join()) out.moved.push(before.id);
+      const differs = before.sha256.join() !== after.sha256.join();
+      if (isSelfNoise(before.id)) {
+        out.noiseHashed++;
+        if (differs) out.noiseMoved.push(before.id);
+      } else {
+        out.hashed++;
+        if (differs) out.moved.push(before.id);
+      }
     }
     for (const tolerance of Object.keys(TOLERANCES)) {
       const wasCorrect = correct(before, tolerance);
@@ -184,6 +195,12 @@ function main() {
       `- Rendered pairs with the baseline's bytes: ${r.hashed - r.moved.length} of ${r.hashed}`,
     );
     for (const id of r.moved) console.log(`  - ${id}: different bytes`);
+  }
+  if (r.noiseHashed) {
+    console.log(
+      `- Self-noise pairs with the baseline's bytes: ${r.noiseHashed - r.noiseMoved.length} of ` +
+        `${r.noiseHashed} (renders of an unchanged page, which may differ)`,
+    );
   }
   if (args.reportRendered) {
     console.log(

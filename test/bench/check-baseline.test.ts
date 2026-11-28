@@ -86,6 +86,19 @@ describe('check', () => {
     expect(r.lost).toEqual([]);
   });
 
+  it('counts self-noise pairs whose bytes changed apart from the other rendered pairs', () => {
+    const noise = 'self-noise 1×/webkit/map/0v1';
+    const before = result(machine, [pair(noise, true, true, ['a', 'b'])]);
+    const r = check(result(machine, [pair(noise, true, true, ['a', 'x'])]), before, true, true);
+    expect(r.moved).toEqual([]);
+    expect(r.hashed).toBe(0);
+    expect(r.noiseHashed).toBe(1);
+    expect(r.noiseMoved).toEqual([noise]);
+    // Their verdicts are still checked.
+    const lost = check(result(machine, [pair(noise, true, false, ['a', 'b'])]), before, true, true);
+    expect(failing(lost, true).lost.map((p) => p.id)).toEqual([noise, noise]);
+  });
+
   it('counts a rendered pair missing on a machine like the baseline’s as missing', () => {
     const now = result(machine, [pair('synthetic/cases/grid line removed', false, false)]);
     const r = check(now, baseline, true, true);

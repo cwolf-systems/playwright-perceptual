@@ -6,7 +6,8 @@
     "synthetic: bench/synthetic.mjs, labelled by the finding each pair reproduces.",
     "synthetic also holds the judge's own textured drift and its control, and two changes beside an edge (added 2026-10-23), generated in bench/judge.mjs.",
     "real: captures from a downstream renderer, not in this repository, keyed by the first 16 hex digits of the SHA-256 of each PNG (expected-actual), so a label applies only to the exact bytes it was given for. golden: pairs of captures of identical input.",
-    "Added 2026-11-12, one pull request of their own: the rendered line-removed pairs (a grid line one pixel high, an overlay outline 1.5 px wide, removed) and bench/cases.mjs's should-fail cases, keyed synthetic/cases/<name>."
+    "Added 2026-11-12, one pull request of their own: the rendered line-removed pairs (a grid line one pixel high, an overlay outline 1.5 px wide, removed) and bench/cases.mjs's should-fail cases, keyed synthetic/cases/<name>.",
+    "Added 2026-11-25, one pull request of their own: the self-noise pairs of WebKit's map at 1×, every pair of ten renders of the unchanged page, keyed self-noise 1×/webkit/map/<i>v<j>. One render in ten differed in the self-noise set."
   ],
   "benchmark": {
     "playwright/should-match/crbug-919955/example-1": {
@@ -828,6 +829,186 @@
     "rendered 2×/line removed/webkit/map": {
       "match": false,
       "why": "The 2D map with the blue zone's outline, 1.5 px wide, left out and its fill kept: an overlay boundary a user reads is gone: should not match."
+    },
+    "self-noise 1×/webkit/map/0v1": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 0 against render 1 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/0v2": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 0 against render 2 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/0v3": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 0 against render 3 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/0v4": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 0 against render 4 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/0v5": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 0 against render 5 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/0v6": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 0 against render 6 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/0v7": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 0 against render 7 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/0v8": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 0 against render 8 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/0v9": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 0 against render 9 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/1v2": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 1 against render 2 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/1v3": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 1 against render 3 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/1v4": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 1 against render 4 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/1v5": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 1 against render 5 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/1v6": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 1 against render 6 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/1v7": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 1 against render 7 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/1v8": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 1 against render 8 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/1v9": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 1 against render 9 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/2v3": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 2 against render 3 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/2v4": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 2 against render 4 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/2v5": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 2 against render 5 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/2v6": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 2 against render 6 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/2v7": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 2 against render 7 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/2v8": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 2 against render 8 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/2v9": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 2 against render 9 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/3v4": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 3 against render 4 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/3v5": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 3 against render 5 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/3v6": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 3 against render 6 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/3v7": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 3 against render 7 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/3v8": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 3 against render 8 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/3v9": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 3 against render 9 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/4v5": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 4 against render 5 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/4v6": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 4 against render 6 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/4v7": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 4 against render 7 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/4v8": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 4 against render 8 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/4v9": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 4 against render 9 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/5v6": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 5 against render 6 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/5v7": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 5 against render 7 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/5v8": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 5 against render 8 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/5v9": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 5 against render 9 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/6v7": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 6 against render 7 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/6v8": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 6 against render 8 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/6v9": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 6 against render 9 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/7v8": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 7 against render 8 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/7v9": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 7 against render 9 of the same page with nothing changed: should match."
+    },
+    "self-noise 1×/webkit/map/8v9": {
+      "match": true,
+      "why": "WebKit's map at 1×, render 8 against render 9 of the same page with nothing changed: should match."
     }
   },
   "synthetic": {
