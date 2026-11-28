@@ -35,7 +35,8 @@ the version kept on the branch.
    exact to its 0.01 px grid.
 2. **The should-fail pairs in which nothing moved** must give an estimate under 0.02 px. **Missed.**
    Of the 117 should-fail pairs (the design set, the 2× held-out set, the cases and the synthetic
-   set), 45 give 0.02 px or more. Among those in which nothing moved:
+   set), 45 give 0.02 px or more. That count includes pairs in which something did move; the check
+   is over those in which nothing moved, and each of these misses it:
 
    | Pair                                                   | Estimate (x, y) | Length   |
    | ------------------------------------------------------ | --------------- | -------- |
@@ -66,5 +67,10 @@ test of whether the images match after the shift before using it.
 
 ## What remains
 
-- The 1.5× held-out set stays unread pair by pair, for a later candidate.
+- The 1.5× held-out set, rendered and labelled for this item before any of its code ran, is in an
+  open pull request (#13), unread pair by pair, for a later candidate. It was not merged for 0.3.0:
+  nothing reads it, and rendering it timed out once in three Windows runs.
+- A later plan for registration should count the verdicts it gains by page, not by pair. Pairs of
+  one page in three browsers are not independent, so five gained pairs may be two pages, and the
+  0.3.0 plan's sign test over pairs would overstate them.
 - Speed was not measured; the item stopped first.
