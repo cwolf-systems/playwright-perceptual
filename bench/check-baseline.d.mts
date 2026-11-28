@@ -35,6 +35,8 @@ export interface Check {
   readonly compared: number;
   readonly hashed: number;
   readonly moved: readonly string[];
+  readonly noiseHashed: number;
+  readonly noiseMoved: readonly string[];
 }
 
 export function isRendered(id: string): boolean;
