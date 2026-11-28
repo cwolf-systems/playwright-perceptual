@@ -6,6 +6,8 @@
 
 - Generic wording for the benchmark's map scenes, fixture comments and test names: overlay
   outlines, tracks and markers, a 3D terrain view. Rendered pixels and pair ids are unchanged.
+- The plan for 0.3.0 ([docs/releases/0.3.0.md](docs/releases/0.3.0.md)): what each item will
+  measure, the result that would reject it, and what is left out.
 
 ## 0.2.0 (2026-10-23)
 
