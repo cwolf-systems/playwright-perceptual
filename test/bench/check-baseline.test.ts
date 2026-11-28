@@ -1,3 +1,7 @@
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   check,
@@ -135,5 +139,49 @@ describe('failing', () => {
     expect(f.missing).toEqual([]);
     // Reported all the same.
     expect(r.lost).toHaveLength(4);
+  });
+});
+
+describe('the script', () => {
+  // Run through a symbolic link to the script, so that a check that does not recognise it is being
+  // run, and silently does nothing, shows here as a wrong exit code.
+  const dir = mkdtempSync(join(tmpdir(), 'check-baseline-'));
+  const script = join(dir, 'check-baseline.mjs');
+  symlinkSync(resolve('bench/check-baseline.mjs'), script);
+  const machine = ubuntu('AMD EPYC 7763', '1');
+  const file = (name: string, pairs: readonly BaselinePair[]) => {
+    const path = join(dir, name);
+    const judged = {
+      judge: { labels: 'l' },
+      candidate: { name: 'ci', commit: null },
+      ...result(machine, pairs),
+    };
+    writeFileSync(path, JSON.stringify(judged));
+    return path;
+  };
+  const baseline = file('baseline.json', [
+    pair('rendered/regression/firefox/terrain', false, false),
+    pair('synthetic/cases/grid line removed', false, false),
+  ]);
+  const run = (resultFile: string, ...flags: string[]) =>
+    spawnSync(process.execPath, [script, resultFile, '--baseline', baseline, ...flags], {
+      encoding: 'utf8',
+    }).status;
+
+  const renderedLost = file('rendered-lost.json', [
+    pair('rendered/regression/firefox/terrain', false, true),
+    pair('synthetic/cases/grid line removed', false, false),
+  ]);
+  const syntheticMissing = file('synthetic-missing.json', [
+    pair('rendered/regression/firefox/terrain', false, false),
+  ]);
+
+  it('fails on a lost rendered verdict, unless rendered pairs are only reported', () => {
+    expect(run(renderedLost)).toBe(1);
+    expect(run(renderedLost, '--report-rendered')).toBe(0);
+  });
+
+  it('fails on a missing synthetic pair even when rendered pairs are only reported', () => {
+    expect(run(syntheticMissing, '--report-rendered')).toBe(1);
   });
 });

@@ -28,7 +28,7 @@
 
 import { readFileSync, realpathSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const DEFAULT_BASELINE = join(ROOT, 'bench', 'results', 'judge-baseline-0.2.0.json');
@@ -206,7 +206,11 @@ function main() {
 }
 
 // Run as a script, not when imported by its test.
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Real paths on both sides: run through a symbolic link (macOS's /tmp is one), the URLs differ.
+if (
+  process.argv[1] !== undefined &&
+  realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
+) {
   try {
     process.exitCode = main();
   } catch (error) {

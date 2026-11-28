@@ -5,8 +5,8 @@
 // CI prints each platform's run to its job summary, and the per-platform sections of
 // docs/benchmarks/accuracy.md are this script's output on the committed baselines.
 
-import { readFileSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
+import { readFileSync, realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { rateCell } from './stats.mjs';
 
 const PLATFORMS = { darwin: 'macOS', linux: 'Linux', win32: 'Windows' };
@@ -56,7 +56,11 @@ export function section(result) {
 }
 
 // Run as a script, not when imported by its test.
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Real paths on both sides: run through a symbolic link (macOS's /tmp is one), the URLs differ.
+if (
+  process.argv[1] !== undefined &&
+  realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
+) {
   const files = process.argv.slice(2);
   if (files.length === 0) {
     console.error('Usage: tables.mjs <result.json> …');
