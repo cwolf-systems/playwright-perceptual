@@ -2,9 +2,11 @@
 // baseline judged correctly is now judged wrongly, with no changed pixels allowed or with 0.1% of
 // the image. CI runs it after the judge's accuracy section:
 //
-//   node bench/check-baseline.mjs <result.json> [--baseline <file>] [--rendered]
+//   node bench/check-baseline.mjs <result.json> [--baseline <file>] [--rendered] [--report-rendered]
 //
-// The baseline defaults to bench/results/judge-baseline-0.2.0.json.
+// The baseline defaults to bench/results/judge-baseline-0.2.0.json. With --report-rendered, rendered
+// pairs are compared and reported as usual but cannot fail the check: CI passes it on a platform
+// whose renders were not reproducible, as the accuracy page lists them.
 //
 // Not every pair can be compared on every machine:
 // - Real captures come from a downstream renderer and are not in this repository. Pairs of theirs
@@ -13,8 +15,9 @@
 //   depend on the operating system, its fonts and its GPU. They are compared only when the result
 //   and the baseline come from the same platform and CPU, or from the same GitHub-hosted runner
 //   image (bench/results/judge-baseline-0.3.0-<platform>.json, made by CI), or with --rendered.
-//   Where both carry the hashes of the rendered PNGs, the pairs whose bytes differ are listed. Playwright's fixtures
-//   and the synthetic set are the same bytes everywhere and are always compared.
+//   Where both carry the hashes of the rendered PNGs, the pairs whose bytes differ are listed.
+//   Playwright's fixtures and the synthetic set are the same bytes everywhere and are always
+//   compared, and always enforced.
 //   Rendered pairs a machine cannot render (the GPU pairs off macOS, WebGL pages without WebGL)
 //   are left out by the judge, and skipped here, except on a machine like the baseline's: there a
 //   rendered pair the result lacks was lost, not left out.
@@ -25,23 +28,26 @@
 
 import { readFileSync, realpathSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const DEFAULT_BASELINE = join(ROOT, 'bench', 'results', 'judge-baseline-0.2.0.json');
 const TOLERANCES = { none: 'none allowed', allowance: '0.1% allowed' };
 
 function parseArgs(argv) {
-  const args = { baseline: DEFAULT_BASELINE, rendered: false, result: null };
+  const args = { baseline: DEFAULT_BASELINE, rendered: false, reportRendered: false, result: null };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--baseline') args.baseline = argv[++i];
     else if (arg === '--rendered') args.rendered = true;
+    else if (arg === '--report-rendered') args.reportRendered = true;
     else if (!arg.startsWith('--') && args.result === null) args.result = arg;
     else throw new Error(`Unknown argument ${arg}`);
   }
   if (!args.result || !args.baseline) {
-    throw new Error('Usage: check-baseline.mjs <result.json> [--baseline <file>] [--rendered]');
+    throw new Error(
+      'Usage: check-baseline.mjs <result.json> [--baseline <file>] [--rendered] [--report-rendered]',
+    );
   }
   return args;
 }
@@ -56,13 +62,26 @@ function readResult(file) {
 
 // The judge's ids for its rendered pairs start with the corpus name: "rendered/…" at 1× and
 // "rendered 2×/…" at 2×.
-const isRendered = (id) => id.startsWith('rendered');
+export const isRendered = (id) => id.startsWith('rendered');
 const isReal = (set) => set.startsWith('real');
 const correct = (pair, tolerance) => pair.pass[tolerance] === pair.match;
 // The runner image's name without its weekly version, e.g. "ubuntu24".
 const imageName = (machine) => machine?.image?.split(' ')[0];
 
-function check(result, baseline, compareRendered, sameMachine) {
+/**
+ * Whether two results come from a machine alike enough for rendered bytes to be compared: the same
+ * platform, and the same runner image where either names one (an image runs on more than one CPU
+ * model, and one CPU model serves more than one image), otherwise the same CPU.
+ */
+export function sameMachine(result, baseline) {
+  if (result.machine?.platform !== baseline.machine?.platform) return false;
+  const image = imageName(result.machine);
+  const baselineImage = imageName(baseline.machine);
+  if (image !== undefined || baselineImage !== undefined) return image === baselineImage;
+  return result.machine?.cpu === baseline.machine?.cpu;
+}
+
+export function check(result, baseline, compareRendered, sameMachine) {
   const now = new Map(result.accuracy.pairs.map((p) => [p.id, p]));
   const out = {
     lost: [],
@@ -105,6 +124,18 @@ function check(result, baseline, compareRendered, sameMachine) {
   return out;
 }
 
+/**
+ * The verdicts lost and the pairs missing that fail the check. With `enforceRendered` false,
+ * rendered pairs are reported but fail nothing.
+ */
+export function failing(r, enforceRendered) {
+  const counts = (id) => enforceRendered || !isRendered(id);
+  return {
+    lost: r.lost.filter((p) => counts(p.id)),
+    missing: r.missing.filter((id) => counts(id)),
+  };
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (realpathSync(args.result) === realpathSync(args.baseline)) {
@@ -126,14 +157,10 @@ function main() {
 
   // Rendered bytes depend on the machine, not only its operating system: they are compared on a
   // machine like the baseline's, or with --rendered. There, a rendered pair that is missing was
-  // lost, not left out. A runner image runs on more than one CPU model, so in CI the image counts.
-  const sameImage =
-    imageName(result.machine) !== undefined &&
-    imageName(result.machine) === imageName(baseline.machine);
-  const sameMachine =
-    result.machine?.platform === baseline.machine?.platform &&
-    (result.machine?.cpu === baseline.machine?.cpu || sameImage);
-  const r = check(result, baseline, args.rendered || sameMachine, sameMachine);
+  // lost, not left out.
+  const alike = sameMachine(result, baseline);
+  const r = check(result, baseline, args.rendered || alike, alike);
+  const fails = failing(r, !args.reportRendered);
 
   const name = (file) => file.split(/[\\/]/).pop();
   console.log(
@@ -158,6 +185,11 @@ function main() {
     );
     for (const id of r.moved) console.log(`  - ${id}: different bytes`);
   }
+  if (args.reportRendered) {
+    console.log(
+      '- Rendered pairs are reported, not enforced: renders on this platform are not reproducible.',
+    );
+  }
   console.log(`- Verdicts gained: ${r.gained.length}`);
   console.log(`- Verdicts lost: ${r.lost.length}`);
   for (const p of r.lost) {
@@ -170,12 +202,15 @@ function main() {
     console.log(`- Pairs in the baseline that this run lacks: ${r.missing.length}`);
     for (const id of r.missing) console.log(`  - ${id}`);
   }
-  return r.lost.length || r.missing.length ? 1 : 0;
+  return fails.lost.length || fails.missing.length ? 1 : 0;
 }
 
-try {
-  process.exitCode = main();
-} catch (error) {
-  console.error(error.message);
-  process.exitCode = 2;
+// Run as a script, not when imported by its test.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    process.exitCode = main();
+  } catch (error) {
+    console.error(error.message);
+    process.exitCode = 2;
+  }
 }
