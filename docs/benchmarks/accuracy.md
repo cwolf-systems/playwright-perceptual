@@ -74,9 +74,10 @@ Each comparator is judged with no changed pixels allowed, and with 0.1% of the i
 ## Results
 
 macOS, Apple M4. Each cell counts wrong verdicts, with their share of the group and that share's
-95% interval (Wilson, 1927): with 9 to 24 pairs in a group, one pair moves a share by 4 to 11
+95% interval (Wilson, 1927): with 15 to 35 pairs in a group, one pair moves a share by 3 to 7
 points, and a difference of a pair or two between comparators is not evidence that one is more
-accurate. The last table instead gives each synthetic pair's changed pixels (looks-same reports
+accurate. Comparators judged on the same pairs are compared by the pairs one gets right and the
+other wrong, not by whether their intervals overlap. The last table instead gives each synthetic pair's changed pixels (looks-same reports
 only whether two images differ).
 
 ### Design set (107 pairs), no changed pixels allowed
