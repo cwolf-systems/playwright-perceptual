@@ -324,7 +324,30 @@ On Linux and Windows, 30 labelled pairs are not rendered: the 16 GPU pairs, whic
 renders only on macOS, and the 14 pairs of the WebGL pages in Firefox, which has no WebGL there.
 The macOS runner has a GPU for Chromium: with the GPU pairs' flags it reports "ANGLE Metal
 Renderer: Apple Paravirtual device", and each of the 16 GPU pairs differs in bytes from software
-rendering.
+rendering (measured once, in the run below).
+
+### Reproducible on each platform
+
+The judge jobs of one CI run ([run 45598860344](https://github.com/cwolf-systems/playwright-perceptual/actions/runs/45598860344),
+commit `3e60f62`, 2026-11-25), whose result files are the baselines above, were run again on
+2026-11-28 on the same commit. Each re-run's result against its platform's baseline:
+`node bench/check-baseline.mjs judge.json --baseline bench/results/judge-baseline-0.3.0-<platform>.json`.
+By the [0.3.0 plan](../releases/0.3.0.md), any rendered pair whose bytes differ makes a platform
+not reproducible: CI then reports its rendered pairs but does not enforce them
+(`check-baseline.mjs --report-rendered`). Playwright's fixtures and the synthetic set are enforced
+everywhere.
+
+| Platform | Image, first run            | Image, second run           | Rendered pairs with the same bytes | Verdicts changed | Rendered pairs in CI |
+| -------- | --------------------------- | --------------------------- | ---------------------------------- | ---------------- | -------------------- |
+| Linux    | ubuntu24 20261116.376.1     | ubuntu24 20261122.23.1      | 154 of 154                         | 0                | enforced             |
+| macOS    | macos15 20261118.0550.1     | macos15 20261123.0558.1     | 180 of 184                         | 0                | reported             |
+| Windows  | win25-vs2026 20261116.315.1 | win25-vs2026 20261123.321.1 | 154 of 154                         | 0                | enforced             |
+
+On macOS the four pairs that moved are Firefox on the WebGL pages, which it draws through the
+runner's GPU: `rendered/colour/firefox/terrain`, `rendered/colour/firefox/viewer`,
+`rendered/regression/firefox/terrain` and `rendered 2×/faint regression/firefox/terrain`. Their
+counted pixels did not change. The second run was on a newer weekly version of each image, so
+Linux and Windows held across a week of image updates as well as three days.
 
 ### Linux, runner image ubuntu24 20261116.376.1 (AMD EPYC 7763 64-Core Processor)
 

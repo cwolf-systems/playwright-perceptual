@@ -126,9 +126,17 @@ jobs:
     strategy:
       fail-fast: false
       # Pinned images rather than -latest: rendered pairs are checked against a baseline made by CI
-      # on the same image, bench/results/judge-baseline-0.3.0-<platform>.json.
+      # on the same image, bench/results/judge-baseline-0.3.0-<platform>.json. Where a re-run of the
+      # same commit rendered other bytes, rendered pairs are reported, not enforced
+      # (docs/benchmarks/accuracy.md, "Reproducible on each platform").
       matrix:
-        os: [ubuntu-24.04, macos-15, windows-2025]
+        include:
+          - os: ubuntu-24.04
+            rendered: enforce
+          - os: macos-15
+            rendered: report
+          - os: windows-2025
+            rendered: enforce
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -165,26 +173,13 @@ jobs:
       # Rendered pairs against the baseline CI made on this image, with any whose bytes changed.
       - name: No verdict lost against this platform's baseline
         shell: bash
+        env:
+          RENDERED: ${{ matrix.rendered }}
         run: |
           baseline="bench/results/judge-baseline-0.3.0-$(node -p process.platform).json"
-          node bench/check-baseline.mjs "$RUNNER_TEMP/judge.json" --baseline "$baseline" | tee -a "$GITHUB_STEP_SUMMARY"
-      # Whether Chromium, launched with the flags the benchmark's GPU pairs use, finds a GPU here.
-      - name: GPU seen by Chromium
-        if: runner.os == 'macOS'
-        shell: bash
-        run: |
-          node --input-type=module --eval "
-            import { chromium } from '@playwright/test';
-            const browser = await chromium.launch({ args: ['--use-angle=metal', '--enable-gpu'] });
-            const page = await browser.newPage();
-            const renderer = await page.evaluate(() => {
-              const gl = document.createElement('canvas').getContext('webgl');
-              const info = gl?.getExtension('WEBGL_debug_renderer_info');
-              return info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : 'no WebGL';
-            });
-            console.log('WebGL renderer with the GPU flags: ' + renderer);
-            await browser.close();
-          " | tee -a "$GITHUB_STEP_SUMMARY"
+          report=()
+          if [ "$RENDERED" = report ]; then report=(--report-rendered); fi
+          node bench/check-baseline.mjs "$RUNNER_TEMP/judge.json" --baseline "$baseline" "${report[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
