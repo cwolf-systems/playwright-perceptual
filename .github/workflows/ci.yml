@@ -191,9 +191,10 @@ jobs:
 
   frozen:
     name: Frozen labels and baselines
-    # The judge job reads the labels and the baseline from the pull request's own tree, so a change
-    # to them could hide a lost verdict. They change only in a pull request of their own; this job
-    # makes such a change visible as a warning, for the reviewer.
+    # The judge job reads the labels, the baselines and the check that compares them from the pull
+    # request's own tree, so a change to them could hide a lost verdict. Labels and baselines change
+    # only in a pull request of their own; this job makes any such change visible as a warning, for
+    # the reviewer.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -205,10 +206,10 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: |
           git fetch --depth=1 origin "$BASE_REF"
-          changed=$(git diff --name-only FETCH_HEAD HEAD -- bench/judge-labels.json 'bench/results/judge-baseline-*.json' | tr '\n' ' ')
+          changed=$(git diff --name-only FETCH_HEAD HEAD -- bench/judge-labels.json 'bench/results/judge-baseline-*.json' bench/check-baseline.mjs .github/workflows/ci.yml | tr '\n' ' ')
           if [ -n "$changed" ]; then
-            echo "::warning::This pull request changes frozen labels or baselines: $changed"
-            printf '\n**This pull request changes frozen labels or baselines:** %s\n' "$changed" >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::This pull request changes frozen labels, baselines or the check that reads them: $changed"
+            printf '\n**This pull request changes frozen labels, baselines or the check that reads them:** %s\n' "$changed" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Frozen labels and baselines unchanged."
+            echo "Frozen labels, baselines and the check unchanged."
           fi

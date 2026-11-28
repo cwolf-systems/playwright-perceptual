@@ -96,7 +96,8 @@ b.json`. The reasoning and the variants tried go in a design log in `docs/design
 `bench/judge-labels.json` holds the expected verdict for each pair. Changing a label is its own
 pull request: one label change and its reason per entry, reviewed on its own, with the baselines
 regenerated. Never change a label in the same pull request as the code it would let pass. CI
-warns on any pull request that changes the labels or a committed baseline.
+warns on any pull request that changes the labels, a committed baseline or the check that reads
+them.
 
 ## Quality floor
 
