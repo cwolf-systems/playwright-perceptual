@@ -12,7 +12,9 @@
 //    the synthetic set and real captures. The current checkout's verdicts (this repository's own
 //    dist/) are taken on the same bytes in the same run, so any pair the checkout gets right and
 //    the candidate gets wrong is listed by name. Without --candidate, the candidate is the
-//    checkout itself, judged against the labels alone.
+//    checkout itself, judged against the labels alone. Each rendered pair carries the SHA-256 of
+//    its two PNGs, so that bench/check-baseline.mjs can tell whether two runs rendered the same
+//    bytes.
 // 2. Issue #2's residual: the share of a faint uniform change that is counted, and likewise the
 //    share of a drift of one to three levels over a whole textured frame. The denominator is every
 //    pixel past ΔE00 1 as the checkout measures it with all noise detection off, so it is the same
@@ -130,7 +132,8 @@ function parseArgs(argv) {
 // ---------------------------------------------------------------------------------------------
 // Inputs
 
-const sha16 = (bytes) => createHash('sha256').update(bytes).digest('hex').slice(0, 16);
+const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
+const sha16 = (bytes) => sha256(bytes).slice(0, 16);
 
 function decode(bytes) {
   const png = PNG.sync.read(bytes);
@@ -182,13 +185,28 @@ async function renderWorker() {
   const manifest = pairs.map((p, n) => {
     writeFileSync(join(staging, `${n}-expected.png`), p.expectedPng);
     writeFileSync(join(staging, `${n}-actual.png`), p.actualPng);
-    return { id: p.id, set: p.corpus === 'rendered' ? 'design' : 'held-out', n };
+    return {
+      id: p.id,
+      set: p.corpus === 'rendered' ? 'design' : 'held-out',
+      n,
+      sha256: [sha256(p.expectedPng), sha256(p.actualPng)],
+    };
   });
   writeFileSync(join(staging, 'manifest.json'), JSON.stringify(manifest, null, 1));
   rmSync(RENDERS, { recursive: true, force: true });
   renameSync(staging, RENDERS);
   process.stdout.write('{}');
 }
+
+/** The SHA-256 of each rendered pair's two PNGs, by pair id, as the render worker wrote them. */
+function renderHashes() {
+  const manifest = JSON.parse(readFileSync(join(RENDERS, 'manifest.json'), 'utf8'));
+  return new Map(manifest.map((p) => [p.id, p.sha256]));
+}
+
+/** The GitHub-hosted runner image a CI run is on, as its environment names it; null elsewhere. */
+const runnerImage = () =>
+  process.env.ImageOS ? `${process.env.ImageOS} ${process.env.ImageVersion}` : null;
 
 /** The benchmark's pairs: Playwright's fixtures, and the rendered pairs from bench/data. */
 async function benchmarkPairs() {
@@ -390,7 +408,7 @@ const counted = (x) => (x === null ? Number.POSITIVE_INFINITY : x);
 const allowed = (pixels) => Math.floor(ALLOWANCE * pixels);
 const SETS = ['design', 'held-out', 'synthetic', 'real golden', 'real findings'];
 
-function accuracy(candidatePairs, checkoutPairs, labels, notices) {
+function accuracy(candidatePairs, checkoutPairs, labels, hashes, notices) {
   const rows = [];
   const seen = new Set();
   for (const [id, p] of Object.entries(checkoutPairs)) {
@@ -412,6 +430,7 @@ function accuracy(candidatePairs, checkoutPairs, labels, notices) {
       checkoutCounted: checkout,
       pass: verdict(candidate),
       checkoutPass: verdict(checkout),
+      sha256: hashes.get(id),
     });
   }
   const benchmarkPrefixes = ['playwright/', 'rendered'];
@@ -1174,7 +1193,13 @@ async function judge(args) {
   const candidateCounts = self
     ? checkoutCounts
     : worker('--count-worker', countInput(candidateDir, adapterName, false));
-  const acc = accuracy(candidateCounts.pairs, checkoutCounts.pairs, labels, notices);
+  const acc = accuracy(
+    candidateCounts.pairs,
+    checkoutCounts.pairs,
+    labels,
+    renderHashes(),
+    notices,
+  );
   const res = residual(candidateCounts.residual, checkoutCounts.residual);
   const sl = slivers(candidateCounts.slivers, checkoutCounts.slivers);
 
@@ -1205,7 +1230,12 @@ async function judge(args) {
   const result = {
     judge: { labels: sha16(labelsText), commit: describe(ROOT).commit },
     candidate: { name, ...describe(candidateDir) },
-    machine: { cpu: cpus()[0]?.model ?? 'unknown', node: process.version, platform: platform() },
+    machine: {
+      cpu: cpus()[0]?.model ?? 'unknown',
+      node: process.version,
+      platform: platform(),
+      image: runnerImage(),
+    },
     notices,
     accuracy: acc,
     margin: margin(acc.pairs),

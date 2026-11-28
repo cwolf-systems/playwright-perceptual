@@ -120,9 +120,23 @@ jobs:
       - run: npx playwright test --project=chromium
 
   judge:
-    name: Judge accuracy
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    name: Judge accuracy (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      # Pinned images rather than -latest: rendered pairs are checked against a baseline made by CI
+      # on the same image, bench/results/judge-baseline-0.3.0-<platform>.json. Where a re-run of the
+      # same commit rendered other bytes, rendered pairs are reported, not enforced
+      # (docs/benchmarks/accuracy.md, "Reproducible on each platform").
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            rendered: enforce
+          - os: macos-15
+            rendered: report
+          - os: windows-2025
+            rendered: enforce
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -138,26 +152,49 @@ jobs:
         with:
           path: bench/data/playwright-v1.60.0
           key: playwright-fixtures-v1.60.0
+      # Built here rather than by the judge, which runs npm without a shell and so cannot on Windows.
+      - run: npm run build
       # The judge's accuracy section only: the benchmark and synthetic sets. The real captures
       # aren't in the repository, and speed on a shared runner says little.
-      - run: node bench/judge.mjs --skip-speed --name ci --out "$RUNNER_TEMP/judge.json"
+      - name: Judge
+        shell: bash
+        env:
+          # For the API request that lists Playwright's fixtures when the cache misses.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node bench/judge.mjs --no-build --skip-speed --name ci --out "$RUNNER_TEMP/judge.json"
+      - name: Accuracy table
+        shell: bash
+        run: node bench/tables.mjs "$RUNNER_TEMP/judge.json" | tee -a "$GITHUB_STEP_SUMMARY"
       # Fails if a verdict the 0.2.0 baseline got right is now wrong. Rendered pairs are compared
       # only on a machine like the one the baseline was made on; check-baseline.mjs says why.
       - name: No verdict lost against 0.2.0
         shell: bash
         run: node bench/check-baseline.mjs "$RUNNER_TEMP/judge.json" | tee -a "$GITHUB_STEP_SUMMARY"
+      # Rendered pairs against the baseline CI made on this image, with any whose bytes changed.
+      - name: No verdict lost against this platform's baseline
+        shell: bash
+        env:
+          RENDERED: ${{ matrix.rendered }}
+        run: |
+          baseline="bench/results/judge-baseline-0.3.0-$(node -p process.platform).json"
+          report=()
+          if [ "$RENDERED" = report ]; then report=(--report-rendered); fi
+          node bench/check-baseline.mjs "$RUNNER_TEMP/judge.json" --baseline "$baseline" "${report[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: judge-result
+          # Attempts apart: a re-run of the same commit on another day is how reproducibility is
+          # measured (docs/benchmarks/accuracy.md).
+          name: judge-${{ matrix.os }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/judge.json
-          retention-days: 7
+          retention-days: 30
 
   frozen:
     name: Frozen labels and baselines
-    # The judge job reads the labels and the baseline from the pull request's own tree, so a change
-    # to them could hide a lost verdict. They change only in a pull request of their own; this job
-    # makes such a change visible as a warning, for the reviewer.
+    # The judge job reads the labels, the baselines and the check that compares them from the pull
+    # request's own tree, so a change to them could hide a lost verdict. Labels and baselines change
+    # only in a pull request of their own; this job makes any such change visible as a warning, for
+    # the reviewer.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -169,10 +206,10 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: |
           git fetch --depth=1 origin "$BASE_REF"
-          changed=$(git diff --name-only FETCH_HEAD HEAD -- bench/judge-labels.json 'bench/results/judge-baseline-*.json' | tr '\n' ' ')
+          changed=$(git diff --name-only FETCH_HEAD HEAD -- bench/judge-labels.json 'bench/results/judge-baseline-*.json' bench/check-baseline.mjs .github/workflows/ci.yml | tr '\n' ' ')
           if [ -n "$changed" ]; then
-            echo "::warning::This pull request changes frozen labels or baselines: $changed"
-            printf '\n**This pull request changes frozen labels or baselines:** %s\n' "$changed" >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::This pull request changes frozen labels, baselines or the check that reads them: $changed"
+            printf '\n**This pull request changes frozen labels, baselines or the check that reads them:** %s\n' "$changed" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Frozen labels and baselines unchanged."
+            echo "Frozen labels, baselines and the check unchanged."
           fi

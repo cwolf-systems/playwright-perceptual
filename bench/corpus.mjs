@@ -39,9 +39,17 @@ function readdirNames(dir) {
 
 export async function playwrightPairs() {
   if (!existsSync(DATA)) {
-    const tree = await fetch(
+    // Anonymous requests to GitHub's API share a small hourly limit per address, and CI runners
+    // share addresses; a token, where one is set, has a limit of its own.
+    const token = process.env.GITHUB_TOKEN;
+    const response = await fetch(
       `https://api.github.com/repos/microsoft/playwright/git/trees/${PLAYWRIGHT_COMMIT}?recursive=1`,
-    ).then((r) => r.json());
+      { headers: token ? { authorization: `Bearer ${token}` } : {} },
+    );
+    if (!response.ok) {
+      throw new Error(`Listing Playwright's fixtures on GitHub failed: ${response.status}`);
+    }
+    const tree = await response.json();
     const files = tree.tree
       .map((entry) => entry.path)
       .filter((path) => path.startsWith(FIXTURE_PREFIX) && path.endsWith('.png'));

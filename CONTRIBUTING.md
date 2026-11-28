@@ -52,12 +52,21 @@ node bench/check-baseline.mjs bench/results/judge-local.json
 ```
 
 The second command fails if a pair that `bench/results/judge-baseline-0.2.0.json` judged correctly
-is now judged wrongly, or if a pair in the baseline is missing from your run. CI runs both on
-every pull request and enforces 40 pairs: Playwright's 21 fixture pairs and the 19 synthetic
-pairs. The other 184 are screenshots the judge renders, whose pixels depend on the machine; CI
-reports them as not compared. They are compared only on a machine like the one the baseline was
-made on (macOS, Apple M4), where the maintainer checks them before each release. A Linux
-baseline, so that CI can check them too, is future work.
+is now judged wrongly, or if a pair in the baseline is missing from your run. That baseline's 184
+rendered pairs are screenshots whose pixels depend on the machine, so they are compared only on a
+machine like the one it was made on (macOS, Apple M4), where the maintainer checks them before
+each release; elsewhere it enforces Playwright's 21 fixture pairs and the 19 synthetic pairs.
+
+CI runs the judge on every pull request on Linux, macOS and Windows, each on a pinned runner image.
+On each it checks the result against the 0.2.0 baseline, and its rendered pairs against the
+baseline CI made on that image, `bench/results/judge-baseline-0.3.0-<platform>.json`, listing any
+whose bytes changed. On Linux and Windows a lost rendered verdict fails the job. On macOS, whose
+renders were not reproducible between two runs of the same commit three days apart, on a newer
+weekly image, rendered pairs are reported
+and not enforced ([the accuracy page](docs/benchmarks/accuracy.md#reproducible-on-each-platform)
+says which moved). Each run's accuracy table (`bench/tables.mjs`) is in its job summary, and its
+result file is an artifact. Linux and Windows render 154 of the 184 pairs: the GPU pairs need
+macOS, and Firefox has no WebGL there for the terrain and viewer pages.
 
 The judge renders the fixture pages once into `bench/data` and reuses them: add `--render` after
 changing a page in `test/browser/fixtures/` or Playwright's version.
@@ -88,7 +97,8 @@ b.json`. The reasoning and the variants tried go in a design log in `docs/design
 `bench/judge-labels.json` holds the expected verdict for each pair. Changing a label is its own
 pull request: one label change and its reason per entry, reviewed on its own, with the baselines
 regenerated. Never change a label in the same pull request as the code it would let pass. CI
-warns on any pull request that changes the labels or a committed baseline.
+warns on any pull request that changes the labels, a committed baseline or the check that reads
+them.
 
 ## Quality floor
 
