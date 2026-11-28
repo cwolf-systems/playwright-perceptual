@@ -151,6 +151,27 @@ options or captures of each layer. Region masks with per-region `maxDeltaE` and 
 simple first step. Localising a failure to the element that caused it, as WebSee does for HTML
 pages (Mahajan and Halfond, 2015), would make failure messages more useful.
 
+### Recurring differences
+
+Some differences come back run after run: a label landing on the other pixel (gap 7), a seam
+between raster tiles (gap 2). Hosted review services handle these with history rather than a
+different comparison. Argos's documentation, for example, describes giving each visual change a
+fingerprint, "a stable signature computed from the shape of its diff", so that visually similar
+diffs on the same test get the same one, and treating a change as flaky once it appears a set
+number of times (3 by default) in auto-approved builds within seven days (Argos, 2026).
+
+Here, a fingerprint could be the set of changed pixels coarsened to a grid, with each cell's ΔE
+binned, kept in a small file beside the baseline with a count and the date last seen. A
+difference matching an approved fingerprint would be reported as known, not passed silently.
+The risk is the same as an allowance's: a real change that lands on a known fingerprint's cells
+is hidden. The existing should-fail pairs are not placed where recurring differences fall, so
+they cannot show that risk. Before adopting it, build should-fail pairs that put a real change
+inside the cells of fingerprints learned from the benchmark's self-noise renders, such as a label
+changed where it jitters or a line removed along a tile seam; fix the grid and bins on the design
+set; and on the held-out set report both the should-fail pairs let through, which has to be zero,
+with its upper bound, and the share of self-noise differences recognised. The
+[0.3.0 plan](releases/0.3.0.md) leaves it for after that release.
+
 ### Speed
 
 Most of the time on heavily changed images goes to colour maths and noise checks per changed
@@ -167,6 +188,8 @@ account of why two images differ. This package stays dependency-light and explai
 
 ## References
 
+- Argos (2026). Flaky test detection. Argos documentation,
+  https://argos-ci.com/docs/learn/reliability-and-flakiness/flaky-test-detection (read 2026-11-28).
 - P. Andersson, J. Nilsson, T. Akenine-Möller, M. Oskarsson, K. Åström, M. D. Fairchild (2020).
   FLIP: A difference evaluator for alternating images. _Proceedings of the ACM on Computer
   Graphics and Interactive Techniques_ 3(2).
