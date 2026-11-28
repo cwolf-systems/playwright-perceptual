@@ -393,35 +393,35 @@ Linux and Windows held across a week of image updates as well as three days.
 
 ### Linux, runner image ubuntu24 20261116.376.1 (AMD EPYC 7763 64-Core Processor)
 
-ci at bfd0f39, Node v22.23.5; 154 rendered pairs. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson).
+ci at bfd0f39, Node v22.23.5; 154 rendered pairs, and 45 self-noise pairs of 1 page. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson); in the self-noise set, over pages.
 
 | Set        | Pairs | Should match: failed, none allowed | Should fail: passed, none allowed | Should match: failed, 0.1% allowed | Should fail: passed, 0.1% allowed |
 | ---------- | ----- | ---------------------------------- | --------------------------------- | ---------------------------------- | --------------------------------- |
 | design     | 98    | 15 (38%, 25–54%)                   | 0 (0%, 0–6%)                      | 12 (31%, 19–46%)                   | 2 (3%, 1–12%)                     |
 | held-out   | 77    | 14 (52%, 34–69%)                   | 0 (0%, 0–7%)                      | 9 (33%, 19–52%)                    | 0 (0%, 0–7%)                      |
-| self-noise | 45    | 0 (0%, 0–8%)                       | 0                                 | 0 (0%, 0–8%)                       | 0                                 |
+| self-noise | 45    | 0 (0%, 0–79%)                      | 0                                 | 0 (0%, 0–79%)                      | 0                                 |
 | synthetic  | 19    | 4 (57%, 25–84%)                    | 1 (8%, 1–35%)                     | 0 (0%, 0–35%)                      | 1 (8%, 1–35%)                     |
 
 ### macOS, runner image macos15 20261118.0550.1 (Apple M1 (Virtual))
 
-ci at bfd0f39, Node v22.23.5; 184 rendered pairs. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson).
+ci at bfd0f39, Node v22.23.5; 184 rendered pairs, and 45 self-noise pairs of 1 page. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson); in the self-noise set, over pages.
 
 | Set        | Pairs | Should match: failed, none allowed | Should fail: passed, none allowed | Should match: failed, 0.1% allowed | Should fail: passed, 0.1% allowed |
 | ---------- | ----- | ---------------------------------- | --------------------------------- | ---------------------------------- | --------------------------------- |
 | design     | 113   | 20 (40%, 28–54%)                   | 0 (0%, 0–6%)                      | 14 (28%, 17–42%)                   | 2 (3%, 1–11%)                     |
 | held-out   | 92    | 18 (47%, 32–63%)                   | 0 (0%, 0–7%)                      | 10 (26%, 15–42%)                   | 0 (0%, 0–7%)                      |
-| self-noise | 45    | 0 (0%, 0–8%)                       | 0                                 | 0 (0%, 0–8%)                       | 0                                 |
+| self-noise | 45    | 0 (0%, 0–79%)                      | 0                                 | 0 (0%, 0–79%)                      | 0                                 |
 | synthetic  | 19    | 4 (57%, 25–84%)                    | 1 (8%, 1–35%)                     | 0 (0%, 0–35%)                      | 1 (8%, 1–35%)                     |
 
 ### Windows, runner image win25-vs2026 20261116.315.1 (AMD EPYC 7763 64-Core Processor)
 
-ci at bfd0f39, Node v22.23.5; 154 rendered pairs. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson).
+ci at bfd0f39, Node v22.23.5; 154 rendered pairs, and 45 self-noise pairs of 1 page. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson); in the self-noise set, over pages.
 
 | Set        | Pairs | Should match: failed, none allowed | Should fail: passed, none allowed | Should match: failed, 0.1% allowed | Should fail: passed, 0.1% allowed |
 | ---------- | ----- | ---------------------------------- | --------------------------------- | ---------------------------------- | --------------------------------- |
 | design     | 98    | 15 (38%, 25–54%)                   | 0 (0%, 0–6%)                      | 12 (31%, 19–46%)                   | 2 (3%, 1–12%)                     |
 | held-out   | 77    | 14 (52%, 34–69%)                   | 0 (0%, 0–7%)                      | 9 (33%, 19–52%)                    | 0 (0%, 0–7%)                      |
-| self-noise | 45    | 0 (0%, 0–8%)                       | 0                                 | 0 (0%, 0–8%)                       | 0                                 |
+| self-noise | 45    | 0 (0%, 0–79%)                      | 0                                 | 0 (0%, 0–79%)                      | 0                                 |
 | synthetic  | 19    | 4 (57%, 25–84%)                    | 1 (8%, 1–35%)                     | 0 (0%, 0–35%)                      | 1 (8%, 1–35%)                     |
 
 ## Reading the results

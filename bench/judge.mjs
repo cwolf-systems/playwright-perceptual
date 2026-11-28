@@ -501,8 +501,9 @@ const MARGIN_MIN_ALLOWED = 10;
  * worked out from.
  */
 function margin(pairs) {
+  // Self-noise pairs are every pair of one page's renders, so they would weigh one page many times.
   const passing = pairs
-    .filter((p) => p.match && p.counted <= allowed(p.pixels))
+    .filter((p) => p.set !== 'self-noise' && p.match && p.counted <= allowed(p.pixels))
     .map((p) => {
       const allowance = allowed(p.pixels);
       const share = allowance === 0 ? 0 : Math.round((p.counted / allowance) * 1000) / 1000;
@@ -900,8 +901,11 @@ function size(dir) {
 
 function conditions(result) {
   const { accuracy: acc, residual: res, slivers: sl, speed, size: sz } = result;
-  const regressions =
-    acc.changes.none.regressions.length + acc.changes.allowance.regressions.length;
+  // A page's self-noise pairs are not independent: losing several of them counts once.
+  const lost = (ids) =>
+    new Set(ids.map((id) => (id.startsWith('self-noise') ? id.slice(0, id.lastIndexOf('/')) : id)))
+      .size;
+  const regressions = lost(acc.changes.none.regressions) + lost(acc.changes.allowance.regressions);
   const shares = Object.entries(res)
     .filter(([name]) => name !== DRIFT_CASE)
     .map(([, r]) => r);

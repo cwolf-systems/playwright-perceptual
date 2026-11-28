@@ -92,7 +92,11 @@ describe('check', () => {
     const r = check(result(machine, [pair(noise, true, true, ['a', 'x'])]), before, true, true);
     expect(r.moved).toEqual([]);
     expect(r.hashed).toBe(0);
+    expect(r.noiseHashed).toBe(1);
     expect(r.noiseMoved).toEqual([noise]);
+    // Their verdicts are still checked.
+    const lost = check(result(machine, [pair(noise, true, false, ['a', 'b'])]), before, true, true);
+    expect(failing(lost, true).lost.map((p) => p.id)).toEqual([noise, noise]);
   });
 
   it('counts a rendered pair missing on a machine like the baseline’s as missing', () => {

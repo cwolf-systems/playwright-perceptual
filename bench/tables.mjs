@@ -19,6 +19,14 @@ function machine({ platform, cpu, image }) {
   return image ? `${name}, runner image ${image} (${model})` : `${name} (${model})`;
 }
 
+/**
+ * What a rate in a set is over: a pair, except in the self-noise set, whose pairs are every pair of
+ * one page's repeated renders and so are not independent. There it is the page, and a page is wrong
+ * if any of its pairs is.
+ */
+const unit = (p) => (p.set === 'self-noise' ? p.id.slice(0, p.id.lastIndexOf('/')) : p.id);
+const units = (pairs) => new Set(pairs.map(unit)).size;
+
 /** Wrong verdicts by set and by expected verdict, at both tolerances, each with its interval. */
 export function accuracyTable(result) {
   const pairs = result.accuracy.pairs;
@@ -34,8 +42,8 @@ export function accuracyTable(result) {
     for (const tolerance of Object.keys(TOLERANCES)) {
       for (const match of [true, false]) {
         const group = inSet.filter((p) => p.match === match);
-        const wrong = group.filter((p) => p.pass[tolerance] !== match).length;
-        cells.push(rateCell(wrong, group.length));
+        const wrong = group.filter((p) => p.pass[tolerance] !== match);
+        cells.push(rateCell(units(wrong), units(group)));
       }
     }
     lines.push(`| ${cells.join(' | ')} |`);
@@ -45,11 +53,17 @@ export function accuracyTable(result) {
 
 export function section(result) {
   const commit = result.candidate.commit?.slice(0, 7) ?? 'no commit';
-  const rendered = result.accuracy.pairs.filter((p) => p.id.startsWith('rendered')).length;
+  const pairs = result.accuracy.pairs;
+  const rendered = pairs.filter((p) => p.id.startsWith('rendered')).length;
+  const noise = pairs.filter((p) => p.set === 'self-noise');
+  const noiseText = noise.length
+    ? `, and ${noise.length} self-noise pairs of ${units(noise)} page${units(noise) === 1 ? '' : 's'}`
+    : '';
   return [
     `### ${machine(result.machine)}\n`,
     `${result.candidate.name} at ${commit}, Node ${result.machine.node}; ${rendered} rendered ` +
-      'pairs. Each cell: wrong verdicts, their share of the group and its 95% interval (Wilson).\n',
+      `pairs${noiseText}. Each cell: wrong verdicts, their share of the group and its 95% ` +
+      'interval (Wilson); in the self-noise set, over pages.\n',
     accuracyTable(result),
     '',
   ].join('\n');

@@ -42,3 +42,22 @@ describe('section', () => {
     expect(section(result(null))).toContain('ci at 0123456, Node v22.22.2; 3 rendered pairs.');
   });
 });
+
+describe('the self-noise set', () => {
+  // Every pair of one page's renders: the rate is over pages, and a page is wrong if any pair is.
+  const noise = (i: number, j: number, none: boolean) =>
+    judged(`self-noise 1×/webkit/map/${i}v${j}`, 'self-noise', true, none, true);
+  const withNoise: JudgeResult = {
+    ...result(null),
+    accuracy: { pairs: [noise(0, 1, false), noise(0, 2, false), noise(1, 2, true)] },
+  };
+
+  it('counts pages, not pairs', () => {
+    const rows = accuracyTable(withNoise).split('\n');
+    expect(rows[2]).toBe('| self-noise | 3 | 1 (100%, 21–100%) | 0 | 0 (0%, 0–79%) | 0 |');
+  });
+
+  it('says how many pages its pairs come from', () => {
+    expect(section(withNoise)).toContain('0 rendered pairs, and 3 self-noise pairs of 1 page.');
+  });
+});
