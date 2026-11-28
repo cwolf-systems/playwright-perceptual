@@ -61,7 +61,8 @@ CI runs the judge on every pull request on Linux, macOS and Windows, each on a p
 On each it checks the result against the 0.2.0 baseline, and its rendered pairs against the
 baseline CI made on that image, `bench/results/judge-baseline-0.3.0-<platform>.json`, listing any
 whose bytes changed. On Linux and Windows a lost rendered verdict fails the job. On macOS, whose
-renders were not reproducible between two runs of the same commit, rendered pairs are reported
+renders were not reproducible between two runs of the same commit three days apart, on a newer
+weekly image, rendered pairs are reported
 and not enforced ([the accuracy page](docs/benchmarks/accuracy.md#reproducible-on-each-platform)
 says which moved). Each run's accuracy table (`bench/tables.mjs`) is in its job summary, and its
 result file is an artifact. Linux and Windows render 154 of the 184 pairs: the GPU pairs need

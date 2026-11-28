@@ -329,7 +329,7 @@ rendering (measured once, in the run below).
 ### Reproducible on each platform
 
 The judge jobs of one CI run ([run 45598860344](https://github.com/cwolf-systems/playwright-perceptual/actions/runs/45598860344),
-commit `3e60f62`, 2026-11-25), whose result files are the baselines above, were run again on
+head `ba1b41f`, judged at the pull request's merge commit `3e60f62`, 2026-11-25), whose result files are the baselines above, were run again on
 2026-11-28 on the same commit. Each re-run's result against its platform's baseline:
 `node bench/check-baseline.mjs judge.json --baseline bench/results/judge-baseline-0.3.0-<platform>.json`.
 By the [0.3.0 plan](../releases/0.3.0.md), any rendered pair whose bytes differ makes a platform
@@ -343,10 +343,11 @@ everywhere.
 | macOS    | macos15 20261118.0550.1     | macos15 20261123.0558.1     | 180 of 184                         | 0                | reported             |
 | Windows  | win25-vs2026 20261116.315.1 | win25-vs2026 20261123.321.1 | 154 of 154                         | 0                | enforced             |
 
-On macOS the four pairs that moved are Firefox on the WebGL pages, which it draws through the
-runner's GPU: `rendered/colour/firefox/terrain`, `rendered/colour/firefox/viewer`,
-`rendered/regression/firefox/terrain` and `rendered 2×/faint regression/firefox/terrain`. Their
-counted pixels did not change. The second run was on a newer weekly version of each image, so
+On macOS the four pairs that moved are Firefox on the WebGL pages: `rendered/colour/firefox/terrain`,
+`rendered/colour/firefox/viewer`, `rendered/regression/firefox/terrain` and
+`rendered 2×/faint regression/firefox/terrain`. Their counted pixels did not change. The second
+run was on a newer weekly version of each image, so whether macOS's pairs moved with the image or
+from one run to the next was not measured; either way CI runs on the current weekly version.
 Linux and Windows held across a week of image updates as well as three days.
 
 ### Linux, runner image ubuntu24 20261116.376.1 (AMD EPYC 7763 64-Core Processor)
