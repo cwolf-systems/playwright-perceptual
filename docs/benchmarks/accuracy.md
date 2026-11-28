@@ -366,10 +366,13 @@ rendering (measured once, in the run below).
 
 ### Reproducible on each platform
 
-The judge jobs of one CI run ([run 45598860344](https://github.com/cwolf-systems/playwright-perceptual/actions/runs/45598860344),
-head `ba1b41f`, judged at the pull request's merge commit `3e60f62`, 2026-11-25), whose result files are the baselines above, were run again on
-2026-11-28 on the same commit. Each re-run's result against its platform's baseline:
-`node bench/check-baseline.mjs judge.json --baseline bench/results/judge-baseline-0.3.0-<platform>.json`.
+The judge jobs of one CI run
+([run 45598860344](https://github.com/cwolf-systems/playwright-perceptual/actions/runs/45598860344),
+head `ba1b41f`, judged at the pull request's merge commit `3e60f62`, 2026-11-25), whose result
+files were the first per-platform baselines, were run again on 2026-11-28 on the same commit. Each
+re-run's result was checked against the baseline made from the first run, with
+`node bench/check-baseline.mjs judge.json --baseline <that baseline>`. The baselines above were
+made later on the same images, with the self-noise labels.
 By the [0.3.0 plan](../releases/0.3.0.md), any rendered pair whose bytes differ makes a platform
 not reproducible: CI then reports its rendered pairs but does not enforce them
 (`check-baseline.mjs --report-rendered`). Playwright's fixtures and the synthetic set are enforced
